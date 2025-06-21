@@ -1,0 +1,132 @@
+{% extends "admin_dashboard.html" %}
+
+{% block content %}
+<style>
+  body {
+    background: url("/static/images/dimension.jpg") no-repeat center center fixed;
+    background-size: cover;
+  }
+
+  .user-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    padding: 40px 30px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+    max-width: 1150px;
+    margin: 40px auto;
+    font-family: 'Segoe UI', sans-serif;
+    backdrop-filter: blur(10px);
+  }
+
+  .user-card h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #004080;
+    text-align: center;
+    margin-bottom: 25px;
+    letter-spacing: 0.5px;
+  }
+
+  .user-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+
+  .user-table thead {
+    background: linear-gradient(to right, #004080, #0073e6);
+    color: white;
+  }
+
+  .user-table th,
+  .user-table td {
+    padding: 14px 18px;
+    border-bottom: 1px solid #e2e2e2;
+    text-align: left;
+  }
+
+  .user-table tbody tr:hover {
+    background-color: #f0f7ff;
+  }
+
+  .action-link {
+    color: #0073e6;
+    font-weight: bold;
+    text-decoration: none;
+    transition: 0.2s ease;
+  }
+
+  .action-link:hover {
+    text-decoration: underline;
+    color: #004080;
+  }
+
+  .button-group {
+    margin-top: 30px;
+    text-align: center;
+  }
+
+  .back-btn,
+  .drive-btn {
+    display: inline-block;
+    margin: 8px 12px;
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.3s ease;
+    color: white;
+  }
+
+  .back-btn {
+    background-color: #004080;
+  }
+
+  .back-btn:hover {
+    background-color: #002c5a;
+  }
+
+  .drive-btn {
+    background-color: #27ae60;
+  }
+
+  .drive-btn:hover {
+    background-color: #1e8449;
+  }
+</style>
+
+<div class="user-card">
+  <h2>👥 Registered Users – Venus File Portal</h2>
+
+  <table class="user-table">
+    <thead>
+      <tr>
+        {% for key in users[0].keys() %}
+        <th>{{ key }}</th>
+        {% endfor %}
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for user in users %}
+      <tr>
+        {% for key, value in user.items() %}
+        <td>{{ value }}</td>
+        {% endfor %}
+        <td><a href="{{ url_for('view_user', username=user['Username']) }}" class="action-link">View</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="button-group">
+    <a class="drive-btn" href="https://drive.google.com/drive/u/0/folders/1qXWq7LktKu3gI_LYpyGYnoUCBH9iZpAd" target="_blank">
+      📁 Open Venus Diamond Files
+    </a>
+    <a href="{{ url_for('admin_dashboard') }}" class="back-btn">← Back to Dashboard</a>
+  </div>
+</div>
+{% endblock %}

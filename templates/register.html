@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Register - Venus Jewel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'DM Sans', sans-serif;
+      background-color: #001a4d;
+      color: white;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+      width: 100%;
+      flex-direction: row;
+    }
+
+    .left-panel {
+      flex: 1;
+      background:
+        linear-gradient(to bottom, rgba(0, 26, 77, 0.88), rgba(0, 26, 77, 0.88)),
+        url('/static/images/pencil.png') no-repeat center center;
+      background-size: cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+    }
+
+    .left-panel img {
+      width: 540px;
+      max-width: 90%;
+    }
+
+    .right-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px;
+      background-color: #001a4d;
+    }
+
+    .form-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #c7d7ff;
+      margin-bottom: 6px;
+    }
+
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 24px;
+      border: none;
+      border-bottom: 1px solid #ccc;
+      background: transparent;
+      color: #fff;
+      font-size: 15px;
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #7b9dff;
+      border: none;
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+
+    .bottom-links {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .bottom-links a {
+      color: white;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .bottom-links a:hover {
+      color: #aad4ff;
+    }
+
+    .error-message {
+      color: #ff8888;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    @media (max-width: 960px) {
+      .container {
+        flex-direction: column;
+      }
+
+      .left-panel, .right-panel {
+        width: 100%;
+        padding: 30px;
+      }
+
+      .left-panel img {
+        width: 280px;
+      }
+
+      .bottom-links {
+        justify-content: center;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- LEFT PANEL: Logo with Pencil Design -->
+  <div class="left-panel">
+    <img src="{{ url_for('static', filename='images/vj_logo_new.png') }}" alt="Venus Logo" />
+  </div>
+
+  <!-- RIGHT PANEL: Register Form -->
+  <div class="right-panel">
+    <form method="POST">
+      <div class="form-title">🧑 FULL NAME</div>
+      <input type="text" name="full_name" placeholder="Full Name" required />
+
+      <div class="form-title">👤 USER NAME</div>
+      <input type="text" name="username" placeholder="Username" required />
+
+      <div class="form-title">🔒 PASSWORD</div>
+      <input type="password" name="password" placeholder="Password (min 8 characters)" required />
+
+      <div class="form-title">📞 CONTACT NUMBER</div>
+      <input type="text" name="contact_number" placeholder="Contact Number" required />
+
+      <div class="form-title">🏢 ORGANIZATION</div>
+      <input type="text" name="organization" placeholder="Organization" required />
+
+      <button type="submit">REGISTER</button>
+
+      <div class="bottom-links">
+        <a href="/login">ALREADY HAVE ACCOUNT? SIGN IN</a>
+        <a onclick="alert('Please contact the administrator for help or credentials.')">HELP</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+</body>
+</html>

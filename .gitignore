@@ -1,0 +1,45 @@
+# Ignore virtual environment
+.venv/
+
+# Ignore Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Ignore credentials
+credentials.json
+client_secret.json
+
+# Ignore uploads folder and video files
+uploads/
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore VSCode settings
+.vscode/
+
+# Ignore PyCharm project files
+.idea/
+
+# Ignore log files
+*.log
+
+# Ignore temporary files
+*.swp
+*.bak
+*.tmp
+
+# Ignore compiled binaries
+*.so
+*.dll
+*.exe
+
+# Ignore render configuration (optional if private)
+render.yaml

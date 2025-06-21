@@ -1,0 +1,139 @@
+{% extends "admin_dashboard.html" %}
+
+{% block content %}
+<div style="text-align: center; margin-bottom: 30px;">
+    <img src="{{ url_for('static', filename='images/vj_logo_new.png') }}" alt="Venus Jewel Logo" style="height: 60px;">
+    <h2 style="margin-top: 10px; color: #004080;">User Profile – {{ user['Username'] }}</h2>
+</div>
+
+<style>
+    .profile-card {
+        background: rgba(255, 255, 255, 0.92);
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+        max-width: 700px;
+        margin: 0 auto;
+        font-family: 'Segoe UI', sans-serif;
+        backdrop-filter: blur(12px);
+    }
+
+    .profile-details {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 12px 24px;
+        margin-bottom: 30px;
+        font-size: 16px;
+    }
+
+    .profile-details div {
+        padding: 6px 0;
+    }
+
+    .label {
+        font-weight: bold;
+        color: #004080;
+    }
+
+    .form-row {
+        margin-top: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        justify-content: center;
+    }
+
+    input[type="password"] {
+        padding: 10px;
+        width: 220px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        font-size: 15px;
+    }
+
+    button {
+        padding: 10px 20px;
+        background-color: #004080;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+
+    button:hover {
+        background-color: #003060;
+    }
+
+    .file-list {
+        margin-top: 30px;
+        background: #f7faff;
+        border-radius: 12px;
+        padding: 20px;
+        border: 1px solid #d0e4ff;
+    }
+
+    .file-list ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .file-list li {
+        padding: 8px 0;
+        border-bottom: 1px solid #ddd;
+        font-size: 15px;
+    }
+
+    .file-list li:last-child {
+        border-bottom: none;
+    }
+
+    .back-btn {
+        display: inline-block;
+        margin-top: 25px;
+        padding: 10px 22px;
+        background-color: #004080;
+        color: white;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    .back-btn:hover {
+        background-color: #002c5a;
+    }
+</style>
+
+<div class="profile-card">
+    <div class="profile-details">
+        <div class="label">Full Name:</div><div>{{ user['Full Name'] }}</div>
+        <div class="label">Username:</div><div>{{ user['Username'] }}</div>
+        <div class="label">Contact Number:</div><div>{{ user['Contact Number'] }}</div>
+        <div class="label">Organization:</div><div>{{ user['Organization'] }}</div>
+        <div class="label">Registered On:</div><div>{{ user['Timestamp'] }}</div>
+    </div>
+
+    <h3 style="color: #004080; text-align: center; margin-bottom: 10px;">Change Password</h3>
+    <form action="{{ url_for('change_user_password', username=user['Username']) }}" method="POST" class="form-row">
+        <input type="password" name="new_password" placeholder="Enter new password" required>
+        <button type="submit">Update</button>
+    </form>
+
+    {% if files %}
+    <div class="file-list">
+        <h4 style="color: #004080;">Uploaded Files (Local):</h4>
+        <ul>
+            {% for file in files %}
+                <li>{{ file }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <div style="text-align: center;">
+        <a href="{{ url_for('admin_users') }}" class="back-btn">← Back to Users</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,122 @@
+/* ======= BASE BODY STYLING ======= */
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background: url('/static/images/dimension.jpg') no-repeat center center fixed;
+  background-size: cover;
+  font-family: 'Segoe UI', sans-serif;
+  color: #1a1a1a;
+}
+
+/* ======= GLASS CARD BASE (Login/Register) ======= */
+.glass-card {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 40px;
+  width: 100%;
+  max-width: 360px;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  text-align: center;
+}
+
+/* ======= INPUT & BUTTONS ======= */
+.glass-card input,
+.glass-card button {
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.glass-card input {
+  background: rgba(255, 255, 255, 0.3);
+  color: #000;
+  border: 1px solid #ccc;
+}
+
+.glass-card input::placeholder {
+  color: #666;
+}
+
+.glass-card button {
+  background: linear-gradient(135deg, #004080, #0073e6);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.glass-card button:hover {
+  background: linear-gradient(135deg, #003060, #005ac1);
+}
+
+/* ======= LINKS ======= */
+a {
+  color: #004080;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* ======= ERROR & STATUS TEXT ======= */
+.error {
+  color: red;
+  font-size: 0.9em;
+}
+
+.status {
+  font-size: 0.95em;
+  margin-top: 10px;
+  color: green;
+  font-weight: 500;
+}
+
+/* ======= SPINNER VIDEO (ht.mp4) ======= */
+#spinner {
+  display: none;
+  margin-top: 18px;
+  text-align: center;
+}
+
+#spinner video {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+/* ======= PASSWORD STRENGTH METER ======= */
+.password-strength {
+  margin-top: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #004080;
+}
+
+.password-strength.weak {
+  color: red;
+}
+
+.password-strength.medium {
+  color: orange;
+}
+
+.password-strength.strong {
+  color: green;
+}
+
+/* ======= RESPONSIVE ======= */
+@media (max-width: 600px) {
+  .glass-card {
+    padding: 30px 20px;
+  }
+}
