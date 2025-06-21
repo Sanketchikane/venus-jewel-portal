@@ -1,25 +1,25 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory, jsonify, make_response
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory, jsonify
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 import os
 import io
 import tempfile
-import subprocess
 from werkzeug.utils import secure_filename
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseUpload
+from moviepy.editor import VideoFileClip
 
 app = Flask(__name__)
-app.secret_key = os.getenv('SECRET_KEY', 'default-fallback')
+app.secret_key = 'your_secret_key_here'
 
 # Google Sheets setup
 scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-creds = ServiceAccountCredentials.from_json_keyfile_name(os.getenv('GOOGLE_CREDENTIALS_FILE', 'Credentials.json'), scope)
+creds = ServiceAccountCredentials.from_json_keyfile_name('Credentials.json', scope)
 client = gspread.authorize(creds)
 
-SHEET_ID = os.getenv('SHEET_ID')
+SHEET_ID = '19c2tlUmzSQsQhqNvWRuKMgdw86M0PLsKrWk51m7apA4'
 spreadsheet = client.open_by_key(SHEET_ID)
 sheet = spreadsheet.worksheet('Sheet1')
 
@@ -27,21 +27,23 @@ UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-ADMIN_USERNAME = os.getenv('ADMIN_USERNAME', 'admin')
-ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'Admin@123')
-VENUSFILES_USERNAME = os.getenv('VENUSFILES_USERNAME', 'Venusfiles')
-VENUSFILES_PASSWORD = os.getenv('VENUSFILES_PASSWORD', 'Natural1969')
+ADMIN_USERNAME = 'admin'
+ADMIN_PASSWORD = 'Admin@123'
+VENUSFILES_USERNAME = 'Venusfiles'
+VENUSFILES_PASSWORD = 'Natural1969'
 
 # Google Drive setup
-DRIVE_FOLDER_ID = os.getenv('GOOGLE_DRIVE_FOLDER')
-SERVICE_ACCOUNT_FILE = os.getenv('GOOGLE_CREDENTIALS_FILE', 'credentials.json')
+DRIVE_FOLDER_ID = '1qXWq7LktKu3gI_LYpyGYnoUCBH9iZpAd'
+SERVICE_ACCOUNT_FILE = 'credentials.json'
 DRIVE_SCOPES = ['https://www.googleapis.com/auth/drive']
 drive_creds = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=DRIVE_SCOPES)
 drive_service = build('drive', 'v3', credentials=drive_creds)
 
+
 def username_exists(username):
     usernames = sheet.col_values(3)
     return username in usernames[1:]
+
 
 def get_user(username):
     usernames = sheet.col_values(3)
@@ -59,6 +61,7 @@ def get_user(username):
             }
     return None
 
+
 def get_or_create_folder(name, parent_id):
     query = f"name='{name}' and mimeType='application/vnd.google-apps.folder' and '{parent_id}' in parents and trashed=false"
     results = drive_service.files().list(q=query, fields="files(id, name)").execute()
@@ -73,6 +76,7 @@ def get_or_create_folder(name, parent_id):
     folder = drive_service.files().create(body=file_metadata, fields='id').execute()
     return folder.get('id')
 
+
 def mute_video(file_storage, filename):
     ext = os.path.splitext(filename)[1]
     temp_dir = tempfile.mkdtemp()
@@ -82,74 +86,54 @@ def mute_video(file_storage, filename):
     file_storage.save(input_path)
 
     try:
-        subprocess.run([
-            'ffmpeg', '-i', input_path, '-c:v', 'copy', '-an', output_path
-        ], check=True)
+        clip = VideoFileClip(input_path)
+        print(f"[DEBUG] Muting {filename}. Duration: {clip.duration}, Audio: {clip.audio}")
+        muted = clip.without_audio()
+        muted.write_videofile(output_path, codec='libx264', audio_codec='aac', logger='bar')
+        clip.close()
+        muted.close()
 
-        with open(output_path, 'rb') as f:
+        with open(output_path, "rb") as f:
             return io.BytesIO(f.read())
     except Exception as e:
-        print(f"[FFMPEG ERROR] {filename}: {e}")
-        with open(input_path, 'rb') as f:
+        print(f"[MUTE ERROR] {filename}: {e}")
+        with open(input_path, "rb") as f:
             return io.BytesIO(f.read())
+
 
 @app.route('/')
 def home():
-    username = request.cookies.get('username')
-    password = request.cookies.get('password')
-    if username and password:
-        if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
-            session['username'] = username
-            session['admin'] = True
-            return redirect(url_for('admin_dashboard'))
-        elif username == VENUSFILES_USERNAME and password == VENUSFILES_PASSWORD:
-            session['username'] = username
-            session['venus_user'] = True
-            return redirect(url_for('venus_upload_dashboard'))
-        else:
-            user = get_user(username)
-            if user and user['Password'] == password:
-                session['username'] = username
-                session['admin'] = False
-                return redirect(url_for('dashboard'))
     return redirect(url_for('login'))
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form['username'].strip()
         password = request.form['password'].strip()
-        remember = request.form.get('remember')
-
-        response = make_response(redirect(url_for('dashboard')))
 
         if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
             session['username'] = username
             session['admin'] = True
-            if remember:
-                response.set_cookie('username', username, max_age=60*60*24*30)
-                response.set_cookie('password', password, max_age=60*60*24*30)
+            flash('Admin login successful.', 'success')
             return redirect(url_for('admin_dashboard'))
 
         if username == VENUSFILES_USERNAME and password == VENUSFILES_PASSWORD:
             session['username'] = username
             session['venus_user'] = True
-            if remember:
-                response.set_cookie('username', username, max_age=60*60*24*30)
-                response.set_cookie('password', password, max_age=60*60*24*30)
+            flash('Login successful.', 'success')
             return redirect(url_for('venus_upload_dashboard'))
 
         user = get_user(username)
         if user and user['Password'] == password:
             session['username'] = username
             session['admin'] = False
-            if remember:
-                response.set_cookie('username', username, max_age=60*60*24*30)
-                response.set_cookie('password', password, max_age=60*60*24*30)
-            return response
+            flash('Login successful.', 'success')
+            return redirect(url_for('dashboard'))
 
         flash('Invalid credentials.', 'danger')
     return render_template('login.html')
+
 
 @app.route('/venus-upload')
 def venus_upload_dashboard():
@@ -157,6 +141,7 @@ def venus_upload_dashboard():
         flash('Access denied.', 'danger')
         return redirect(url_for('login'))
     return render_template('Venus_Upload.html')
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -177,12 +162,14 @@ def register():
         return redirect(url_for('login'))
     return render_template('register.html')
 
+
 @app.route('/dashboard')
 def dashboard():
     if 'username' not in session or session.get('admin'):
         flash('Access denied.', 'danger')
         return redirect(url_for('login'))
     return render_template('dashboard.html', user=session['username'])
+
 
 @app.route('/upload', methods=['POST'])
 def upload():
@@ -200,6 +187,7 @@ def upload():
                 if file and file.filename:
                     ext = os.path.splitext(file.filename)[1]
                     filename = f"{subpoint}{ext}"
+                    print(f"[UPLOAD] Processing {filename}")
 
                     if filename.lower().endswith(('.mp4', '.mov', '.avi', '.mkv', '.webm')):
                         file_stream = mute_video(file, filename)
@@ -220,12 +208,14 @@ def upload():
     except Exception as e:
         return jsonify({'success': False, 'message': f'Upload failed: {e}'}), 500
 
+
 @app.route('/admin-dashboard')
 def admin_dashboard():
     if 'username' not in session or not session.get('admin'):
         flash('Admin access only.', 'danger')
         return redirect(url_for('login'))
     return render_template('admin_dashboard.html', user=session['username'])
+
 
 @app.route('/admin/users')
 def admin_users():
@@ -237,12 +227,14 @@ def admin_users():
     users = [dict(zip(headers, row)) for row in all_records[1:]]
     return render_template('admin_users.html', users=users)
 
+
 @app.route('/admin/venus-files')
 def admin_files():
     if 'username' not in session or not session.get('admin'):
         flash('Admin access only.', 'danger')
         return redirect(url_for('login'))
     return redirect("https://drive.google.com/drive/u/0/folders/1qXWq7LktKu3gI_LYpyGYnoUCBH9iZpAd")
+
 
 @app.route('/admin/user/<username>')
 def view_user(username):
@@ -255,6 +247,7 @@ def view_user(username):
         return redirect(url_for('admin_users'))
     files = [f for f in os.listdir(UPLOAD_FOLDER) if username in f]
     return render_template('user_profile.html', user=user, files=files)
+
 
 @app.route('/admin/user/<username>/change-password', methods=['POST'])
 def change_user_password(username):
@@ -271,19 +264,17 @@ def change_user_password(username):
     flash(f"Password updated for {username}.", 'success')
     return redirect(url_for('view_user', username=username))
 
+
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
+
 @app.route('/logout')
 def logout():
     session.clear()
-    resp = make_response(redirect(url_for('login')))
-    resp.set_cookie('username', '', expires=0)
-    resp.set_cookie('password', '', expires=0)
-    return resp
+    return redirect(url_for('login'))
 
-# ✅ Final deploy-ready server run
+
 if __name__ == '__main__':
-    from waitress import serve
-    serve(app, host='0.0.0.0', port=8080)
+    app.run(debug=True)
