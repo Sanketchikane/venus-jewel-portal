@@ -3,7 +3,7 @@ services:
     name: venus-jewel-portal
     env: python
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "waitress-serve --port=$PORT --host=0.0.0.0 app:app"
+    startCommand: "waitress-serve --host=0.0.0.0 --port=$PORT app:app"
     plan: free
     envVars:
       - key: PORT
@@ -22,9 +22,8 @@ services:
         value: Admin@123
       - key: VENUSFILES_USERNAME
         value: Venusfiles
-      - key: VENUSFILES_PASSWORD
         value: Natural1969
 
-secretFiles:
-  - path: /etc/secrets/credentials.json
-    envVarName: GOOGLE_CREDENTIALS_FILE
+    secretFiles:
+      - path: /etc/secrets/credentials.json
+        envVarName: GOOGLE_CREDENTIALS_FILE
