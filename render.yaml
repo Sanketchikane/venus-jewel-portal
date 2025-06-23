@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: venus-jewel-portal
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python app.py"
+    plan: free
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: SECRET_KEY
+        sync: false
+      - key: SHEET_ID
+        value: 19c2tlUmzSQsQhqNvWRuKMgdw86M0PLsKrWk51m7apA4
+      - key: GOOGLE_DRIVE_FOLDER
+        value: 1Yjvp5TMg7mERWxq4dsYJq748CcQIucLK
+      - key: GOOGLE_CREDENTIALS_FILE
+        value: /etc/secrets/credentials.json
+      - key: ADMIN_USERNAME
+        value: admin
+      - key: ADMIN_PASSWORD
+        value: Admin@123
+      - key: VENUSFILES_USERNAME
+        value: Venusfiles
+        value: Natural1969
+
+    secretFiles:
+      - path: /etc/secrets/credentials.json
+        envVarName: GOOGLE_CREDENTIALS_FILE
