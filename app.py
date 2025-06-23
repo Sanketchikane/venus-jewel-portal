@@ -1,22 +1,25 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory, jsonify, make_response
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 import os
 import io
 import tempfile
+import subprocess
 from werkzeug.utils import secure_filename
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseUpload
-from moviepy.editor import VideoFileClip
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'
 
+# Unified credentials path for both Sheets and Drive
+CREDENTIALS_PATH = '/etc/secrets/Credentials.json' if os.environ.get('RENDER') else 'Credentials.json'
+
 # Google Sheets setup
 scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-creds = ServiceAccountCredentials.from_json_keyfile_name('Credentials.json', scope)
+creds = ServiceAccountCredentials.from_json_keyfile_name(CREDENTIALS_PATH, scope)
 client = gspread.authorize(creds)
 
 SHEET_ID = '19c2tlUmzSQsQhqNvWRuKMgdw86M0PLsKrWk51m7apA4'
@@ -33,10 +36,9 @@ VENUSFILES_USERNAME = 'Venusfiles'
 VENUSFILES_PASSWORD = 'Natural1969'
 
 # Google Drive setup
-DRIVE_FOLDER_ID = '1qXWq7LktKu3gI_LYpyGYnoUCBH9iZpAd'
-SERVICE_ACCOUNT_FILE = 'credentials.json'
+DRIVE_FOLDER_ID = '1Yjvp5TMg7mERWxq4dsYJq748CcQIucLK'
 DRIVE_SCOPES = ['https://www.googleapis.com/auth/drive']
-drive_creds = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=DRIVE_SCOPES)
+drive_creds = service_account.Credentials.from_service_account_file(CREDENTIALS_PATH, scopes=DRIVE_SCOPES)
 drive_service = build('drive', 'v3', credentials=drive_creds)
 
 
@@ -82,27 +84,37 @@ def mute_video(file_storage, filename):
     temp_dir = tempfile.mkdtemp()
     input_path = os.path.join(temp_dir, f"input{ext}")
     output_path = os.path.join(temp_dir, f"muted{ext}")
-
     file_storage.save(input_path)
 
     try:
-        clip = VideoFileClip(input_path)
-        print(f"[DEBUG] Muting {filename}. Duration: {clip.duration}, Audio: {clip.audio}")
-        muted = clip.without_audio()
-        muted.write_videofile(output_path, codec='libx264', audio_codec='aac', logger='bar')
-        clip.close()
-        muted.close()
-
-        with open(output_path, "rb") as f:
+        subprocess.run(['ffmpeg', '-i', input_path, '-c:v', 'copy', '-an', output_path], check=True)
+        with open(output_path, 'rb') as f:
             return io.BytesIO(f.read())
     except Exception as e:
-        print(f"[MUTE ERROR] {filename}: {e}")
-        with open(input_path, "rb") as f:
+        print(f"[FFMPEG ERROR] {filename}: {e}")
+        with open(input_path, 'rb') as f:
             return io.BytesIO(f.read())
 
 
 @app.route('/')
 def home():
+    username = request.cookies.get('username')
+    password = request.cookies.get('password')
+    if username and password:
+        if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
+            session['username'] = username
+            session['admin'] = True
+            return redirect(url_for('admin_dashboard'))
+        elif username == VENUSFILES_USERNAME and password == VENUSFILES_PASSWORD:
+            session['username'] = username
+            session['venus_user'] = True
+            return redirect(url_for('venus_upload_dashboard'))
+        else:
+            user = get_user(username)
+            if user and user['Password'] == password:
+                session['username'] = username
+                session['admin'] = False
+                return redirect(url_for('dashboard'))
     return redirect(url_for('login'))
 
 
@@ -111,25 +123,34 @@ def login():
     if request.method == 'POST':
         username = request.form['username'].strip()
         password = request.form['password'].strip()
+        remember = request.form.get('remember')
+
+        response = make_response(redirect(url_for('dashboard')))
 
         if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
             session['username'] = username
             session['admin'] = True
-            flash('Admin login successful.', 'success')
+            if remember:
+                response.set_cookie('username', username, max_age=60 * 60 * 24 * 30)
+                response.set_cookie('password', password, max_age=60 * 60 * 24 * 30)
             return redirect(url_for('admin_dashboard'))
 
         if username == VENUSFILES_USERNAME and password == VENUSFILES_PASSWORD:
             session['username'] = username
             session['venus_user'] = True
-            flash('Login successful.', 'success')
+            if remember:
+                response.set_cookie('username', username, max_age=60 * 60 * 24 * 30)
+                response.set_cookie('password', password, max_age=60 * 60 * 24 * 30)
             return redirect(url_for('venus_upload_dashboard'))
 
         user = get_user(username)
         if user and user['Password'] == password:
             session['username'] = username
             session['admin'] = False
-            flash('Login successful.', 'success')
-            return redirect(url_for('dashboard'))
+            if remember:
+                response.set_cookie('username', username, max_age=60 * 60 * 24 * 30)
+                response.set_cookie('password', password, max_age=60 * 60 * 24 * 30)
+            return response
 
         flash('Invalid credentials.', 'danger')
     return render_template('login.html')
@@ -187,7 +208,6 @@ def upload():
                 if file and file.filename:
                     ext = os.path.splitext(file.filename)[1]
                     filename = f"{subpoint}{ext}"
-                    print(f"[UPLOAD] Processing {filename}")
 
                     if filename.lower().endswith(('.mp4', '.mov', '.avi', '.mkv', '.webm')):
                         file_stream = mute_video(file, filename)
@@ -273,8 +293,15 @@ def uploaded_file(filename):
 @app.route('/logout')
 def logout():
     session.clear()
-    return redirect(url_for('login'))
-
+    resp = make_response(redirect(url_for('login')))
+    resp.set_cookie('username', '', expires=0)
+    resp.set_cookie('password', '', expires=0)
+    return resp
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    from waitress import serve
+    import os
+
+    # Render expects your app to listen on 0.0.0.0 and the provided $PORT
+    port = int(os.environ.get('PORT', 10000))  # default 10000 for Render
+    serve(app, host='0.0.0.0', port=port)
