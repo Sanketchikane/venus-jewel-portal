@@ -10,6 +10,7 @@
       margin: 0;
       padding: 0;
     }
+
     body {
       font-family: 'Segoe UI', sans-serif;
       background: url('/static/images/dimension.jpg') no-repeat center center fixed;
@@ -139,15 +140,23 @@
 
     #spinner {
       display: none;
-      margin-top: 16px;
+      margin-top: 18px;
       text-align: center;
     }
 
-    #spinner video {
+    .loader {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #004080;
+      border-radius: 50%;
       width: 50px;
       height: 50px;
-      border-radius: 50%;
-      object-fit: cover;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
     #passwordModal {
@@ -216,9 +225,7 @@
   </form>
 
   <div id="spinner">
-    <video autoplay muted loop playsinline>
-      <source src="/static/images/ht.mp4" type="video/mp4">
-    </video>
+    <div class="loader"></div>
     <div>Please wait, uploading...</div>
   </div>
   <div class="status" id="statusMsg"></div>
@@ -273,6 +280,7 @@
   function showPasswordModal() {
     document.getElementById("passwordModal").style.display = "flex";
   }
+
   function closePasswordModal() {
     document.getElementById("passwordModal").style.display = "none";
   }
