@@ -1,10 +1,12 @@
 {
   "name": "Venus Jewel File Portal",
-  "short_name": "VenusJewel",
-  "start_url": "/login",
+  "short_name": "Venus Portal",
+  "description": "Secure file upload & download system for Venus Jewel users and admins.",
+  "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ffffff",
+  "background_color": "#001a4d",
+  "theme_color": "#004080",
+  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "/static/images/android-chrome-192x192.png",
@@ -24,11 +26,6 @@
     {
       "src": "/static/images/favicon-16x16.png",
       "sizes": "16x16",
-      "type": "image/png"
-    },
-    {
-      "src": "/static/images/apple-touch-icon.png",
-      "sizes": "180x180",
       "type": "image/png"
     }
   ]
