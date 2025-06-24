@@ -1,11 +1,40 @@
-<!-- templates/login.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>Venus Jewel Login</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Favicon & App Icons -->
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='images/apple-touch-icon.png') }}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/favicon-32x32.png') }}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='images/favicon-16x16.png') }}">
+  <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
+  <link rel="manifest" href="{{ url_for('static', filename='images/site.webmanifest') }}">
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Secure login to Venus Jewel File Portal. Upload, mute, and manage files with confidence.">
+
+  <!-- Open Graph for Social Sharing -->
+  <meta property="og:title" content="Venus Jewel Login">
+  <meta property="og:description" content="Secure login to the Venus Jewel File Portal.">
+  <meta property="og:image" content="https://www.filesvenusjewel.info/static/images/android-chrome-512x512.png">
+  <meta property="og:url" content="https://www.filesvenusjewel.info">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <!-- Structured Data for Google -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "url": "https://www.filesvenusjewel.info",
+    "logo": "https://www.filesvenusjewel.info/static/images/android-chrome-512x512.png"
+  }
+  </script>
+
+  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&display=swap" rel="stylesheet">
+
   <style>
     * { box-sizing: border-box; }
     body {
