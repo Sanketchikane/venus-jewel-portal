@@ -14,6 +14,13 @@ from googleapiclient.http import MediaIoBaseUpload
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'
 
+# ✅ HTTPS handling for Render (to prevent redirect loop)
+@app.before_request
+def enforce_https_on_render():
+    if request.headers.get('X-Forwarded-Proto', 'http') != 'https':
+        url = request.url.replace("http://", "https://", 1)
+        return redirect(url)
+
 # Unified credentials path for both Sheets and Drive
 CREDENTIALS_PATH = '/etc/secrets/Credentials.json' if os.environ.get('RENDER') else 'Credentials.json'
 
@@ -253,14 +260,14 @@ def admin_files():
     if 'username' not in session or not session.get('admin'):
         flash('Admin access only.', 'danger')
         return redirect(url_for('login'))
-    return redirect("https://drive.google.com/drive/u/0/folders/1qXWq7LktKu3gI_LYpyGYnoUCBH9iZpAd")
+    return redirect("https://drive.google.com/drive/u/0/folders/1Yjvp5TMg7mERWxq4dsYJq748CcQIucLK")
 
 
 @app.route('/admin/user/<username>')
 def view_user(username):
     if 'username' not in session or not session.get('admin'):
         flash('Admin access only.', 'danger')
-        return redirect(url_for('login'))
+        return redirect(url_for('admin_users'))
     user = get_user(username)
     if not user:
         flash('User not found.', 'danger')
@@ -273,7 +280,7 @@ def view_user(username):
 def change_user_password(username):
     if 'username' not in session or not session.get('admin'):
         flash('Admin access only.', 'danger')
-        return redirect(url_for('login'))
+        return redirect(url_for('admin_users'))
     new_password = request.form['new_password']
     user = get_user(username)
     if not user:
@@ -298,10 +305,10 @@ def logout():
     resp.set_cookie('password', '', expires=0)
     return resp
 
+
 if __name__ == '__main__':
     from waitress import serve
     import os
 
-    # Render expects your app to listen on 0.0.0.0 and the provided $PORT
-    port = int(os.environ.get('PORT', 10000))  # default 10000 for Render
+    port = int(os.environ.get('PORT', 10000))
     serve(app, host='0.0.0.0', port=port)
