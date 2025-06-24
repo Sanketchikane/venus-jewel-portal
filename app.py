@@ -14,21 +14,13 @@ from googleapiclient.http import MediaIoBaseUpload
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'
 
-# ✅ Fix HTTPS redirect loop (Render proxy aware)
+# Enforce HTTPS
 @app.before_request
 def enforce_https_on_render():
     if request.headers.get('X-Forwarded-Proto', 'http') != 'https':
-        url = request.url.replace("http://", "https://", 1)
-        return redirect(url)
+        return redirect(request.url.replace("http://", "https://", 1))
 
-# ✅ Optional: force redirect to www domain
-@app.before_request
-def redirect_to_www():
-    host = request.host
-    if host == 'filesvenusjewel.info':
-        return redirect(request.url.replace("//filesvenusjewel.info", "//www.filesvenusjewel.info"), code=301)
-
-# Unified credentials path for both Sheets and Drive
+# Unified credentials path
 CREDENTIALS_PATH = '/etc/secrets/Credentials.json' if os.environ.get('RENDER') else 'Credentials.json'
 
 # Google Sheets setup
@@ -260,7 +252,7 @@ def admin_files():
 def view_user(username):
     if 'username' not in session or not session.get('admin'):
         flash('Admin access only.', 'danger')
-        return redirect(url_for('admin_users'))
+        return redirect(url_for('login'))
     user = get_user(username)
     if not user:
         flash('User not found.', 'danger')
@@ -272,7 +264,7 @@ def view_user(username):
 def change_user_password(username):
     if 'username' not in session or not session.get('admin'):
         flash('Admin access only.', 'danger')
-        return redirect(url_for('admin_users'))
+        return redirect(url_for('login'))
     new_password = request.form['new_password']
     user = get_user(username)
     if not user:
@@ -297,5 +289,7 @@ def logout():
 
 if __name__ == '__main__':
     from waitress import serve
+    import os
+
     port = int(os.environ.get('PORT', 10000))
     serve(app, host='0.0.0.0', port=port)
