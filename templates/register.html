@@ -4,24 +4,30 @@
   <meta charset="UTF-8" />
   <title>Register - Venus Jewel</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ✅ Favicon Setup -->
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='images/apple-touch-icon.png') }}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/favicon-32x32.png') }}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='images/favicon-16x16.png') }}">
+  <link rel="manifest" href="{{ url_for('static', filename='images/site.webmanifest') }}">
+  <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&display=swap" rel="stylesheet">
+
   <style>
     * { box-sizing: border-box; }
-
     body {
       margin: 0;
       font-family: 'DM Sans', sans-serif;
       background-color: #001a4d;
       color: white;
     }
-
     .container {
       display: flex;
       height: 100vh;
       width: 100%;
       flex-direction: row;
     }
-
     .left-panel {
       flex: 1;
       background: linear-gradient(to bottom, rgba(0, 26, 77, 0.88), rgba(0, 26, 77, 0.88)),
@@ -32,12 +38,10 @@
       align-items: center;
       padding: 40px;
     }
-
     .left-panel img {
       width: 540px;
       max-width: 90%;
     }
-
     .right-panel {
       flex: 1;
       display: flex;
@@ -46,14 +50,12 @@
       padding: 60px;
       background-color: #001a4d;
     }
-
     .form-title {
       font-size: 18px;
       font-weight: 600;
       color: #c7d7ff;
       margin-bottom: 6px;
     }
-
     input[type="text"], input[type="password"] {
       width: 100%;
       padding: 12px;
@@ -66,15 +68,12 @@
       outline: none;
       transition: border-color 0.3s;
     }
-
     .password-wrapper {
       position: relative;
     }
-
     .password-wrapper input {
       padding-right: 40px;
     }
-
     .toggle-password {
       position: absolute;
       top: 50%;
@@ -82,31 +81,25 @@
       transform: translateY(-50%);
       cursor: pointer;
     }
-
     .toggle-password svg {
       fill: white;
       transition: fill 0.3s;
     }
-
     .toggle-password.match svg {
       fill: #00ff99;
     }
-
     .error-message {
       color: #ff8888;
       font-size: 14px;
       margin-top: -18px;
       margin-bottom: 16px;
     }
-
     .error-border {
       border-bottom: 2px solid #ff4444 !important;
     }
-
     .success-border {
       border-bottom: 2px solid #00ff99 !important;
     }
-
     button {
       width: 100%;
       padding: 12px;
@@ -119,7 +112,6 @@
       cursor: pointer;
       margin-bottom: 20px;
     }
-
     .bottom-links {
       display: flex;
       justify-content: space-between;
@@ -127,17 +119,14 @@
       flex-wrap: wrap;
       gap: 12px;
     }
-
     .bottom-links a {
       color: white;
       text-decoration: underline;
       cursor: pointer;
     }
-
     .bottom-links a:hover {
       color: #aad4ff;
     }
-
     @media (max-width: 960px) {
       .container { flex-direction: column; }
       .left-panel, .right-panel {
@@ -249,4 +238,3 @@
 
 </body>
 </html>
-
