@@ -14,12 +14,19 @@ from googleapiclient.http import MediaIoBaseUpload
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'
 
-# ✅ HTTPS handling for Render (to prevent redirect loop)
+# ✅ Fix HTTPS redirect loop (Render proxy aware)
 @app.before_request
 def enforce_https_on_render():
     if request.headers.get('X-Forwarded-Proto', 'http') != 'https':
         url = request.url.replace("http://", "https://", 1)
         return redirect(url)
+
+# ✅ Optional: force redirect to www domain
+@app.before_request
+def redirect_to_www():
+    host = request.host
+    if host == 'filesvenusjewel.info':
+        return redirect(request.url.replace("//filesvenusjewel.info", "//www.filesvenusjewel.info"), code=301)
 
 # Unified credentials path for both Sheets and Drive
 CREDENTIALS_PATH = '/etc/secrets/Credentials.json' if os.environ.get('RENDER') else 'Credentials.json'
@@ -48,11 +55,9 @@ DRIVE_SCOPES = ['https://www.googleapis.com/auth/drive']
 drive_creds = service_account.Credentials.from_service_account_file(CREDENTIALS_PATH, scopes=DRIVE_SCOPES)
 drive_service = build('drive', 'v3', credentials=drive_creds)
 
-
 def username_exists(username):
     usernames = sheet.col_values(3)
     return username in usernames[1:]
-
 
 def get_user(username):
     usernames = sheet.col_values(3)
@@ -70,7 +75,6 @@ def get_user(username):
             }
     return None
 
-
 def get_or_create_folder(name, parent_id):
     query = f"name='{name}' and mimeType='application/vnd.google-apps.folder' and '{parent_id}' in parents and trashed=false"
     results = drive_service.files().list(q=query, fields="files(id, name)").execute()
@@ -84,7 +88,6 @@ def get_or_create_folder(name, parent_id):
     }
     folder = drive_service.files().create(body=file_metadata, fields='id').execute()
     return folder.get('id')
-
 
 def mute_video(file_storage, filename):
     ext = os.path.splitext(filename)[1]
@@ -101,7 +104,6 @@ def mute_video(file_storage, filename):
         print(f"[FFMPEG ERROR] {filename}: {e}")
         with open(input_path, 'rb') as f:
             return io.BytesIO(f.read())
-
 
 @app.route('/')
 def home():
@@ -123,7 +125,6 @@ def home():
                 session['admin'] = False
                 return redirect(url_for('dashboard'))
     return redirect(url_for('login'))
-
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -162,14 +163,12 @@ def login():
         flash('Invalid credentials.', 'danger')
     return render_template('login.html')
 
-
 @app.route('/venus-upload')
 def venus_upload_dashboard():
     if 'username' not in session or not session.get('venus_user'):
         flash('Access denied.', 'danger')
         return redirect(url_for('login'))
     return render_template('Venus_Upload.html')
-
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -190,14 +189,12 @@ def register():
         return redirect(url_for('login'))
     return render_template('register.html')
 
-
 @app.route('/dashboard')
 def dashboard():
     if 'username' not in session or session.get('admin'):
         flash('Access denied.', 'danger')
         return redirect(url_for('login'))
     return render_template('dashboard.html', user=session['username'])
-
 
 @app.route('/upload', methods=['POST'])
 def upload():
@@ -235,14 +232,12 @@ def upload():
     except Exception as e:
         return jsonify({'success': False, 'message': f'Upload failed: {e}'}), 500
 
-
 @app.route('/admin-dashboard')
 def admin_dashboard():
     if 'username' not in session or not session.get('admin'):
         flash('Admin access only.', 'danger')
         return redirect(url_for('login'))
     return render_template('admin_dashboard.html', user=session['username'])
-
 
 @app.route('/admin/users')
 def admin_users():
@@ -254,14 +249,12 @@ def admin_users():
     users = [dict(zip(headers, row)) for row in all_records[1:]]
     return render_template('admin_users.html', users=users)
 
-
 @app.route('/admin/venus-files')
 def admin_files():
     if 'username' not in session or not session.get('admin'):
         flash('Admin access only.', 'danger')
         return redirect(url_for('login'))
     return redirect("https://drive.google.com/drive/u/0/folders/1Yjvp5TMg7mERWxq4dsYJq748CcQIucLK")
-
 
 @app.route('/admin/user/<username>')
 def view_user(username):
@@ -274,7 +267,6 @@ def view_user(username):
         return redirect(url_for('admin_users'))
     files = [f for f in os.listdir(UPLOAD_FOLDER) if username in f]
     return render_template('user_profile.html', user=user, files=files)
-
 
 @app.route('/admin/user/<username>/change-password', methods=['POST'])
 def change_user_password(username):
@@ -291,11 +283,9 @@ def change_user_password(username):
     flash(f"Password updated for {username}.", 'success')
     return redirect(url_for('view_user', username=username))
 
-
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
-
 
 @app.route('/logout')
 def logout():
@@ -305,10 +295,7 @@ def logout():
     resp.set_cookie('password', '', expires=0)
     return resp
 
-
 if __name__ == '__main__':
     from waitress import serve
-    import os
-
     port = int(os.environ.get('PORT', 10000))
     serve(app, host='0.0.0.0', port=port)
