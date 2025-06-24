@@ -3,13 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <title>Venus Jewel File Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -23,9 +20,7 @@
       position: fixed;
       top: 0;
       left: 0;
-      background:
-        linear-gradient(to bottom, rgba(0,48,112, 0.92), rgba(0,64,128, 0.95)),
-        url('/static/images/pencil.png') no-repeat center center;
+      background: linear-gradient(to bottom, rgba(0,48,112, 0.92), rgba(0,64,128, 0.95)), url('/static/images/pencil.png') no-repeat center center;
       background-size: cover;
       padding: 20px 0;
       box-shadow: 2px 0 6px rgba(0,0,0,0.25);
@@ -40,13 +35,13 @@
     }
 
     .sidebar .logo img {
-      height: 150px;
+      height: 120px;
+      max-width: 100%;
     }
 
     .sidebar h2 {
       color: white;
       font-size: 20px;
-      margin-top: 5px;
       font-weight: 600;
     }
 
@@ -92,7 +87,7 @@
     }
 
     .main-content h2 {
-      font-size: 30px;
+      font-size: 28px;
       color: #004080;
       text-align: center;
       margin-bottom: 30px;
@@ -184,11 +179,6 @@
       margin-bottom: 15px;
     }
 
-    #passwordModal p {
-      font-size: 15px;
-      color: #333;
-    }
-
     #passwordModal button {
       margin-top: 20px;
       background: #004080;
@@ -197,6 +187,62 @@
       border: none;
       border-radius: 8px;
       cursor: pointer;
+    }
+
+    /* Responsive Media Queries */
+    @media (max-width: 991px) {
+      .sidebar {
+        width: 220px;
+      }
+      .main-content {
+        margin-left: 230px;
+        padding: 40px 20px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        box-shadow: none;
+      }
+
+      .main-content {
+        margin-left: 0;
+        margin-top: 20px;
+        padding: 20px;
+      }
+
+      .sidebar .logo img {
+        height: 90px;
+      }
+
+      .main-content h2 {
+        font-size: 24px;
+      }
+
+      .upload-btn {
+        font-size: 15px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      label, input[type="text"], input[type="file"] {
+        font-size: 14px;
+      }
+
+      .main-content h2 {
+        font-size: 22px;
+      }
+
+      .upload-btn {
+        padding: 12px;
+      }
+
+      .sidebar h2 {
+        font-size: 18px;
+      }
     }
   </style>
 </head>
@@ -234,8 +280,8 @@
 <div id="passwordModal">
   <div class="modal-content">
     <h3>Change Password</h3>
-   <a href="/forgot-password">Change Password</a>
-   <button onclick="closePasswordModal()">OK</button>
+    <a href="/forgot-password">Change Password</a><br>
+    <button onclick="closePasswordModal()">OK</button>
   </div>
 </div>
 
