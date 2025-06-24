@@ -1,3 +1,4 @@
+<!-- templates/login.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,40 +7,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: 'DM Sans', sans-serif;
       background-color: #001a4d;
       color: white;
     }
-
     .container {
       display: flex;
       height: 100vh;
       width: 100%;
     }
-
     .left-panel {
       flex: 1;
-      background:
-        linear-gradient(to bottom, rgba(0, 26, 77, 0.88), rgba(0, 26, 77, 0.88)),
-        url('/static/images/pencil.png') no-repeat center center;
+      background: linear-gradient(to bottom, rgba(0, 26, 77, 0.88), rgba(0, 26, 77, 0.88)),
+                  url('/static/images/pencil.png') no-repeat center center;
       background-size: cover;
       display: flex;
       justify-content: center;
       align-items: center;
       padding: 40px;
     }
-
-    .left-panel img {
-      width: 540px;
-      max-width: 90%;
-    }
-
+    .left-panel img { width: 540px; max-width: 90%; }
     .right-panel {
       flex: 1;
       display: flex;
@@ -48,16 +38,13 @@
       padding: 60px;
       background-color: #001a4d;
     }
-
     .form-title {
       font-size: 18px;
       font-weight: 600;
       color: #c7d7ff;
       margin-bottom: 6px;
     }
-
-    input[type="text"],
-    input[type="password"] {
+    input[type="text"], input[type="password"] {
       width: 100%;
       padding: 12px;
       margin-bottom: 24px;
@@ -68,28 +55,20 @@
       font-size: 15px;
       outline: none;
     }
-
     .password-wrapper {
       position: relative;
     }
-
-    .password-wrapper input[type="password"],
-    .password-wrapper input[type="text"] {
+    .password-wrapper input {
       padding-right: 40px;
     }
-
     .toggle-password {
       position: absolute;
-      top: calc(50% - 2px); /* moved up slightly more */
+      top: calc(50% - 2px);
       right: 10px;
       transform: translateY(-50%);
       cursor: pointer;
     }
-
-    .toggle-password svg {
-      fill: white;
-    }
-
+    .toggle-password svg { fill: white; }
     .options {
       display: flex;
       justify-content: space-between;
@@ -97,22 +76,16 @@
       margin-bottom: 20px;
       font-size: 14px;
     }
-
     .options label {
       display: flex;
       align-items: center;
       gap: 6px;
     }
-
     .options a {
       color: gold;
       text-decoration: none;
     }
-
-    .options a:hover {
-      text-decoration: underline;
-    }
-
+    .options a:hover { text-decoration: underline; }
     button {
       width: 100%;
       padding: 12px;
@@ -125,23 +98,17 @@
       cursor: pointer;
       margin-bottom: 20px;
     }
-
     .bottom-links {
       display: flex;
       justify-content: space-between;
       font-size: 14px;
     }
-
     .bottom-links a {
       color: white;
       text-decoration: underline;
       cursor: pointer;
     }
-
-    .bottom-links a:hover {
-      color: #aad4ff;
-    }
-
+    .bottom-links a:hover { color: #aad4ff; }
     .flash-message {
       color: #ffb3b3;
       background-color: rgba(255, 0, 0, 0.1);
@@ -150,39 +117,26 @@
       margin-bottom: 16px;
       text-align: center;
     }
-
     @media (max-width: 960px) {
-      .container {
-        flex-direction: column;
-      }
-
-      .left-panel,
-      .right-panel {
+      .container { flex-direction: column; }
+      .left-panel, .right-panel {
         width: 100%;
         padding: 30px;
       }
-
       .bottom-links {
         flex-direction: column;
         gap: 10px;
         align-items: center;
       }
-
-      .left-panel img {
-        width: 280px;
-      }
+      .left-panel img { width: 280px; }
     }
   </style>
 </head>
 <body>
-
 <div class="container">
-  <!-- LEFT PANEL: Logo with Pencil Design -->
   <div class="left-panel">
     <img src="{{ url_for('static', filename='images/vj_logo_new.png') }}" alt="Venus Logo" />
   </div>
-
-  <!-- RIGHT PANEL: Login Form -->
   <div class="right-panel">
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
@@ -191,7 +145,6 @@
         {% endfor %}
       {% endif %}
     {% endwith %}
-
     <form method="POST">
       <div class="form-title">👤 USER NAME</div>
       <input type="text" name="username" placeholder="User Name" required value="{{ remembered_user }}"/>
@@ -214,7 +167,7 @@
 
       <div class="bottom-links">
         <a href="/register">CREATE ACCOUNT</a>
-        <a onclick="alert('Please contact the administrator for login credentials.')">FORGOT PASSWORD?</a>
+        <a href="/forgot-password">FORGOT PASSWORD?</a>
       </div>
     </form>
   </div>
@@ -224,16 +177,14 @@
   function togglePassword() {
     const pwd = document.getElementById('password');
     const icon = document.getElementById('eyeIcon');
-
     if (pwd.type === 'password') {
       pwd.type = 'text';
-      icon.innerHTML = `<path d="M2.39 1.73 1.11 3 5 6.89A11.72 11.72 0 0 0 1 12c1.73 3.89 6 7.5 11 7.5 2.07 0 4.03-.5 5.77-1.39l2.84 2.84 1.27-1.27L2.39 1.73zM12 17c-3.31 0-6.31-2.06-8-5 .72-1.29 1.74-2.39 2.97-3.18l1.47 1.47A3.49 3.49 0 0 0 12 15c.69 0 1.34-.2 1.89-.54l1.47 1.47c-.92.44-1.95.71-3.06.71zm-.62-5.88 2.5 2.5c-.23.23-.52.38-.84.44A1.5 1.5 0 0 1 10.5 12c0-.32.11-.61.29-.88zM12 6.5c3.31 0 6.31 2.06 8 5-.49.89-1.14 1.7-1.9 2.39l1.45 1.45c1.13-1.13 2.07-2.51 2.65-4.09C21.27 8.11 17 4.5 12 4.5c-1.22 0-2.4.21-3.5.59l1.61 1.61c.58-.12 1.18-.2 1.89-.2z"/>`;
+      icon.innerHTML = `<path d="M2.39 1.73 1.11 3 5 6.89A11.72 11.72 0 0 0 1 12c1.73 3.89 6 7.5 11 7.5 2.07 0 4.03-.5 5.77-1.39l2.84 2.84 1.27-1.27L2.39 1.73zM12 17c-3.31 0-6.31-2.06-8-5 .72-1.29 1.74-2.39 2.97-3.18l1.47 1.47A3.49 3.49 0 0 0 12 15c.69 0 1.34-.2 1.89-.54l1.47 1.47c-.92.44-1.95.71-3.06.71z"/>`;
     } else {
       pwd.type = 'password';
       icon.innerHTML = `<path d="M12 4.5C7 4.5 2.73 8.11 1 12c1.73 3.89 6 7.5 11 7.5s9.27-3.61 11-7.5c-1.73-3.89-6-7.5-11-7.5zm0 13a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11zm0-9a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z"/>`;
     }
   }
 </script>
-
 </body>
 </html>
