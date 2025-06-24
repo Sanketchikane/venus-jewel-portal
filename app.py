@@ -143,16 +143,16 @@ def login():
 @app.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
     if request.method == 'POST':
+        full_name = request.form['full_name'].strip()
         username = request.form['username'].strip()
-        contact = request.form['contact_number'].strip()
         new_password = request.form['new_password'].strip()
         confirm_password = request.form['confirm_password'].strip()
 
         user = get_user(username)
         if not user:
             flash('User not found.', 'danger')
-        elif user['Contact Number'] != contact:
-            flash('Contact number mismatch.', 'danger')
+        elif user['Full Name'].lower() != full_name.lower():
+            flash('Full name mismatch.', 'danger')
         elif new_password != confirm_password:
             flash('Passwords do not match.', 'danger')
         else:
@@ -160,6 +160,7 @@ def forgot_password():
             flash('Password updated successfully.', 'success')
             return redirect(url_for('login'))
     return render_template('forgot_password.html')
+
 
 @app.route('/venus-upload')
 def venus_upload_dashboard():
