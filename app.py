@@ -83,31 +83,34 @@ def login():
         username = request.form['username'].strip()
         password = request.form['password'].strip()
         remember = request.form.get('remember')
-        response = make_response(redirect(url_for('dashboard')))
 
         if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
             session.update({'username': username, 'admin': True})
+            response = make_response(redirect(url_for('admin_dashboard')))
             if remember:
                 response.set_cookie('username', username, max_age=2592000)
                 response.set_cookie('password', password, max_age=2592000)
-            return redirect(url_for('admin_dashboard'))
+            return response
 
         if username == VENUSFILES_USERNAME and password == VENUSFILES_PASSWORD:
             session.update({'username': username, 'venus_user': True})
+            response = make_response(redirect(url_for('venus_upload_dashboard')))
             if remember:
                 response.set_cookie('username', username, max_age=2592000)
                 response.set_cookie('password', password, max_age=2592000)
-            return redirect(url_for('venus_upload_dashboard'))
+            return response
 
         user = get_user(username)
         if user and check_password_hash(user['Password'], password):
             session.update({'username': username, 'admin': False})
+            response = make_response(redirect(url_for('dashboard')))
             if remember:
                 response.set_cookie('username', username, max_age=2592000)
                 response.set_cookie('password', password, max_age=2592000)
             return response
 
         flash('Invalid credentials.', 'danger')
+
     return render_template('login.html', remembered_user=remembered_user)
 
 @app.route('/forgot-password', methods=['GET', 'POST'])
