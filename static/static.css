@@ -123,9 +123,76 @@ a:hover {
   color: green;
 }
 
-/* ======= RESPONSIVE ======= */
+/* ======= RESPONSIVE GLASS CARD ======= */
 @media (max-width: 600px) {
   .glass-card {
     padding: 30px 20px;
+  }
+}
+
+/* ======= ADDITIONAL RESPONSIVE RULES FOR DASHBOARD ======= */
+@media (max-width: 1024px) {
+  .main-content {
+    margin-left: 0 !important;
+    border-radius: 0 !important;
+    padding: 50px 20px 30px !important;
+  }
+
+  .sidebar {
+    width: 100% !important;
+    height: auto !important;
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    padding-bottom: 10px !important;
+    box-shadow: none !important;
+  }
+
+  .sidebar .nav-links {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    margin: 10px 0 !important;
+  }
+
+  .nav-links li {
+    margin: 5px 10px !important;
+    padding: 8px 12px !important;
+  }
+
+  .nav-links li a {
+    font-size: 15px !important;
+  }
+
+  .sidebar .logo img {
+    height: 48px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .core-values-row {
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 30px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content h1 {
+    font-size: 24px !important;
+  }
+
+  .main-content h2 {
+    font-size: 18px !important;
+  }
+
+  .core-value img {
+    width: 130px !important;
+    height: 130px !important;
+  }
+
+  .core-value span {
+    font-size: 14px !important;
   }
 }
