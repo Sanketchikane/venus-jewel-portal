@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Loading...</title>
   <style>
     html, body {
@@ -30,7 +30,8 @@
     .splash-logo {
       width: 400px;
       max-width: 95%;
-      animation: growFade 3s ease-in-out;
+      animation: growFade 3s ease-in-out, shineEffect 3s ease-in-out 1s forwards;
+      filter: drop-shadow(0 0 10px rgba(255,255,255,0.2));
     }
 
     @keyframes growFade {
@@ -54,16 +55,22 @@
         filter: brightness(1.1);
       }
     }
+
+    @keyframes shineEffect {
+      0% { filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2)); }
+      50% { filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.5)); }
+      100% { filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2)); }
+    }
   </style>
   <script>
     setTimeout(function() {
       window.location.href = "/login";
-    }, 5000); // reduced from 6500 to 5000 ms (5 seconds)
+    }, 5000); // Redirect after 5 seconds
   </script>
 </head>
 <body>
   <div class="splash-container">
-    <img class="splash-logo" src="/static/images/vj_logo_new.png" alt="Venus Jewel Logo">
+    <img class="splash-logo" src="/static/images/splash.png" alt="Venus Jewel Logo">
   </div>
 </body>
 </html>
