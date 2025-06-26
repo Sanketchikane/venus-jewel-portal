@@ -96,20 +96,11 @@ def mute_video(file_storage, filename):
 
 @app.route('/')
 def home():
-    username = request.cookies.get('username')
-    password = request.cookies.get('password')
-    if username and password:
-        if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
-            session.update({'username': username, 'admin': True})
-            return redirect(url_for('admin_dashboard'))
-        if username == VENUSFILES_USERNAME and password == VENUSFILES_PASSWORD:
-            session.update({'username': username, 'venus_user': True})
-            return redirect(url_for('venus_upload_dashboard'))
-        user = get_user(username)
-        if user and user['Password'] == password:
-            session.update({'username': username, 'admin': False})
-            return redirect(url_for('dashboard'))
-    return redirect(url_for('login'))
+    return redirect(url_for('splash'))
+
+@app.route('/splash')
+def splash():
+    return render_template('splash.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -160,7 +151,6 @@ def forgot_password():
             flash('Password updated successfully.', 'success')
             return redirect(url_for('login'))
     return render_template('forgot_password.html')
-
 
 @app.route('/venus-upload')
 def venus_upload_dashboard():
