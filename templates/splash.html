@@ -16,7 +16,6 @@
 
     .splash-container {
       display: flex;
-      flex-direction: column;
       justify-content: center;
       align-items: center;
       height: 100vh;
@@ -24,42 +23,40 @@
         linear-gradient(to bottom, rgba(0, 26, 77, 0.88), rgba(0, 26, 77, 0.88)),
         url('/static/images/pencil.png') no-repeat center center;
       background-size: cover;
-      animation: fadeInBright 2s ease-in-out;
+      animation: fadeInBright 1.5s ease-in-out;
     }
 
     .splash-logo {
-      width: 400px;
-      max-width: 95%;
-      animation: growFade 3s ease-in-out, shineEffect 3s ease-in-out 1s forwards;
-      filter: drop-shadow(0 0 10px rgba(255,255,255,0.2));
+      width: 32vw;
+      max-width: 420px;
+      filter: brightness(0.3) contrast(1.1) drop-shadow(0 0 15px rgba(255,255,255,0.2));
+      clip-path: inset(0 100% 0 0);
+      animation:
+        revealLogo 2.2s ease-out forwards,
+        brighten 2.5s ease-in-out 1.5s forwards;
     }
 
-    @keyframes growFade {
+    @keyframes revealLogo {
       0% {
-        opacity: 0;
-        transform: scale(0.75);
+        clip-path: inset(0 100% 0 0);
       }
       100% {
-        opacity: 1;
-        transform: scale(1);
+        clip-path: inset(0 0% 0 0);
+      }
+    }
+
+    @keyframes brighten {
+      0% {
+        filter: brightness(0.3) contrast(1.1) drop-shadow(0 0 15px rgba(255,255,255,0.2));
+      }
+      100% {
+        filter: brightness(1.25) contrast(1.35) drop-shadow(0 0 30px rgba(255,255,255,0.35));
       }
     }
 
     @keyframes fadeInBright {
-      0% {
-        opacity: 0;
-        filter: brightness(0.4);
-      }
-      100% {
-        opacity: 1;
-        filter: brightness(1.1);
-      }
-    }
-
-    @keyframes shineEffect {
-      0% { filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2)); }
-      50% { filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.5)); }
-      100% { filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2)); }
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
   </style>
   <script>
