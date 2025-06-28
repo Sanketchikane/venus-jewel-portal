@@ -28,16 +28,19 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
+      width: 100vw;
       background:
         linear-gradient(to bottom, rgba(0, 26, 77, 0.88), rgba(0, 26, 77, 0.88)),
         url('/static/images/pencil.png') no-repeat center center;
       background-size: cover;
       animation: fadeInBright 2s ease-in-out;
+      text-align: center;
     }
 
     .splash-logo {
       width: 400px;
-      max-width: 95%;
+      max-width: 80%;
+      height: auto;
       animation: growFade 3s ease-in-out;
     }
 
@@ -62,16 +65,29 @@
         filter: brightness(1.1);
       }
     }
+
+    @media (max-width: 768px) {
+      .splash-logo {
+        width: 220px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .splash-logo {
+        width: 180px;
+      }
+    }
   </style>
+
   <script>
     setTimeout(function() {
       window.location.href = "/login";
-    }, 5000); // reduced from 6500 to 5000 ms (5 seconds)
+    }, 5000); // redirect after 5 seconds
   </script>
 </head>
 <body>
   <div class="splash-container">
-    <img class="splash-logo" src="/static/images/vj_logo_new.png" alt="Venus Jewel Logo">
+    <img class="splash-logo" src="{{ url_for('static', filename='images/vj_logo_new.png') }}" alt="Venus Jewel Logo">
   </div>
 </body>
 </html>
