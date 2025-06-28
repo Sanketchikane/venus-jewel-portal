@@ -43,6 +43,7 @@
       max-width: 80%;
       height: auto;
       animation: growFade 3s ease-in-out;
+      z-index: 2;
     }
 
     @keyframes growFade {
@@ -68,12 +69,22 @@
     }
 
     @media (max-width: 768px) {
+      .splash-container {
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center center;
+      }
+
       .splash-logo {
         width: 220px;
       }
     }
 
     @media (max-width: 480px) {
+      .splash-container {
+        padding: 20px;
+      }
+
       .splash-logo {
         width: 180px;
       }
@@ -83,7 +94,7 @@
   <script>
     setTimeout(function() {
       window.location.href = "/login";
-    }, 5000); // redirect after 5 seconds
+    }, 5000);
   </script>
 </head>
 <body>
