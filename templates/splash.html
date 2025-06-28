@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Loading...</title>
-  
+
   <!-- ✅ Favicon Support -->
   <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='images/apple-touch-icon.png') }}">
   <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/favicon-32x32.png') }}">
@@ -17,6 +17,7 @@
       margin: 0;
       padding: 0;
       height: 100%;
+      width: 100%;
       background-color: #001a4d;
       overflow: hidden;
       font-family: 'DM Sans', sans-serif;
@@ -31,7 +32,7 @@
       width: 100vw;
       background:
         linear-gradient(to bottom, rgba(0, 26, 77, 0.88), rgba(0, 26, 77, 0.88)),
-        url('/static/images/pencil.png') no-repeat center center;
+        url('{{ url_for('static', filename='images/pencil.png') }}') no-repeat center center;
       background-size: cover;
       animation: fadeInBright 2s ease-in-out;
       text-align: center;
