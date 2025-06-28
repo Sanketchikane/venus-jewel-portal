@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Venus Jewel File Portal</title>
+  <title>VENUS JEWEL FILE PORTAL</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- ✅ Favicon Setup -->
@@ -12,26 +12,22 @@
   <link rel="manifest" href="{{ url_for('static', filename='images/site.webmanifest') }}">
   <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
 
-  <!-- ✅ Font Awesome & Google Font -->
+  <!-- Fonts and Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: 'Roboto', 'Segoe UI', sans-serif;
+      font-family: 'Poppins', sans-serif;
       background: url('/static/images/dimension.jpg') no-repeat center center fixed;
       background-size: cover;
     }
 
     .top-logo {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
       text-align: center;
-      padding: 20px 10px;
+      padding: 16px 10px 8px;
       background-color: rgba(255, 255, 255, 0.85);
     }
 
@@ -42,10 +38,10 @@
     }
 
     .top-logo h1 {
-      font-size: 24px;
+      font-size: 26px;
       font-weight: 700;
-      color: #004080;
-      margin: 0;
+      color: #003366;
+      letter-spacing: 1px;
     }
 
     .sidebar {
@@ -110,20 +106,12 @@
 
     .main-content {
       margin-left: 270px;
-      padding: 60px 30px;
+      padding: 40px 30px 60px;
       background: rgba(255, 255, 255, 0.75);
       min-height: 100vh;
       backdrop-filter: blur(10px);
       border-radius: 8px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-    }
-
-    .main-content h2 {
-      font-size: 28px;
-      color: #004080;
-      text-align: center;
-      margin-bottom: 30px;
-      font-weight: 700;
     }
 
     label {
@@ -256,11 +244,13 @@
 </head>
 <body>
 
+<!-- ✅ LOGO + HEADING (only once, clean & centered) -->
 <div class="top-logo">
   <img src="{{ url_for('static', filename='images/venus_black_logo.jpg') }}" alt="Venus Jewel Logo">
-  <h1>Venus Jewel File Portal</h1>
+  <h1>VENUS JEWEL FILE PORTAL</h1>
 </div>
 
+<!-- ✅ Sidebar & Upload Section -->
 <div class="mobile-toggle" onclick="toggleSidebar()">
   <i class="fas fa-bars"></i>
 </div>
@@ -279,7 +269,6 @@
 </div>
 
 <div class="main-content">
-  <h2>Venus Jewel File Portal</h2>
   <form id="uploadForm">
     <label for="packetNo">Packet Number</label>
     <input type="text" id="packetNo" name="packetNo" placeholder="Enter Packet Number" required>
