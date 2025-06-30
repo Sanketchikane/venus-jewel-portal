@@ -21,7 +21,7 @@
       height: 100vh;
       background:
         linear-gradient(to bottom, rgba(0, 26, 77, 0.88), rgba(0, 26, 77, 0.88)),
-        url('/static/images/pencil.png') no-repeat center center;
+        url('{{ url_for('static', filename='images/pencil.png') }}') no-repeat center center;
       background-size: cover;
       animation: fadeInBright 1.5s ease-in-out;
     }
@@ -62,12 +62,12 @@
   <script>
     setTimeout(function() {
       window.location.href = "/login";
-    }, 5000); // Redirect after 5 seconds
+    }, 5000);
   </script>
 </head>
 <body>
   <div class="splash-container">
-    <img class="splash-logo" src="/static/images/splash1.png" alt="Venus Jewel Logo">
+    <img class="splash-logo" src="{{ url_for('static', filename='images/Splash1.png') }}" alt="Venus Jewel Logo">
   </div>
 </body>
 </html>
