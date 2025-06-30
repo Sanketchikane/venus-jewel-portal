@@ -36,6 +36,7 @@
     .splash-logo {
       width: 35vw;
       max-width: 460px;
+      min-width: 200px;
       filter: brightness(0.3) contrast(1.1) drop-shadow(0 0 20px rgba(255,255,255,0.25));
       clip-path: inset(0 100% 0 0);
       animation:
@@ -56,6 +57,13 @@
     @keyframes fadeInBright {
       from { opacity: 0; }
       to { opacity: 1; }
+    }
+
+    @media (max-width: 768px) {
+      .splash-logo {
+        width: 55vw;
+        max-width: 300px;
+      }
     }
   </style>
   <script>
