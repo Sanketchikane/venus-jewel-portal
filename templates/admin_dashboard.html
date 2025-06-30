@@ -23,6 +23,19 @@
       background-size: cover;
     }
 
+    .mobile-toggle {
+      display: none;
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 9999;
+      background-color: #004080;
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
     .sidebar {
       height: 100vh;
       width: 260px;
@@ -36,17 +49,11 @@
       box-shadow: 2px 0 6px rgba(0,0,0,0.25);
       backdrop-filter: blur(8px);
       z-index: 2;
+      transition: left 0.3s ease;
     }
 
-    .sidebar::before {
-      content: "";
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 48, 112, 0.5);
-      z-index: -1;
-      mix-blend-mode: multiply;
+    .sidebar.active {
+      left: 0;
     }
 
     .sidebar .logo {
@@ -114,10 +121,6 @@
       margin-bottom: 12px;
     }
 
-    .main-content h1 {
-      display: none; /* Venus Jewel File Portal removed */
-    }
-
     .main-content h2 {
       font-size: 26px;
       color: #004080;
@@ -167,6 +170,20 @@
     }
 
     @media (max-width: 992px) {
+      .mobile-toggle {
+        display: block;
+      }
+
+      .sidebar {
+        left: -100%;
+      }
+
+      .main-content {
+        margin-left: 0;
+        margin-top: 80px;
+        padding: 20px;
+      }
+
       .core-values-row {
         flex-wrap: wrap;
         justify-content: center;
@@ -207,63 +224,73 @@
 </head>
 <body>
 
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <div class="logo">
-      <img src="{{ url_for('static', filename='images/vj_logo_new.png') }}" alt="Company Logo">
-      <h2>Venus Admin</h2>
+<!-- ✅ Mobile Sidebar Toggle Button -->
+<div class="mobile-toggle" onclick="toggleSidebar()">
+  <i class="fas fa-bars"></i>
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+  <div class="logo">
+    <img src="{{ url_for('static', filename='images/vj_logo_new.png') }}" alt="Company Logo">
+    <h2>Venus Admin</h2>
+  </div>
+  <ul class="nav-links">
+    <li><a href="{{ url_for('admin_users') }}"><i class="fas fa-users"></i> Registered Users</a></li>
+    <li><a href="{{ url_for('admin_files') }}"><i class="fas fa-folder-open"></i> Venus Diamond Files</a></li>
+    <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+  </ul>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+  <div class="header-logo">
+    <img src="{{ url_for('static', filename='images/venus_black_logo.jpg') }}" alt="Venus Jewel Logo">
+  </div>
+  <h2>Admin Dashboard</h2>
+
+  <!-- Horizontally Aligned Core Values -->
+  <div class="core-values-row">
+    <div class="core-value" onclick="highlightValue(this)">
+      <span>Transparency</span>
+      <img src="{{ url_for('static', filename='images/Round.png') }}" alt="Transparency">
     </div>
-    <ul class="nav-links">
-      <li><a href="{{ url_for('admin_users') }}"><i class="fas fa-users"></i> Registered Users</a></li>
-      <li><a href="{{ url_for('admin_files') }}"><i class="fas fa-folder-open"></i> Venus Diamond Files</a></li>
-      <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-    </ul>
+    <div class="core-value" onclick="highlightValue(this)">
+      <span>Fairness & Trust</span>
+      <img src="{{ url_for('static', filename='images/Cushion.png') }}" alt="Fairness">
+    </div>
+    <div class="core-value" onclick="highlightValue(this)">
+      <span>Customer Satisfaction</span>
+      <img src="{{ url_for('static', filename='images/Emerald.png') }}" alt="Customer Satisfaction">
+    </div>
+    <div class="core-value" onclick="highlightValue(this)">
+      <span>Long-Term Relationships</span>
+      <img src="{{ url_for('static', filename='images/Heart.png') }}" alt="Long-Term">
+    </div>
+    <div class="core-value" onclick="highlightValue(this)">
+      <span>Selling What is Needed</span>
+      <img src="{{ url_for('static', filename='images/Oval.png') }}" alt="Selling Need">
+    </div>
+    <div class="core-value" onclick="highlightValue(this)">
+      <span>Reciprocal Best Business</span>
+      <img src="{{ url_for('static', filename='images/Pear.png') }}" alt="Reciprocal Practice">
+    </div>
   </div>
 
-  <!-- Main Content -->
-  <div class="main-content">
-    <div class="header-logo">
-      <img src="{{ url_for('static', filename='images/venus_black_logo.jpg') }}" alt="Venus Jewel Logo">
-    </div>
-    <h2>Admin Dashboard</h2>
+  {% block content %}{% endblock %}
+</div>
 
-    <!-- Core Values Diamonds -->
-    <div class="core-values-row">
-      <div class="core-value" onclick="highlightValue(this)">
-        <span>Transparency</span>
-        <img src="{{ url_for('static', filename='images/Round.png') }}" alt="Transparency">
-      </div>
-      <div class="core-value" onclick="highlightValue(this)">
-        <span>Fairness & Trust</span>
-        <img src="{{ url_for('static', filename='images/Cushion.png') }}" alt="Fairness">
-      </div>
-      <div class="core-value" onclick="highlightValue(this)">
-        <span>Customer Satisfaction</span>
-        <img src="{{ url_for('static', filename='images/Emerald.png') }}" alt="Customer Satisfaction">
-      </div>
-      <div class="core-value" onclick="highlightValue(this)">
-        <span>Long-Term Relationships</span>
-        <img src="{{ url_for('static', filename='images/Heart.png') }}" alt="Long-Term">
-      </div>
-      <div class="core-value" onclick="highlightValue(this)">
-        <span>Selling What is Needed</span>
-        <img src="{{ url_for('static', filename='images/Oval.png') }}" alt="Selling Need">
-      </div>
-      <div class="core-value" onclick="highlightValue(this)">
-        <span>Reciprocal Best Business</span>
-        <img src="{{ url_for('static', filename='images/Pear.png') }}" alt="Reciprocal Practice">
-      </div>
-    </div>
+<script>
+  function toggleSidebar() {
+    const sidebar = document.getElementById("sidebar");
+    sidebar.classList.toggle("active");
+  }
 
-    {% block content %}{% endblock %}
-  </div>
-
-  <script>
-    function highlightValue(el) {
-      document.querySelectorAll('.core-value').forEach(val => val.classList.remove('active'));
-      el.classList.add('active');
-    }
-  </script>
+  function highlightValue(el) {
+    document.querySelectorAll('.core-value').forEach(val => val.classList.remove('active'));
+    el.classList.add('active');
+  }
+</script>
 
 </body>
 </html>
