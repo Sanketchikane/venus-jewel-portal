@@ -143,7 +143,7 @@
       text-align: center;
       cursor: pointer;
       transition: all 0.3s ease;
-      width: 220px;
+      width: 230px;
     }
 
     .core-value span {
@@ -166,7 +166,7 @@
       filter: drop-shadow(0 0 15px rgba(0,0,0,0.35));
     }
 
-    /* Mobile Adjustments */
+    /* Medium mobile: two in a row */
     @media (max-width: 768px) {
       .mobile-toggle {
         display: block;
@@ -191,6 +191,7 @@
       }
 
       .core-value img {
+        width: 160px;
         height: 160px;
       }
 
@@ -199,25 +200,31 @@
       }
     }
 
+    /* Small mobile: one per row */
     @media (max-width: 480px) {
       .core-value {
         width: 100%;
       }
 
       .core-value img {
-        height: 140px;
+        width: 120px;
+        height: 120px;
+      }
+
+      .core-value span {
+        font-size: 14px;
       }
     }
   </style>
 </head>
 <body>
 
-<!-- ✅ Mobile Sidebar Toggle -->
+<!-- Mobile Sidebar Toggle -->
 <div class="mobile-toggle" onclick="toggleSidebar()">
   <i class="fas fa-bars"></i>
 </div>
 
-<!-- ✅ Sidebar -->
+<!-- Sidebar -->
 <div class="sidebar" id="sidebar">
   <div class="logo">
     <img src="{{ url_for('static', filename='images/vj_logo_new.png') }}" alt="Company Logo">
@@ -230,14 +237,14 @@
   </ul>
 </div>
 
-<!-- ✅ Main Content -->
+<!-- Main Content -->
 <div class="main-content">
   <div class="header-logo">
     <img src="{{ url_for('static', filename='images/venus_black_logo.jpg') }}" alt="Venus Jewel Logo">
   </div>
   <h2>Admin Dashboard</h2>
 
-  <!-- ✅ Core Values Section -->
+  <!-- Core Values -->
   <div class="core-values-row">
     <div class="core-value" onclick="highlightValue(this)">
       <span>Transparency</span>
@@ -268,7 +275,7 @@
   {% block content %}{% endblock %}
 </div>
 
-<!-- ✅ Script -->
+<!-- Scripts -->
 <script>
   function toggleSidebar() {
     document.getElementById("sidebar").classList.toggle("active");
