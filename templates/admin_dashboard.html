@@ -1,232 +1,269 @@
-  <!DOCTYPE html>
-  <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <title>Admin Dashboard - Venus Diamond</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <style>
-      body {
-        font-family: 'Segoe UI', sans-serif;
-        margin: 0;
-        background: url('/static/images/dimension.jpg') no-repeat center center fixed;
-        background-size: cover;
-      }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard - Venus Diamond</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-      .sidebar {
-        height: 100vh;
-        width: 260px;
-        position: fixed;
-        top: 0;
-        left: 0;
-        background:
-          linear-gradient(to bottom, rgba(0,48,112, 0.92), rgba(0,64,128, 0.95)),
-          url('/static/images/pencil.png') no-repeat center center;
-        background-size: cover;
-        padding: 20px 0;
-        box-shadow: 2px 0 6px rgba(0,0,0,0.25);
-        backdrop-filter: blur(8px);
-        z-index: 2;
-      }
+  <!-- ✅ Favicon Support -->
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='images/apple-touch-icon.png') }}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/favicon-32x32.png') }}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='images/favicon-16x16.png') }}">
+  <link rel="manifest" href="{{ url_for('static', filename='images/site.webmanifest') }}">
+  <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
 
-      .sidebar::before {
-        content: "";
-        position: absolute;
-        top: 0; left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 48, 112, 0.5);
-        z-index: -1;
-        mix-blend-mode: multiply;
-      }
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
-      .sidebar .logo {
-        text-align: center;
-        margin-bottom: 30px;
-        margin-top: 30px;
-      }
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      background: url('/static/images/dimension.jpg') no-repeat center center fixed;
+      background-size: cover;
+    }
 
-      .sidebar .logo img {
-        height: 60px;
-      }
+    .sidebar {
+      height: 100vh;
+      width: 260px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background: linear-gradient(to bottom, rgba(0,48,112, 0.92), rgba(0,64,128, 0.95)),
+                  url('/static/images/pencil.png') no-repeat center center;
+      background-size: cover;
+      padding: 20px 0;
+      box-shadow: 2px 0 6px rgba(0,0,0,0.25);
+      backdrop-filter: blur(8px);
+      z-index: 2;
+    }
 
-      .sidebar h2 {
-        color: white;
-        font-size: 22px;
-        margin-top: 10px;
-      }
+    .sidebar::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 48, 112, 0.5);
+      z-index: -1;
+      mix-blend-mode: multiply;
+    }
 
-      .nav-links {
-        list-style: none;
-        padding: 0;
-        margin-top: 20px;
-      }
+    .sidebar .logo {
+      text-align: center;
+      margin-bottom: 30px;
+      margin-top: 30px;
+    }
 
-      .nav-links li {
-        padding: 12px 20px;
-        margin-bottom: 5px;
-      }
+    .sidebar .logo img {
+      height: 60px;
+    }
 
-      .nav-links li a {
-        color: white;
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        font-weight: 500;
-        font-size: 16px;
-        transition: background 0.3s, transform 0.2s;
-      }
+    .sidebar h2 {
+      color: white;
+      font-size: 22px;
+      margin-top: 10px;
+    }
 
-      .nav-links li a:hover {
-        background: rgba(255,255,255,0.15);
-        border-radius: 6px;
-        transform: translateX(4px);
-      }
+    .nav-links {
+      list-style: none;
+      padding: 0;
+      margin-top: 20px;
+    }
 
-      .nav-links li a i {
-        margin-right: 10px;
-        min-width: 20px;
-      }
+    .nav-links li {
+      padding: 12px 20px;
+      margin-bottom: 5px;
+    }
 
-      .main-content {
-        margin-left: 270px;
-        padding: 60px 30px 40px;
-        background: rgba(255, 255, 255, 0.78);
-        min-height: 100vh;
-        backdrop-filter: blur(8px);
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-        text-align: center;
-      }
+    .nav-links li a {
+      color: white;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      font-weight: 500;
+      font-size: 16px;
+      transition: background 0.3s, transform 0.2s;
+    }
 
-      .main-content .header-logo img {
-        height: 70px;
-        margin-bottom: 12px;
-      }
+    .nav-links li a:hover {
+      background: rgba(255,255,255,0.15);
+      border-radius: 6px;
+      transform: translateX(4px);
+    }
 
-      .main-content h1 {
-        font-size: 36px;
-        color: #002d5a;
-        margin: 5px 0 6px;
-        font-weight: 700;
-      }
+    .nav-links li a i {
+      margin-right: 10px;
+      min-width: 20px;
+    }
 
-      .main-content h2 {
-        font-size: 22px;
-        color: #004080;
-        margin-bottom: 35px;
-        font-weight: 600;
-      }
+    .main-content {
+      margin-left: 270px;
+      padding: 60px 30px 40px;
+      background: rgba(255, 255, 255, 0.78);
+      min-height: 100vh;
+      backdrop-filter: blur(8px);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      text-align: center;
+      font-family: 'Poppins', sans-serif;
+    }
 
+    .main-content .header-logo img {
+      height: 70px;
+      margin-bottom: 12px;
+    }
+
+    .main-content h1 {
+      display: none; /* Venus Jewel File Portal removed */
+    }
+
+    .main-content h2 {
+      font-size: 26px;
+      color: #004080;
+      margin-bottom: 35px;
+      font-weight: 700;
+    }
+
+    .core-values-row {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      flex-wrap: nowrap;
+      gap: 60px;
+      margin-top: 20px;
+      overflow-x: auto;
+      padding-bottom: 30px;
+    }
+
+    .core-value {
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.3s ease;
+      min-width: 230px;
+      flex: 0 0 auto;
+    }
+
+    .core-value span {
+      display: block;
+      font-size: 17px;
+      font-weight: 600;
+      color: #002c5a;
+      margin-bottom: 14px;
+      letter-spacing: 0.4px;
+    }
+
+    .core-value img {
+      width: 230px;
+      height: 230px;
+      object-fit: contain;
+      background: transparent;
+      transition: all 0.3s ease-in-out;
+    }
+
+    .core-value.active img {
+      transform: scale(1.08);
+      filter: drop-shadow(0 0 15px rgba(0,0,0,0.35));
+    }
+
+    @media (max-width: 992px) {
       .core-values-row {
-        display: flex;
+        flex-wrap: wrap;
         justify-content: center;
-        align-items: flex-start;
-        flex-wrap: nowrap;
-        gap: 60px;
-        margin-top: 20px;
-        overflow-x: auto;
-        padding-bottom: 30px;
+        gap: 40px;
+        overflow-x: hidden;
       }
 
       .core-value {
-        cursor: pointer;
-        text-align: center;
-        transition: all 0.3s ease;
-        min-width: 200px;
-      }
-
-      .core-value span {
-        display: block;
-        font-size: 16px;
-        font-weight: 600;
-        color: #002c5a;
-        margin-bottom: 12px;
-        letter-spacing: 0.3px;
+        flex: 0 1 40%;
+        min-width: unset;
       }
 
       .core-value img {
-        width: 200px;
-        height: 200px;
-        object-fit: contain;
-        background: transparent;
-        transition: all 0.3s ease-in-out;
+        width: 180px;
+        height: 180px;
       }
 
-      .core-value.active img {
-        transform: scale(1.08);
-        filter: drop-shadow(0 0 15px rgba(0,0,0,0.35));
+      .core-value span {
+        font-size: 16px;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .core-value {
+        flex: 0 1 90%;
       }
 
-      @media (max-width: 768px) {
-        .core-values-row {
-          flex-wrap: wrap;
-          justify-content: center;
-          gap: 30px;
-        }
+      .core-value img {
+        width: 160px;
+        height: 160px;
       }
-    </style>
-  </head>
-  <body>
 
-    <!-- Sidebar -->
-    <div class="sidebar">
-      <div class="logo">
-        <img src="{{ url_for('static', filename='images/vj_logo_new.png') }}" alt="Company Logo">
-        <h2>Venus Admin</h2>
+      .core-value span {
+        font-size: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="logo">
+      <img src="{{ url_for('static', filename='images/vj_logo_new.png') }}" alt="Company Logo">
+      <h2>Venus Admin</h2>
+    </div>
+    <ul class="nav-links">
+      <li><a href="{{ url_for('admin_users') }}"><i class="fas fa-users"></i> Registered Users</a></li>
+      <li><a href="{{ url_for('admin_files') }}"><i class="fas fa-folder-open"></i> Venus Diamond Files</a></li>
+      <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="header-logo">
+      <img src="{{ url_for('static', filename='images/venus_black_logo.jpg') }}" alt="Venus Jewel Logo">
+    </div>
+    <h2>Admin Dashboard</h2>
+
+    <!-- Core Values Diamonds -->
+    <div class="core-values-row">
+      <div class="core-value" onclick="highlightValue(this)">
+        <span>Transparency</span>
+        <img src="{{ url_for('static', filename='images/Round.png') }}" alt="Transparency">
       </div>
-      <ul class="nav-links">
-        <li><a href="{{ url_for('admin_users') }}"><i class="fas fa-users"></i> Registered Users</a></li>
-        <li><a href="{{ url_for('admin_files') }}"><i class="fas fa-folder-open"></i> Venus Diamond Files</a></li>
-        <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-      </ul>
+      <div class="core-value" onclick="highlightValue(this)">
+        <span>Fairness & Trust</span>
+        <img src="{{ url_for('static', filename='images/Cushion.png') }}" alt="Fairness">
+      </div>
+      <div class="core-value" onclick="highlightValue(this)">
+        <span>Customer Satisfaction</span>
+        <img src="{{ url_for('static', filename='images/Emerald.png') }}" alt="Customer Satisfaction">
+      </div>
+      <div class="core-value" onclick="highlightValue(this)">
+        <span>Long-Term Relationships</span>
+        <img src="{{ url_for('static', filename='images/Heart.png') }}" alt="Long-Term">
+      </div>
+      <div class="core-value" onclick="highlightValue(this)">
+        <span>Selling What is Needed</span>
+        <img src="{{ url_for('static', filename='images/Oval.png') }}" alt="Selling Need">
+      </div>
+      <div class="core-value" onclick="highlightValue(this)">
+        <span>Reciprocal Best Business</span>
+        <img src="{{ url_for('static', filename='images/Pear.png') }}" alt="Reciprocal Practice">
+      </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="main-content">
-      <!-- Company Logo Above Title -->
-      <div class="header-logo">
-        <img src="{{ url_for('static', filename='images/venus_black_logo.jpg') }}" alt="Venus Jewel Logo">
-      </div>
-      <h1>Venus Jewel File Portal</h1>
-      <h2>Admin Dashboard</h2>
+    {% block content %}{% endblock %}
+  </div>
 
-      <!-- Core Values Diamonds -->
-      <div class="core-values-row">
-        <div class="core-value" onclick="highlightValue(this)">
-          <span>Transparency</span>
-          <img src="{{ url_for('static', filename='images/Round.png') }}" alt="Transparency">
-        </div>
-        <div class="core-value" onclick="highlightValue(this)">
-          <span>Fairness & Trust</span>
-          <img src="{{ url_for('static', filename='images/Cushion.png') }}" alt="Fairness">
-        </div>
-        <div class="core-value" onclick="highlightValue(this)">
-          <span>Customer Satisfaction</span>
-          <img src="{{ url_for('static', filename='images/Emerald.png') }}" alt="Customer Satisfaction">
-        </div>
-        <div class="core-value" onclick="highlightValue(this)">
-          <span>Long-Term Relationships</span>
-          <img src="{{ url_for('static', filename='images/Heart.png') }}" alt="Long-Term">
-        </div>
-        <div class="core-value" onclick="highlightValue(this)">
-          <span>Selling What is Needed</span>
-          <img src="{{ url_for('static', filename='images/Oval.png') }}" alt="Selling Need">
-        </div>
-        <div class="core-value" onclick="highlightValue(this)">
-          <span>Reciprocal Best Business</span>
-          <img src="{{ url_for('static', filename='images/Pear.png') }}" alt="Reciprocal Practice">
-        </div>
-      </div>
+  <script>
+    function highlightValue(el) {
+      document.querySelectorAll('.core-value').forEach(val => val.classList.remove('active'));
+      el.classList.add('active');
+    }
+  </script>
 
-      {% block content %}{% endblock %}
-    </div>
-
-    <script>
-      function highlightValue(el) {
-        document.querySelectorAll('.core-value').forEach(val => val.classList.remove('active'));
-        el.classList.add('active');
-      }
-    </script>
-
-  </body>
-  </html>
+</body>
+</html>

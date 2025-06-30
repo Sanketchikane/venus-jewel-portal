@@ -1,4 +1,4 @@
-/* ======= BASE BODY STYLING ======= */
+/* ================= BASE STYLING ================= */
 body {
   margin: 0;
   padding: 0;
@@ -9,7 +9,48 @@ body {
   color: #1a1a1a;
 }
 
-/* ======= GLASS CARD BASE (Login/Register) ======= */
+/* ================= SPLASH SCREEN ================= */
+.splash-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+  background:
+    linear-gradient(to bottom, rgba(0, 26, 77, 0.88), rgba(0, 26, 77, 0.88)),
+    url('/static/images/pencil.png') no-repeat center center;
+  background-size: cover;
+  animation: fadeInBright 2s ease-in-out;
+  text-align: center;
+}
+
+.splash-logo {
+  width: 400px;
+  max-width: 80%;
+  height: auto;
+  animation: growFade 3s ease-in-out;
+}
+
+@keyframes growFade {
+  0% { opacity: 0; transform: scale(0.75); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fadeInBright {
+  0% { opacity: 0; filter: brightness(0.4); }
+  100% { opacity: 1; filter: brightness(1.1); }
+}
+
+@media (max-width: 768px) {
+  .splash-logo { width: 220px; }
+}
+
+@media (max-width: 480px) {
+  .splash-logo { width: 180px; }
+}
+
+/* ================= GLASS CARD ================= */
 .glass-card {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 15px;
@@ -23,7 +64,6 @@ body {
   text-align: center;
 }
 
-/* ======= INPUT & BUTTONS ======= */
 .glass-card input,
 .glass-card button {
   width: 100%;
@@ -57,31 +97,130 @@ body {
   background: linear-gradient(135deg, #003060, #005ac1);
 }
 
-/* ======= LINKS ======= */
-a {
-  color: #004080;
+/* ================= DASHBOARD ================= */
+.sidebar {
+  height: 100vh;
+  width: 260px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: linear-gradient(to bottom, rgba(0,48,112, 0.92), rgba(0,64,128, 0.95)),
+              url('/static/images/pencil.png') no-repeat center center;
+  background-size: cover;
+  padding: 20px 0;
+  box-shadow: 2px 0 6px rgba(0,0,0,0.25);
+  backdrop-filter: blur(8px);
+  z-index: 2;
+}
+
+.sidebar .logo {
+  text-align: center;
+  margin-bottom: 30px;
+  margin-top: 20px;
+}
+
+.sidebar .logo img {
+  height: 120px;
+  max-width: 100%;
+}
+
+.sidebar h2 {
+  color: white;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.nav-links {
+  list-style: none;
+  padding: 0;
+  margin-top: 20px;
+}
+
+.nav-links li {
+  padding: 12px 20px;
+  margin-bottom: 5px;
+}
+
+.nav-links li a {
+  color: white;
   text-decoration: none;
+  display: flex;
+  align-items: center;
   font-weight: 500;
+  font-size: 16px;
+  transition: background 0.3s, transform 0.2s;
 }
 
-a:hover {
-  text-decoration: underline;
+.nav-links li a:hover {
+  background: rgba(255,255,255,0.15);
+  border-radius: 6px;
+  transform: translateX(4px);
 }
 
-/* ======= ERROR & STATUS TEXT ======= */
-.error {
-  color: red;
-  font-size: 0.9em;
+.nav-links li a i {
+  margin-right: 10px;
+}
+
+/* ================= MAIN CONTENT ================= */
+.main-content {
+  margin-left: 270px;
+  padding: 60px 30px;
+  background: rgba(255, 255, 255, 0.75);
+  min-height: 100vh;
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+.main-content h2 {
+  font-size: 28px;
+  color: #004080;
+  text-align: center;
+  margin-bottom: 30px;
+  font-weight: 700;
+}
+
+/* ================= FORM ================= */
+label {
+  display: block;
+  margin: 12px 0 6px;
+  font-weight: 600;
+}
+
+input[type="text"],
+input[type="file"] {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  margin-bottom: 16px;
+  background: #fff;
+  font-size: 15px;
+}
+
+.upload-btn {
+  background: linear-gradient(135deg, #004080, #0073e6);
+  color: #fff;
+  padding: 14px;
+  font-size: 16px;
+  border: none;
+  border-radius: 10px;
+  width: 100%;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.upload-btn:hover {
+  background: linear-gradient(135deg, #003060, #005ac1);
 }
 
 .status {
-  font-size: 0.95em;
-  margin-top: 10px;
+  text-align: center;
+  margin-top: 18px;
+  font-weight: bold;
   color: green;
-  font-weight: 500;
 }
 
-/* ======= SPINNER CSS (Replaces video spinner) ======= */
 #spinner {
   display: none;
   margin-top: 18px;
@@ -92,8 +231,8 @@ a:hover {
   border: 6px solid #f3f3f3;
   border-top: 6px solid #004080;
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   animation: spin 1s linear infinite;
   margin: 0 auto 10px;
 }
@@ -103,29 +242,131 @@ a:hover {
   100% { transform: rotate(360deg); }
 }
 
-/* ======= PASSWORD STRENGTH METER ======= */
-.password-strength {
-  margin-top: 6px;
-  font-size: 14px;
-  font-weight: 600;
+/* ================= MODAL ================= */
+#passwordModal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+}
+
+#passwordModal .modal-content {
+  background: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+}
+
+#passwordModal h3 {
   color: #004080;
+  margin-bottom: 15px;
 }
 
-.password-strength.weak {
-  color: red;
+#passwordModal button {
+  margin-top: 20px;
+  background: #004080;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
 }
 
-.password-strength.medium {
-  color: orange;
+/* ================= RESPONSIVE RULES ================= */
+@media (max-width: 1024px) {
+  .main-content {
+    margin-left: 0 !important;
+    border-radius: 0 !important;
+    padding: 50px 20px 30px !important;
+  }
+
+  .sidebar {
+    width: 100% !important;
+    height: auto !important;
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    padding-bottom: 10px !important;
+    box-shadow: none !important;
+  }
+
+  .sidebar .nav-links {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 12px !important;
+    padding: 0 12px !important;
+  }
+
+  .nav-links li {
+    flex: 1 1 calc(50% - 10px);
+    margin: 5px !important;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    text-align: center;
+    padding: 10px !important;
+  }
+
+  .nav-links li a {
+    flex-direction: column !important;
+    align-items: center !important;
+    font-size: 14px !important;
+  }
+
+  .nav-links li a i {
+    font-size: 18px;
+    margin-bottom: 4px;
+  }
+
+  .sidebar .logo img {
+    height: 48px !important;
+  }
+
+  .sidebar h2 {
+    font-size: 18px !important;
+    margin-top: 5px;
+  }
 }
 
-.password-strength.strong {
-  color: green;
+@media (max-width: 768px) {
+  .main-content h2 {
+    font-size: 24px;
+  }
+
+  .upload-btn {
+    font-size: 15px;
+  }
+
+  .nav-links li {
+    flex: 1 1 100% !important;
+  }
+
+  .nav-links li a {
+    font-size: 15px !important;
+  }
 }
 
-/* ======= RESPONSIVE ======= */
-@media (max-width: 600px) {
-  .glass-card {
-    padding: 30px 20px;
+@media (max-width: 480px) {
+  .main-content h2 {
+    font-size: 20px;
+  }
+
+  .upload-btn {
+    padding: 12px;
+  }
+
+  .sidebar h2 {
+    font-size: 16px !important;
+  }
+
+  .nav-links li a {
+    font-size: 14px !important;
   }
 }

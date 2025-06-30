@@ -2,19 +2,46 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Venus Jewel File Portal</title>
+  <title>VENUS JEWEL FILE PORTAL</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- ✅ Favicon Setup -->
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='images/apple-touch-icon.png') }}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/favicon-32x32.png') }}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='images/favicon-16x16.png') }}">
+  <link rel="manifest" href="{{ url_for('static', filename='images/site.webmanifest') }}">
+  <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+
+  <!-- Fonts and Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'Poppins', sans-serif;
       background: url('/static/images/dimension.jpg') no-repeat center center fixed;
       background-size: cover;
+    }
+
+    .top-logo {
+      text-align: center;
+      padding: 16px 10px 8px;
+      background-color: rgba(255, 255, 255, 0.85);
+    }
+
+    .top-logo img {
+      height: 80px;
+      max-width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .top-logo h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #003366;
+      letter-spacing: 1px;
     }
 
     .sidebar {
@@ -23,9 +50,7 @@
       position: fixed;
       top: 0;
       left: 0;
-      background:
-        linear-gradient(to bottom, rgba(0,48,112, 0.92), rgba(0,64,128, 0.95)),
-        url('/static/images/pencil.png') no-repeat center center;
+      background: linear-gradient(to bottom, rgba(0,48,112, 0.92), rgba(0,64,128, 0.95)), url('/static/images/pencil.png') no-repeat center center;
       background-size: cover;
       padding: 20px 0;
       box-shadow: 2px 0 6px rgba(0,0,0,0.25);
@@ -35,18 +60,17 @@
 
     .sidebar .logo {
       text-align: center;
-      margin-bottom: 30px;
-      margin-top: 20px;
+      margin-bottom: 20px;
     }
 
     .sidebar .logo img {
-      height: 150px;
+      height: 100px;
+      max-width: 100%;
     }
 
     .sidebar h2 {
       color: white;
       font-size: 20px;
-      margin-top: 5px;
       font-weight: 600;
     }
 
@@ -57,8 +81,7 @@
     }
 
     .nav-links li {
-      padding: 12px 20px;
-      margin-bottom: 5px;
+      padding: 10px 20px;
     }
 
     .nav-links li a {
@@ -67,7 +90,7 @@
       display: flex;
       align-items: center;
       font-weight: 500;
-      font-size: 16px;
+      font-size: 15px;
       transition: background 0.3s, transform 0.2s;
     }
 
@@ -83,20 +106,12 @@
 
     .main-content {
       margin-left: 270px;
-      padding: 60px 30px;
+      padding: 40px 30px 60px;
       background: rgba(255, 255, 255, 0.75);
       min-height: 100vh;
       backdrop-filter: blur(10px);
       border-radius: 8px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-    }
-
-    .main-content h2 {
-      font-size: 30px;
-      color: #004080;
-      text-align: center;
-      margin-bottom: 30px;
-      font-weight: 700;
     }
 
     label {
@@ -184,11 +199,6 @@
       margin-bottom: 15px;
     }
 
-    #passwordModal p {
-      font-size: 15px;
-      color: #333;
-    }
-
     #passwordModal button {
       margin-top: 20px;
       background: #004080;
@@ -198,11 +208,54 @@
       border-radius: 8px;
       cursor: pointer;
     }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        width: 240px;
+        height: 100vh;
+        left: -100%;
+        transition: left 0.3s ease;
+      }
+
+      .sidebar.active {
+        left: 0;
+      }
+
+      .main-content {
+        margin-left: 0;
+        margin-top: 20px;
+        padding: 20px;
+      }
+
+      .mobile-toggle {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 9999;
+        background-color: #004080;
+        color: #fff;
+        padding: 10px 14px;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+    }
   </style>
 </head>
 <body>
 
-<div class="sidebar">
+<!-- ✅ LOGO + HEADING (only once, clean & centered) -->
+<div class="top-logo">
+  <img src="{{ url_for('static', filename='images/venus_black_logo.jpg') }}" alt="Venus Jewel Logo">
+  <h1>VENUS JEWEL FILE PORTAL</h1>
+</div>
+
+<!-- ✅ Sidebar & Upload Section -->
+<div class="mobile-toggle" onclick="toggleSidebar()">
+  <i class="fas fa-bars"></i>
+</div>
+
+<div class="sidebar" id="sidebar">
   <div class="logo">
     <img src="{{ url_for('static', filename='images/vj_logo_new.png') }}" alt="Venus Jewel Logo">
     <h2>Dashboard</h2>
@@ -216,7 +269,6 @@
 </div>
 
 <div class="main-content">
-  <h2>Venus Jewel File Portal</h2>
   <form id="uploadForm">
     <label for="packetNo">Packet Number</label>
     <input type="text" id="packetNo" name="packetNo" placeholder="Enter Packet Number" required>
@@ -234,7 +286,7 @@
 <div id="passwordModal">
   <div class="modal-content">
     <h3>Change Password</h3>
-    <p>To change your password, please contact the administrator directly.</p>
+    <a href="/forgot-password">Change Password</a><br>
     <button onclick="closePasswordModal()">OK</button>
   </div>
 </div>
@@ -283,6 +335,11 @@
 
   function closePasswordModal() {
     document.getElementById("passwordModal").style.display = "none";
+  }
+
+  function toggleSidebar() {
+    const sidebar = document.getElementById("sidebar");
+    sidebar.classList.toggle("active");
   }
 </script>
 
