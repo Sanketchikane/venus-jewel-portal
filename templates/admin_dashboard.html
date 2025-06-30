@@ -2,25 +2,32 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Admin Dashboard - Venus Diamond</title>
+  <title>Admin Dashboard - Venus Jewel</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- ✅ Favicon Support -->
+  <!-- Favicon -->
   <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='images/apple-touch-icon.png') }}">
   <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/favicon-32x32.png') }}">
   <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='images/favicon-16x16.png') }}">
   <link rel="manifest" href="{{ url_for('static', filename='images/site.webmanifest') }}">
   <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
 
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
   <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
       font-family: 'Poppins', sans-serif;
-      margin: 0;
       background: url('/static/images/dimension.jpg') no-repeat center center fixed;
       background-size: cover;
+      overflow-x: hidden;
     }
 
     .mobile-toggle {
@@ -28,7 +35,7 @@
       position: fixed;
       top: 20px;
       left: 20px;
-      z-index: 9999;
+      z-index: 10001;
       background-color: #004080;
       color: #fff;
       padding: 10px 14px;
@@ -42,13 +49,12 @@
       position: fixed;
       top: 0;
       left: 0;
-      background: linear-gradient(to bottom, rgba(0,48,112, 0.92), rgba(0,64,128, 0.95)),
-                  url('/static/images/pencil.png') no-repeat center center;
+      background: linear-gradient(to bottom, rgba(0,48,112, 0.92), rgba(0,64,128, 0.95)), url('/static/images/pencil.png') no-repeat center center;
       background-size: cover;
       padding: 20px 0;
       box-shadow: 2px 0 6px rgba(0,0,0,0.25);
       backdrop-filter: blur(8px);
-      z-index: 2;
+      z-index: 9999;
       transition: left 0.3s ease;
     }
 
@@ -58,8 +64,8 @@
 
     .sidebar .logo {
       text-align: center;
-      margin-bottom: 30px;
       margin-top: 30px;
+      margin-bottom: 20px;
     }
 
     .sidebar .logo img {
@@ -80,7 +86,6 @@
 
     .nav-links li {
       padding: 12px 20px;
-      margin-bottom: 5px;
     }
 
     .nav-links li a {
@@ -93,75 +98,67 @@
       transition: background 0.3s, transform 0.2s;
     }
 
+    .nav-links li a i {
+      margin-right: 10px;
+    }
+
     .nav-links li a:hover {
       background: rgba(255,255,255,0.15);
       border-radius: 6px;
       transform: translateX(4px);
     }
 
-    .nav-links li a i {
-      margin-right: 10px;
-      min-width: 20px;
-    }
-
     .main-content {
       margin-left: 270px;
       padding: 60px 30px 40px;
-      background: rgba(255, 255, 255, 0.78);
+      background: rgba(255, 255, 255, 0.8);
       min-height: 100vh;
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(10px);
       border-radius: 8px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.12);
       text-align: center;
-      font-family: 'Poppins', sans-serif;
     }
 
-    .main-content .header-logo img {
-      height: 70px;
-      margin-bottom: 12px;
+    .header-logo img {
+      height: 80px;
+      margin-bottom: 10px;
     }
 
     .main-content h2 {
-      font-size: 26px;
+      font-size: 28px;
       color: #004080;
-      margin-bottom: 35px;
       font-weight: 700;
+      margin-bottom: 30px;
     }
 
     .core-values-row {
       display: flex;
+      flex-wrap: wrap;
       justify-content: center;
-      align-items: flex-start;
-      flex-wrap: nowrap;
-      gap: 60px;
+      gap: 30px;
       margin-top: 20px;
-      overflow-x: auto;
-      padding-bottom: 30px;
     }
 
     .core-value {
-      cursor: pointer;
       text-align: center;
+      cursor: pointer;
       transition: all 0.3s ease;
-      min-width: 230px;
-      flex: 0 0 auto;
+      width: 220px;
     }
 
     .core-value span {
       display: block;
-      font-size: 17px;
+      font-size: 16px;
       font-weight: 600;
       color: #002c5a;
-      margin-bottom: 14px;
-      letter-spacing: 0.4px;
+      margin-bottom: 10px;
     }
 
     .core-value img {
-      width: 230px;
-      height: 230px;
+      width: 100%;
+      height: 200px;
       object-fit: contain;
-      background: transparent;
-      transition: all 0.3s ease-in-out;
+      transition: transform 0.3s ease, filter 0.3s ease;
     }
 
     .core-value.active img {
@@ -169,7 +166,8 @@
       filter: drop-shadow(0 0 15px rgba(0,0,0,0.35));
     }
 
-    @media (max-width: 992px) {
+    /* Mobile Adjustments */
+    @media (max-width: 768px) {
       .mobile-toggle {
         display: block;
       }
@@ -181,38 +179,18 @@
       .main-content {
         margin-left: 0;
         margin-top: 80px;
-        padding: 20px;
+        padding: 30px 20px;
       }
 
       .core-values-row {
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 40px;
-        overflow-x: hidden;
+        gap: 20px;
       }
 
       .core-value {
-        flex: 0 1 40%;
-        min-width: unset;
+        width: calc(50% - 20px);
       }
 
       .core-value img {
-        width: 180px;
-        height: 180px;
-      }
-
-      .core-value span {
-        font-size: 16px;
-      }
-    }
-
-    @media (max-width: 576px) {
-      .core-value {
-        flex: 0 1 90%;
-      }
-
-      .core-value img {
-        width: 160px;
         height: 160px;
       }
 
@@ -220,16 +198,26 @@
         font-size: 15px;
       }
     }
+
+    @media (max-width: 480px) {
+      .core-value {
+        width: 100%;
+      }
+
+      .core-value img {
+        height: 140px;
+      }
+    }
   </style>
 </head>
 <body>
 
-<!-- ✅ Mobile Sidebar Toggle Button -->
+<!-- ✅ Mobile Sidebar Toggle -->
 <div class="mobile-toggle" onclick="toggleSidebar()">
   <i class="fas fa-bars"></i>
 </div>
 
-<!-- Sidebar -->
+<!-- ✅ Sidebar -->
 <div class="sidebar" id="sidebar">
   <div class="logo">
     <img src="{{ url_for('static', filename='images/vj_logo_new.png') }}" alt="Company Logo">
@@ -242,14 +230,14 @@
   </ul>
 </div>
 
-<!-- Main Content -->
+<!-- ✅ Main Content -->
 <div class="main-content">
   <div class="header-logo">
     <img src="{{ url_for('static', filename='images/venus_black_logo.jpg') }}" alt="Venus Jewel Logo">
   </div>
   <h2>Admin Dashboard</h2>
 
-  <!-- Horizontally Aligned Core Values -->
+  <!-- ✅ Core Values Section -->
   <div class="core-values-row">
     <div class="core-value" onclick="highlightValue(this)">
       <span>Transparency</span>
@@ -280,10 +268,10 @@
   {% block content %}{% endblock %}
 </div>
 
+<!-- ✅ Script -->
 <script>
   function toggleSidebar() {
-    const sidebar = document.getElementById("sidebar");
-    sidebar.classList.toggle("active");
+    document.getElementById("sidebar").classList.toggle("active");
   }
 
   function highlightValue(el) {
@@ -294,3 +282,4 @@
 
 </body>
 </html>
+
