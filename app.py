@@ -109,21 +109,18 @@ def login():
         password = request.form['password'].strip()
         remember = request.form.get('remember')
         response = make_response(redirect(url_for('dashboard')))
-
         if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
             session.update({'username': username, 'admin': True})
             if remember:
                 response.set_cookie('username', username, max_age=2592000)
                 response.set_cookie('password', password, max_age=2592000)
             return redirect(url_for('admin_dashboard'))
-
         if username == VENUSFILES_USERNAME and password == VENUSFILES_PASSWORD:
             session.update({'username': username, 'venus_user': True})
             if remember:
                 response.set_cookie('username', username, max_age=2592000)
                 response.set_cookie('password', password, max_age=2592000)
             return redirect(url_for('venus_upload_dashboard'))
-
         user = get_user(username)
         if user and user['Password'] == password:
             session.update({'username': username, 'admin': False})
