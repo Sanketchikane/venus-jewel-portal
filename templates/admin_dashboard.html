@@ -30,29 +30,26 @@
       overflow-x: hidden;
     }
 
-    /* Splash screen */
+    /* ✅ White Splash screen with fade + blur */
     #global-splash {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background:
-        linear-gradient(to bottom, rgba(0, 26, 77, 0.9), rgba(0, 26, 77, 0.9)),
-        url("{{ url_for('static', filename='images/pencil.png') }}") no-repeat center center;
-      background-size: cover;
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(6px);
       display: flex;
       justify-content: center;
       align-items: center;
-      z-index: 99999;
+      z-index: 9999;
       opacity: 1;
-      visibility: visible;
-      transition: opacity 0.8s ease, visibility 0.8s ease;
+      transition: opacity 0.7s ease;
     }
 
     #global-splash.fade-out {
       opacity: 0;
-      visibility: hidden;
+      pointer-events: none;
     }
 
     #global-splash img {
@@ -255,7 +252,7 @@
 </head>
 <body>
 
-<!-- Splash Screen -->
+<!-- ✅ Splash Screen -->
 <div id="global-splash">
   <img src="{{ url_for('static', filename='images/wings_new.gif') }}" alt="Splash">
 </div>
@@ -265,6 +262,7 @@
     setTimeout(() => {
       const splash = document.getElementById('global-splash');
       splash.classList.add('fade-out');
+      setTimeout(() => splash.style.display = 'none', 700);
     }, 2500);
   });
 </script>
