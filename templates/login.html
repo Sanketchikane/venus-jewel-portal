@@ -43,11 +43,40 @@
       background-color: #001a4d;
       color: white;
     }
+
+    /* ✅ Splash Screen Styling */
+    #global-splash {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.8); /* semi-transparent */
+      backdrop-filter: blur(5px); /* optional soft blur */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 99999;
+      transition: opacity 0.5s ease;
+    }
+
+    #global-splash.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #global-splash img {
+      max-width: 480px;
+      width: 60vw;
+      height: auto;
+    }
+
     .container {
       display: flex;
       height: 100vh;
       width: 100%;
     }
+
     .left-panel {
       flex: 1;
       background: linear-gradient(to bottom, rgba(0, 26, 77, 0.88), rgba(0, 26, 77, 0.88)),
@@ -58,7 +87,9 @@
       align-items: center;
       padding: 40px;
     }
+
     .left-panel img { width: 540px; max-width: 90%; }
+
     .right-panel {
       flex: 1;
       display: flex;
@@ -67,12 +98,14 @@
       padding: 60px;
       background-color: #001a4d;
     }
+
     .form-title {
       font-size: 18px;
       font-weight: 600;
       color: #c7d7ff;
       margin-bottom: 6px;
     }
+
     input[type="text"], input[type="password"] {
       width: 100%;
       padding: 12px;
@@ -84,12 +117,15 @@
       font-size: 15px;
       outline: none;
     }
+
     .password-wrapper {
       position: relative;
     }
+
     .password-wrapper input {
       padding-right: 40px;
     }
+
     .toggle-password {
       position: absolute;
       top: calc(50% - 2px);
@@ -97,7 +133,9 @@
       transform: translateY(-50%);
       cursor: pointer;
     }
+
     .toggle-password svg { fill: white; }
+
     .options {
       display: flex;
       justify-content: space-between;
@@ -105,16 +143,20 @@
       margin-bottom: 20px;
       font-size: 14px;
     }
+
     .options label {
       display: flex;
       align-items: center;
       gap: 6px;
     }
+
     .options a {
       color: gold;
       text-decoration: none;
     }
+
     .options a:hover { text-decoration: underline; }
+
     button {
       width: 100%;
       padding: 12px;
@@ -127,17 +169,21 @@
       cursor: pointer;
       margin-bottom: 20px;
     }
+
     .bottom-links {
       display: flex;
       justify-content: space-between;
       font-size: 14px;
     }
+
     .bottom-links a {
       color: white;
       text-decoration: underline;
       cursor: pointer;
     }
+
     .bottom-links a:hover { color: #aad4ff; }
+
     .flash-message {
       color: #ffb3b3;
       background-color: rgba(255, 0, 0, 0.1);
@@ -146,6 +192,7 @@
       margin-bottom: 16px;
       text-align: center;
     }
+
     @media (max-width: 960px) {
       .container { flex-direction: column; }
       .left-panel, .right-panel {
@@ -162,6 +209,12 @@
   </style>
 </head>
 <body>
+
+<!-- ✅ Splash Screen with transparent background -->
+<div id="global-splash">
+  <img src="{{ url_for('static', filename='images/wings_new.gif') }}" alt="Loading..." />
+</div>
+
 <div class="container">
   <div class="left-panel">
     <img src="{{ url_for('static', filename='images/vj_logo_new.png') }}" alt="Venus Logo" />
@@ -208,12 +261,19 @@
     const icon = document.getElementById('eyeIcon');
     if (pwd.type === 'password') {
       pwd.type = 'text';
-      icon.innerHTML = `<path d="M2.39 1.73 1.11 3 5 6.89A11.72 11.72 0 0 0 1 12c1.73 3.89 6 7.5 11 7.5 2.07 0 4.03-.5 5.77-1.39l2.84 2.84 1.27-1.27L2.39 1.73zM12 17c-3.31 0-6.31-2.06-8-5 .72-1.29 1.74-2.39 2.97-3.18l1.47 1.47A3.49 3.49 0 0 0 12 15c.69 0 1.34-.2 1.89-.54l1.47 1.47c-.92.44-1.95.71-3.06.71z"/>`;
     } else {
       pwd.type = 'password';
-      icon.innerHTML = `<path d="M1  2 4.5C7 4.5 2.73 8.11 1 12c1.73 3.89 6 7.5 11 7.5s9.27-3.61 11-7.5c-1.73-3.89-6-7.5-11-7.5zm0 13a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11zm0-9a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z"/>`;
     }
   }
+
+  // ✅ Splash fade after 2.5s
+  window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+      const splash = document.getElementById('global-splash');
+      splash.classList.add('fade-out');
+      setTimeout(() => splash.style.display = 'none', 500);
+    }, 2500);
+  });
 </script>
 </body>
 </html>
