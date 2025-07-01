@@ -1,9 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Loading...</title>
+
+  <!-- ✅ Favicon Support -->
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='images/apple-touch-icon.png') }}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/favicon-32x32.png') }}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='images/favicon-16x16.png') }}">
+  <link rel="manifest" href="{{ url_for('static', filename='images/site.webmanifest') }}">
+  <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+
   <style>
     html, body {
       margin: 0;
@@ -11,7 +19,6 @@
       height: 100%;
       background-color: #001a4d;
       overflow: hidden;
-      font-family: 'DM Sans', sans-serif;
     }
 
     .splash-container {
@@ -23,51 +30,51 @@
         linear-gradient(to bottom, rgba(0, 26, 77, 0.88), rgba(0, 26, 77, 0.88)),
         url('/static/images/pencil.png') no-repeat center center;
       background-size: cover;
-      animation: fadeInBright 1.5s ease-in-out;
+      animation: fadeInBright 2s ease-in-out;
     }
 
     .splash-logo {
-      width: 32vw;
-      max-width: 420px;
-      filter: brightness(0.3) contrast(1.1) drop-shadow(0 0 15px rgba(255,255,255,0.2));
+      width: 35vw;
+      max-width: 460px;
+      min-width: 200px;
+      filter: brightness(0.3) contrast(1.1) drop-shadow(0 0 20px rgba(255,255,255,0.25));
       clip-path: inset(0 100% 0 0);
       animation:
-        revealLogo 2.2s ease-out forwards,
+        revealLogo 2.4s ease-out forwards,
         brighten 2.5s ease-in-out 1.5s forwards;
     }
 
     @keyframes revealLogo {
-      0% {
-        clip-path: inset(0 100% 0 0);
-      }
-      100% {
-        clip-path: inset(0 0% 0 0);
-      }
+      0% { clip-path: inset(0 100% 0 0); }
+      100% { clip-path: inset(0 0% 0 0); }
     }
 
     @keyframes brighten {
-      0% {
-        filter: brightness(0.3) contrast(1.1) drop-shadow(0 0 15px rgba(255,255,255,0.2));
-      }
-      100% {
-        filter: brightness(1.25) contrast(1.35) drop-shadow(0 0 30px rgba(255,255,255,0.35));
-      }
+      0% { filter: brightness(0.3) contrast(1.1) drop-shadow(0 0 15px rgba(255,255,255,0.2)); }
+      100% { filter: brightness(1.25) contrast(1.35) drop-shadow(0 0 40px rgba(255,255,255,0.45)); }
     }
 
     @keyframes fadeInBright {
       from { opacity: 0; }
       to { opacity: 1; }
     }
+
+    @media (max-width: 768px) {
+      .splash-logo {
+        width: 55vw;
+        max-width: 300px;
+      }
+    }
   </style>
   <script>
     setTimeout(function() {
       window.location.href = "/login";
-    }, 5000); // Redirect after 5 seconds
+    }, 4000);
   </script>
 </head>
 <body>
   <div class="splash-container">
-    <img class="splash-logo" src="/static/images/splash.png" alt="Venus Jewel Logo">
+    <img class="splash-logo" src="/static/images/Splash1.png" alt="Venus Jewel Logo">
   </div>
 </body>
 </html>
