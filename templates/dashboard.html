@@ -18,11 +18,14 @@
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
       font-family: 'Poppins', sans-serif;
       background: url('/static/images/dimension.jpg') no-repeat center center fixed;
       background-size: cover;
     }
+
+    /* ✅ Transparent Splash Screen with fade and blur */
     #global-splash {
       position: fixed;
       top: 0;
@@ -38,37 +41,44 @@
       opacity: 1;
       transition: opacity 0.7s ease;
     }
+
     #global-splash.fade-out {
       opacity: 0;
       pointer-events: none;
     }
+
     #global-splash img {
       width: 50vw;
       max-width: 500px;
       min-width: 200px;
     }
+
     @media (max-width: 768px) {
       #global-splash img {
         width: 75vw;
         max-width: 400px;
       }
     }
+
     .top-logo {
       text-align: center;
       padding: 16px 10px 8px;
       background-color: rgba(255, 255, 255, 0.85);
     }
+
     .top-logo img {
       height: 80px;
       max-width: 100%;
       margin-bottom: 10px;
     }
+
     .top-logo h1 {
       font-size: 26px;
       font-weight: 700;
       color: #003366;
       letter-spacing: 1px;
     }
+
     .sidebar {
       height: 100vh;
       width: 260px;
@@ -82,27 +92,33 @@
       backdrop-filter: blur(8px);
       z-index: 2;
     }
+
     .sidebar .logo {
       text-align: center;
       margin-bottom: 20px;
     }
+
     .sidebar .logo img {
       height: 100px;
       max-width: 100%;
     }
+
     .sidebar h2 {
       color: white;
       font-size: 20px;
       font-weight: 600;
     }
+
     .nav-links {
       list-style: none;
       padding: 0;
       margin-top: 20px;
     }
+
     .nav-links li {
       padding: 10px 20px;
     }
+
     .nav-links li a {
       color: white;
       text-decoration: none;
@@ -112,14 +128,17 @@
       font-size: 15px;
       transition: background 0.3s, transform 0.2s;
     }
+
     .nav-links li a:hover {
       background: rgba(255,255,255,0.15);
       border-radius: 6px;
       transform: translateX(4px);
     }
+
     .nav-links li a i {
       margin-right: 10px;
     }
+
     .main-content {
       margin-left: 270px;
       padding: 40px 30px 60px;
@@ -129,11 +148,13 @@
       border-radius: 8px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.12);
     }
+
     label {
       display: block;
       margin: 12px 0 6px;
       font-weight: 600;
     }
+
     input[type="text"], input[type="file"] {
       width: 100%;
       padding: 10px;
@@ -143,6 +164,7 @@
       background: #fff;
       font-size: 15px;
     }
+
     .upload-btn {
       background: linear-gradient(135deg, #004080, #0073e6);
       color: #fff;
@@ -154,20 +176,24 @@
       cursor: pointer;
       margin-top: 10px;
     }
+
     .upload-btn:hover {
       background: linear-gradient(135deg, #003060, #005ac1);
     }
+
     .status {
       text-align: center;
       margin-top: 18px;
       font-weight: bold;
       color: green;
     }
+
     #spinner {
       display: none;
       margin-top: 18px;
       text-align: center;
     }
+
     .loader {
       border: 6px solid #f3f3f3;
       border-top: 6px solid #004080;
@@ -177,10 +203,12 @@
       animation: spin 1s linear infinite;
       margin: 0 auto 10px;
     }
+
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+
     #passwordModal {
       display: none;
       position: fixed;
@@ -191,6 +219,7 @@
       align-items: center;
       justify-content: center;
     }
+
     #passwordModal .modal-content {
       background: #fff;
       padding: 30px;
@@ -199,10 +228,12 @@
       width: 90%;
       text-align: center;
     }
+
     #passwordModal h3 {
       color: #004080;
       margin-bottom: 15px;
     }
+
     #passwordModal button {
       margin-top: 20px;
       background: #004080;
@@ -212,6 +243,7 @@
       border-radius: 8px;
       cursor: pointer;
     }
+
     @media (max-width: 768px) {
       .sidebar {
         position: fixed;
@@ -220,14 +252,17 @@
         left: -100%;
         transition: left 0.3s ease;
       }
+
       .sidebar.active {
         left: 0;
       }
+
       .main-content {
         margin-left: 0;
         margin-top: 20px;
         padding: 20px;
       }
+
       .mobile-toggle {
         position: fixed;
         top: 20px;
@@ -243,27 +278,33 @@
   </style>
 </head>
 <body>
-<!-- Splash -->
+
+<!-- ✅ Splash screen -->
 <div id="global-splash">
   <img src="{{ url_for('static', filename='images/wings_new.gif') }}" alt="Splash">
 </div>
+
 <script>
   window.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
       const splash = document.getElementById('global-splash');
       splash.classList.add('fade-out');
-      setTimeout(() => splash.style.display = 'none', 700);
-    }, 2500);
+      setTimeout(() => splash.style.display = 'none', 700); // Wait for fade
+    }, 2500); // 2.5 seconds
   });
 </script>
-<!-- Logo -->
+
+<!-- ✅ LOGO + HEADING -->
 <div class="top-logo">
   <img src="{{ url_for('static', filename='images/venus_black_logo.jpg') }}" alt="Venus Jewel Logo">
   <h1>VENUS JEWEL FILE PORTAL</h1>
 </div>
+
+<!-- ✅ Sidebar & Upload Section -->
 <div class="mobile-toggle" onclick="toggleSidebar()">
   <i class="fas fa-bars"></i>
 </div>
+
 <div class="sidebar" id="sidebar">
   <div class="logo">
     <img src="{{ url_for('static', filename='images/vj_logo_new.png') }}" alt="Venus Jewel Logo">
@@ -276,6 +317,7 @@
     <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
   </ul>
 </div>
+
 <div class="main-content">
   <form id="uploadForm">
     <label for="packetNo">Packet Number</label>
@@ -283,12 +325,14 @@
     <div id="subpoints"></div>
     <button type="submit" class="upload-btn">Upload & Proceed</button>
   </form>
+
   <div id="spinner">
     <div class="loader"></div>
     <div>Please wait, uploading...</div>
   </div>
   <div class="status" id="statusMsg"></div>
 </div>
+
 <div id="passwordModal">
   <div class="modal-content">
     <h3>Change Password</h3>
@@ -296,6 +340,7 @@
     <button onclick="closePasswordModal()">OK</button>
   </div>
 </div>
+
 <script>
   const SUBPOINTS = [
     "Front Hand", "Back Hand", "Tweezer", "Shade Card",
@@ -308,16 +353,17 @@
     const input = document.createElement('input');
     input.type = 'file';
     input.name = 'file_' + point;
-    input.multiple = true;
     subpointContainer.appendChild(label);
     subpointContainer.appendChild(input);
   });
+
   document.getElementById("uploadForm").addEventListener("submit", function(e) {
     e.preventDefault();
     const form = document.getElementById("uploadForm");
     const formData = new FormData(form);
     document.getElementById("spinner").style.display = "block";
     document.getElementById("statusMsg").textContent = "";
+
     fetch("/upload", {
       method: "POST",
       body: formData
@@ -332,16 +378,20 @@
       document.getElementById("statusMsg").textContent = "❌ Upload error occurred.";
     });
   });
+
   function showPasswordModal() {
     document.getElementById("passwordModal").style.display = "flex";
   }
+
   function closePasswordModal() {
     document.getElementById("passwordModal").style.display = "none";
   }
+
   function toggleSidebar() {
     const sidebar = document.getElementById("sidebar");
     sidebar.classList.toggle("active");
   }
 </script>
+
 </body>
 </html>
