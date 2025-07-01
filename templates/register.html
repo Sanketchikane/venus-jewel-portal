@@ -34,11 +34,16 @@
         linear-gradient(to bottom, rgba(0, 26, 77, 0.88), rgba(0, 26, 77, 0.88)),
         url("{{ url_for('static', filename='images/pencil.png') }}") no-repeat center center;
       background-size: cover;
-      display: flex;
+      display: none;
       justify-content: center;
       align-items: center;
       z-index: 9999;
-      transition: opacity 0.6s ease;
+      transition: opacity 0.5s ease;
+    }
+
+    #global-splash.fade-out {
+      opacity: 0;
+      pointer-events: none;
     }
 
     #global-splash img {
@@ -66,6 +71,7 @@
       width: 100%;
       flex-direction: row;
     }
+
     .left-panel {
       flex: 1;
       background: linear-gradient(to bottom, rgba(0, 26, 77, 0.88), rgba(0, 26, 77, 0.88)),
@@ -76,10 +82,12 @@
       align-items: center;
       padding: 40px;
     }
+
     .left-panel img {
       width: 540px;
       max-width: 90%;
     }
+
     .right-panel {
       flex: 1;
       display: flex;
@@ -88,12 +96,14 @@
       padding: 60px;
       background-color: #001a4d;
     }
+
     .form-title {
       font-size: 18px;
       font-weight: 600;
       color: #c7d7ff;
       margin-bottom: 6px;
     }
+
     input[type="text"], input[type="password"] {
       width: 100%;
       padding: 12px;
@@ -106,12 +116,15 @@
       outline: none;
       transition: border-color 0.3s;
     }
+
     .password-wrapper {
       position: relative;
     }
+
     .password-wrapper input {
       padding-right: 40px;
     }
+
     .toggle-password {
       position: absolute;
       top: 50%;
@@ -119,25 +132,31 @@
       transform: translateY(-50%);
       cursor: pointer;
     }
+
     .toggle-password svg {
       fill: white;
       transition: fill 0.3s;
     }
+
     .toggle-password.match svg {
       fill: #00ff99;
     }
+
     .error-message {
       color: #ff8888;
       font-size: 14px;
       margin-top: -18px;
       margin-bottom: 16px;
     }
+
     .error-border {
       border-bottom: 2px solid #ff4444 !important;
     }
+
     .success-border {
       border-bottom: 2px solid #00ff99 !important;
     }
+
     button {
       width: 100%;
       padding: 12px;
@@ -150,6 +169,7 @@
       cursor: pointer;
       margin-bottom: 20px;
     }
+
     .bottom-links {
       display: flex;
       justify-content: space-between;
@@ -157,14 +177,17 @@
       flex-wrap: wrap;
       gap: 12px;
     }
+
     .bottom-links a {
       color: white;
       text-decoration: underline;
       cursor: pointer;
     }
+
     .bottom-links a:hover {
       color: #aad4ff;
     }
+
     @media (max-width: 960px) {
       .container { flex-direction: column; }
       .left-panel, .right-panel {
@@ -178,7 +201,7 @@
 </head>
 <body>
 
-<!-- 🌟 Splash Overlay -->
+<!-- 🌟 Conditional Splash -->
 <div id="global-splash">
   <img src="{{ url_for('static', filename='images/wings_new.gif') }}" alt="Splash">
 </div>
@@ -257,8 +280,6 @@
     if (pwd.value !== confirm.value) {
       pwd.classList.add("error-border");
       confirm.classList.add("error-border");
-      pwd.classList.remove("success-border");
-      confirm.classList.remove("success-border");
       eyePass.classList.remove("match");
       eyeConfirm.classList.remove("match");
       error.style.display = "block";
@@ -278,13 +299,16 @@
   document.getElementById('confirm_password').addEventListener('input', validatePasswords);
   document.getElementById('password').addEventListener('input', validatePasswords);
 
-  // 🌟 Fade out splash after 1.5s
+  // ✅ Splash logic triggered only if URL has ?showSplash=1
   window.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
+    if (window.location.search.includes('showSplash=1')) {
       const splash = document.getElementById('global-splash');
-      splash.style.opacity = '0';
-      setTimeout(() => splash.style.display = 'none', 600);
-    }, 1500);
+      splash.style.display = 'flex';
+      setTimeout(() => {
+        splash.classList.add('fade-out');
+        setTimeout(() => splash.style.display = 'none', 500);
+      }, 2500);
+    }
   });
 </script>
 
