@@ -149,7 +149,7 @@ def forgot_password():
         else:
             sheet.update_cell(user['row_number'], 4, new_password)
             flash('Password updated successfully.', 'success')
-            return redirect(url_for('login'))
+            return redirect(url_for('login') + '?showSplash=1')
     return render_template('forgot_password.html')
 
 @app.route('/venus-upload')
@@ -216,7 +216,7 @@ def register():
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         sheet.append_row([timestamp, full_name, username, password, contact, org])
         flash('Registration successful.', 'success')
-        return redirect(url_for('login'))
+        return redirect(url_for('login') + '?showSplash=1')
     return render_template('register.html')
 
 @app.route('/admin-dashboard')
@@ -276,7 +276,7 @@ def uploaded_file(filename):
 @app.route('/logout')
 def logout():
     session.clear()
-    resp = make_response(redirect(url_for('login')))
+    resp = make_response(redirect(url_for('login') + '?showSplash=1'))
     resp.set_cookie('username', '', expires=0)
     resp.set_cookie('password', '', expires=0)
     return resp
