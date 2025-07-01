@@ -111,6 +111,27 @@
       transition: border-color 0.3s ease;
     }
 
+    .password-wrapper {
+      position: relative;
+    }
+
+    .password-wrapper input {
+      padding-right: 40px;
+    }
+
+    .toggle-password {
+      position: absolute;
+      top: 50%;
+      right: 10px;
+      transform: translateY(-50%);
+      cursor: pointer;
+    }
+
+    .toggle-password svg {
+      fill: white;
+      transition: fill 0.3s ease;
+    }
+
     button {
       width: 100%;
       padding: 12px;
@@ -176,6 +197,11 @@
       splash.classList.add('fade-out');
     }, 2500);
   });
+
+  function togglePassword(fieldId) {
+    const input = document.getElementById(fieldId);
+    input.type = input.type === "password" ? "text" : "password";
+  }
 </script>
 
 <div class="container">
@@ -197,7 +223,14 @@
       <input type="text" name="username" placeholder="Enter your username" required />
 
       <div class="form-title">🔒 PASSWORD</div>
-      <input type="password" name="password" placeholder="Enter your password" required />
+      <div class="password-wrapper">
+        <input type="password" name="password" id="password" placeholder="Enter your password" required />
+        <span class="toggle-password" onclick="togglePassword('password')">
+          <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" width="20">
+            <path d="M12 4.5C7 4.5 2.73 8.11 1 12c1.73 3.89 6 7.5 11 7.5s9.27-3.61 11-7.5c-1.73-3.89-6-7.5-11-7.5zm0 13a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11zm0-9a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z"/>
+          </svg>
+        </span>
+      </div>
 
       <button type="submit">SIGN IN</button>
 
