@@ -45,7 +45,14 @@
       justify-content: center;
       align-items: center;
       z-index: 99999;
-      transition: opacity 0.5s ease;
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.8s ease, visibility 0.8s ease;
+    }
+
+    #global-splash.fade-out {
+      opacity: 0;
+      visibility: hidden;
     }
 
     #global-splash img {
@@ -253,14 +260,12 @@
   <img src="{{ url_for('static', filename='images/wings_new.gif') }}" alt="Splash">
 </div>
 
-<!-- Splash Hide Script -->
 <script>
   window.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
       const splash = document.getElementById('global-splash');
-      splash.style.opacity = '0';
-      setTimeout(() => splash.style.display = 'none', 500);
-    }, 2500); // 2.5 seconds
+      splash.classList.add('fade-out');
+    }, 2500);
   });
 </script>
 
@@ -319,7 +324,6 @@
   {% block content %}{% endblock %}
 </div>
 
-<!-- JS -->
 <script>
   function toggleSidebar() {
     document.getElementById("sidebar").classList.toggle("active");
