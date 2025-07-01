@@ -26,55 +26,32 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
-      background:
-        linear-gradient(to bottom, rgba(0, 26, 77, 0.88), rgba(0, 26, 77, 0.88)),
-        url('/static/images/pencil.png') no-repeat center center;
-      background-size: cover;
-      animation: fadeInBright 2s ease-in-out;
+      background-color: #001a4d;
     }
 
-    .splash-logo {
-      width: 35vw;
-      max-width: 460px;
+    .splash-gif {
+      width: 50vw;
+      max-width: 500px;
       min-width: 200px;
-      filter: brightness(0.3) contrast(1.1) drop-shadow(0 0 20px rgba(255,255,255,0.25));
-      clip-path: inset(0 100% 0 0);
-      animation:
-        revealLogo 2.4s ease-out forwards,
-        brighten 2.5s ease-in-out 1.5s forwards;
-    }
-
-    @keyframes revealLogo {
-      0% { clip-path: inset(0 100% 0 0); }
-      100% { clip-path: inset(0 0% 0 0); }
-    }
-
-    @keyframes brighten {
-      0% { filter: brightness(0.3) contrast(1.1) drop-shadow(0 0 15px rgba(255,255,255,0.2)); }
-      100% { filter: brightness(1.25) contrast(1.35) drop-shadow(0 0 40px rgba(255,255,255,0.45)); }
-    }
-
-    @keyframes fadeInBright {
-      from { opacity: 0; }
-      to { opacity: 1; }
     }
 
     @media (max-width: 768px) {
-      .splash-logo {
-        width: 55vw;
-        max-width: 300px;
+      .splash-gif {
+        width: 75vw;
+        max-width: 400px;
       }
     }
   </style>
+
   <script>
     setTimeout(function() {
       window.location.href = "/login";
-    }, 4000);
+    }, 4000); // Redirect after 4 seconds
   </script>
 </head>
 <body>
   <div class="splash-container">
-    <img class="splash-logo" src="/static/images/Splash1.png" alt="Venus Jewel Logo">
+    <img class="splash-gif" src="{{ url_for('static', filename='images/wings_new.gif') }}" alt="Loading...">
   </div>
 </body>
 </html>
