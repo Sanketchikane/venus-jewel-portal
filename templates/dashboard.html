@@ -25,7 +25,7 @@
       background-size: cover;
     }
 
-    /* ✅ Transparent Splash Screen with background blur */
+    /* ✅ Transparent Splash Screen with fade and blur */
     #global-splash {
       position: fixed;
       top: 0;
@@ -38,7 +38,13 @@
       justify-content: center;
       align-items: center;
       z-index: 9999;
-      transition: opacity 0.5s ease;
+      opacity: 1;
+      transition: opacity 0.7s ease;
+    }
+
+    #global-splash.fade-out {
+      opacity: 0;
+      pointer-events: none;
     }
 
     #global-splash img {
@@ -282,8 +288,8 @@
   window.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
       const splash = document.getElementById('global-splash');
-      splash.style.opacity = '0';
-      setTimeout(() => splash.style.display = 'none', 500);
+      splash.classList.add('fade-out');
+      setTimeout(() => splash.style.display = 'none', 700); // Wait for fade
     }, 2500); // 2.5 seconds
   });
 </script>
