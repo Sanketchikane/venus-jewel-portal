@@ -38,13 +38,19 @@
       justify-content: center;
       align-items: center;
       z-index: 9999;
-      transition: opacity 0.5s ease;
+      transition: opacity 0.6s ease;
     }
 
     #global-splash img {
       width: 50vw;
       max-width: 500px;
       min-width: 200px;
+      animation: fadeZoom 1.4s ease-in-out;
+    }
+
+    @keyframes fadeZoom {
+      0% { opacity: 0; transform: scale(0.95); }
+      100% { opacity: 1; transform: scale(1); }
     }
 
     @media (max-width: 768px) {
@@ -272,12 +278,12 @@
   document.getElementById('confirm_password').addEventListener('input', validatePasswords);
   document.getElementById('password').addEventListener('input', validatePasswords);
 
-  // 🌟 Hide splash after 1.5s
+  // 🌟 Fade out splash after 1.5s
   window.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
       const splash = document.getElementById('global-splash');
       splash.style.opacity = '0';
-      setTimeout(() => splash.style.display = 'none', 500);
+      setTimeout(() => splash.style.display = 'none', 600);
     }, 1500);
   });
 </script>
