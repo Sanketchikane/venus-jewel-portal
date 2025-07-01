@@ -25,6 +25,37 @@
       background-size: cover;
     }
 
+    /* 🔥 Splash screen style */
+    #global-splash {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background:
+        linear-gradient(to bottom, rgba(0, 26, 77, 0.9), rgba(0, 26, 77, 0.9)),
+        url("{{ url_for('static', filename='images/pencil.png') }}") no-repeat center center;
+      background-size: cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease;
+    }
+
+    #global-splash img {
+      width: 50vw;
+      max-width: 500px;
+      min-width: 200px;
+    }
+
+    @media (max-width: 768px) {
+      #global-splash img {
+        width: 75vw;
+        max-width: 400px;
+      }
+    }
+
     .top-logo {
       text-align: center;
       padding: 16px 10px 8px;
@@ -244,7 +275,22 @@
 </head>
 <body>
 
-<!-- ✅ LOGO + HEADING (only once, clean & centered) -->
+<!-- ✅ Splash screen -->
+<div id="global-splash">
+  <img src="{{ url_for('static', filename='images/wings_new.gif') }}" alt="Splash">
+</div>
+
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+      const splash = document.getElementById('global-splash');
+      splash.style.opacity = '0';
+      setTimeout(() => splash.style.display = 'none', 500);
+    }, 2500); // 2.5 seconds
+  });
+</script>
+
+<!-- ✅ LOGO + HEADING -->
 <div class="top-logo">
   <img src="{{ url_for('static', filename='images/venus_black_logo.jpg') }}" alt="Venus Jewel Logo">
   <h1>VENUS JEWEL FILE PORTAL</h1>
