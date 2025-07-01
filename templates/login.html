@@ -129,8 +129,10 @@
     }
 
     .bottom-links {
-      text-align: center;
+      display: flex;
+      justify-content: space-between;
       font-size: 14px;
+      margin-top: 10px;
     }
 
     .bottom-links a {
@@ -156,12 +158,17 @@
       .container { flex-direction: column; }
       .left-panel, .right-panel { width: 100%; padding: 30px; }
       .left-panel img { width: 280px; }
+      .bottom-links {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
     }
   </style>
 </head>
 <body>
 
-<!-- ✅ Splash (only when ?showSplash=1) -->
+<!-- ✅ Splash (only on showSplash=1) -->
 <div id="global-splash">
   <img src="{{ url_for('static', filename='images/wings_new.gif') }}" alt="Splash">
 </div>
@@ -181,7 +188,7 @@
     {% endwith %}
 
     <form method="POST">
-      <div class="form-title">👤 USERNAME</div>
+      <div class="form-title">👤 USER NAME</div>
       <input type="text" name="username" placeholder="Enter your username" required />
 
       <div class="form-title">🔒 PASSWORD</div>
@@ -190,15 +197,14 @@
       <button type="submit">SIGN IN</button>
 
       <div class="bottom-links">
-        <a href="/register">New User? Register</a> | 
-        <a href="/forgot-password">Forgot Password?</a>
+        <a href="/register">CREATE ACCOUNT</a>
+        <a href="/forgot-password">FORGOT PASSWORD?</a>
       </div>
     </form>
   </div>
 </div>
 
 <script>
-  // ✅ Splash logic
   window.addEventListener('DOMContentLoaded', () => {
     if (window.location.search.includes('showSplash=1')) {
       const splash = document.getElementById('global-splash');
