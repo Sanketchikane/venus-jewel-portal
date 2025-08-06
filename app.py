@@ -33,9 +33,9 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 ADMIN_USERNAME = 'admin'
-ADMIN_PASSWORD = 'Admin@123'
+ADMIN_PASSWORD = 'Admin@2211'
 VENUSFILES_USERNAME = 'Venusfiles'
-VENUSFILES_PASSWORD = 'Natural1969'
+VENUSFILES_PASSWORD = 'Natural@1969'
 
 DRIVE_FOLDER_ID = '1Yjvp5TMg7mERWxq4dsYJq748CcQIucLK'
 drive_creds = service_account.Credentials.from_service_account_file(CREDENTIALS_PATH, scopes=['https://www.googleapis.com/auth/drive'])
