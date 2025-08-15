@@ -20,24 +20,14 @@ def enforce_https_on_render():
     if request.headers.get('X-Forwarded-Proto', 'http') != 'https':
         return redirect(request.url.replace("http://", "https://", 1))
 
-# ------------------- Credentials -------------------
 CREDENTIALS_PATH = '/etc/secrets/Credentials.json' if os.environ.get('RENDER') else 'Credentials.json'
 
-# Google Sheets
 scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
 creds = ServiceAccountCredentials.from_json_keyfile_name(CREDENTIALS_PATH, scope)
 client = gspread.authorize(creds)
 SHEET_ID = '19c2tlUmzSQsQhqNvWRuKMgdw86M0PLsKrWk51m7apA4'
 sheet = client.open_by_key(SHEET_ID).worksheet('Sheet1')
 
-# Google Drive
-DRIVE_FOLDER_ID = '1Yjvp5TMg7mERWxq4dsYJq748CcQIucLK'
-drive_creds = service_account.Credentials.from_service_account_file(
-    CREDENTIALS_PATH, scopes=['https://www.googleapis.com/auth/drive']
-)
-drive_service = build('drive', 'v3', credentials=drive_creds)
-
-# ------------------- Config -------------------
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -47,7 +37,10 @@ ADMIN_PASSWORD = 'Admin@2211'
 VENUSFILES_USERNAME = 'Venusfiles'
 VENUSFILES_PASSWORD = 'Natural@1969'
 
-# ------------------- Helper Functions -------------------
+DRIVE_FOLDER_ID = '1Yjvp5TMg7mERWxq4dsYJq748CcQIucLK'
+drive_creds = service_account.Credentials.from_service_account_file(CREDENTIALS_PATH, scopes=['https://www.googleapis.com/auth/drive'])
+drive_service = build('drive', 'v3', credentials=drive_creds)
+
 def username_exists(username):
     return username in sheet.col_values(3)[1:]
 
@@ -101,7 +94,6 @@ def mute_video(file_storage, filename):
     except Exception:
         return io.BytesIO(open(input_path, 'rb').read())
 
-# ------------------- Routes -------------------
 @app.route('/')
 def home():
     return redirect(url_for('splash'))
@@ -289,7 +281,6 @@ def logout():
     resp.set_cookie('password', '', expires=0)
     return resp
 
-# ------------------- Run App -------------------
 if __name__ == '__main__':
     from waitress import serve
     port = int(os.environ.get('PORT', 10000))
