@@ -1,18 +1,17 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory, jsonify, make_response
 import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 import os
 import io
 import tempfile
 import subprocess
 from werkzeug.utils import secure_filename
-
-# Google API OAuth2 imports
-from google_auth_oauthlib.flow import InstalledAppFlow
-from google.auth.transport.requests import Request
+from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseUpload
 import pickle
+from google_auth_oauthlib.flow import InstalledAppFlow
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'
@@ -23,30 +22,38 @@ def enforce_https_on_render():
     if request.headers.get('X-Forwarded-Proto', 'http') != 'https':
         return redirect(request.url.replace("http://", "https://", 1))
 
-# ---------------- Google Sheets ----------------
+# -------------------------------
+# Credentials and Google Sheets
+# -------------------------------
 CREDENTIALS_PATH = '/etc/secrets/Credentials.json' if os.environ.get('RENDER') else 'Credentials.json'
+
 scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-
-# Authorize gspread
-creds = gspread.service_account(filename=CREDENTIALS_PATH)
+creds = ServiceAccountCredentials.from_json_keyfile_name(CREDENTIALS_PATH, scope)
+client = gspread.authorize(creds)
 SHEET_ID = '19c2tlUmzSQsQhqNvWRuKMgdw86M0PLsKrWk51m7apA4'
-sheet = creds.open_by_key(SHEET_ID).worksheet('Sheet1')
+sheet = client.open_by_key(SHEET_ID).worksheet('Sheet1')
 
-# ---------------- Upload Folder ----------------
+# -------------------------------
+# Upload folder
+# -------------------------------
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# ---------------- Users ----------------
+# -------------------------------
+# Users
+# -------------------------------
 ADMIN_USERNAME = 'admin'
 ADMIN_PASSWORD = 'Admin@2211'
 VENUSFILES_USERNAME = 'Venusfiles'
 VENUSFILES_PASSWORD = 'Natural@1969'
 
-# ---------------- Google Drive OAuth2 ----------------
+# -------------------------------
+# Google Drive Service (Headless OAuth)
+# -------------------------------
 DRIVE_FOLDER_ID = '1Yjvp5TMg7mERWxq4dsYJq748CcQIucLK'
-DRIVE_SCOPES = ['https://www.googleapis.com/auth/drive']
 TOKEN_PATH = 'token.pickle'
+SCOPES = ['https://www.googleapis.com/auth/drive']
 
 def get_drive_service():
     creds = None
@@ -54,19 +61,17 @@ def get_drive_service():
         with open(TOKEN_PATH, 'rb') as token:
             creds = pickle.load(token)
     if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file('client_secret.json', DRIVE_SCOPES)
-            creds = flow.run_local_server(port=0)
+        flow = InstalledAppFlow.from_client_secrets_file(CREDENTIALS_PATH, SCOPES)
+        creds = flow.run_console()  # Headless: prints URL to console for one-time auth
         with open(TOKEN_PATH, 'wb') as token:
             pickle.dump(creds, token)
-    service = build('drive', 'v3', credentials=creds)
-    return service
+    return build('drive', 'v3', credentials=creds)
 
 drive_service = get_drive_service()
 
-# ---------------- Helper Functions ----------------
+# -------------------------------
+# Helper functions
+# -------------------------------
 def username_exists(username):
     return username in sheet.col_values(3)[1:]
 
@@ -120,7 +125,9 @@ def mute_video(file_storage, filename):
     except Exception:
         return io.BytesIO(open(input_path, 'rb').read())
 
-# ---------------- Routes ----------------
+# -------------------------------
+# Routes (all old routes kept)
+# -------------------------------
 @app.route('/')
 def home():
     return redirect(url_for('splash'))
@@ -165,7 +172,6 @@ def forgot_password():
         username = request.form['username'].strip()
         new_password = request.form['new_password'].strip()
         confirm_password = request.form['confirm_password'].strip()
-
         user = get_user(username)
         if not user:
             flash('User not found.', 'danger')
@@ -308,6 +314,9 @@ def logout():
     resp.set_cookie('password', '', expires=0)
     return resp
 
+# -------------------------------
+# Run app
+# -------------------------------
 if __name__ == '__main__':
     from waitress import serve
     port = int(os.environ.get('PORT', 10000))
