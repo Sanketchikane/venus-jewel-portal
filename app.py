@@ -1,15 +1,18 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory, jsonify, make_response
 import gspread
-from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 import os
 import io
 import tempfile
 import subprocess
 from werkzeug.utils import secure_filename
-from google.oauth2 import service_account
+
+# Google API OAuth2 imports
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseUpload
+import pickle
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'
@@ -20,27 +23,50 @@ def enforce_https_on_render():
     if request.headers.get('X-Forwarded-Proto', 'http') != 'https':
         return redirect(request.url.replace("http://", "https://", 1))
 
+# ---------------- Google Sheets ----------------
 CREDENTIALS_PATH = '/etc/secrets/Credentials.json' if os.environ.get('RENDER') else 'Credentials.json'
-
 scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-creds = ServiceAccountCredentials.from_json_keyfile_name(CREDENTIALS_PATH, scope)
-client = gspread.authorize(creds)
-SHEET_ID = '19c2tlUmzSQsQhqNvWRuKMgdw86M0PLsKrWk51m7apA4'
-sheet = client.open_by_key(SHEET_ID).worksheet('Sheet1')
 
+# Authorize gspread
+creds = gspread.service_account(filename=CREDENTIALS_PATH)
+SHEET_ID = '19c2tlUmzSQsQhqNvWRuKMgdw86M0PLsKrWk51m7apA4'
+sheet = creds.open_by_key(SHEET_ID).worksheet('Sheet1')
+
+# ---------------- Upload Folder ----------------
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+# ---------------- Users ----------------
 ADMIN_USERNAME = 'admin'
 ADMIN_PASSWORD = 'Admin@2211'
 VENUSFILES_USERNAME = 'Venusfiles'
 VENUSFILES_PASSWORD = 'Natural@1969'
 
+# ---------------- Google Drive OAuth2 ----------------
 DRIVE_FOLDER_ID = '1Yjvp5TMg7mERWxq4dsYJq748CcQIucLK'
-drive_creds = service_account.Credentials.from_service_account_file(CREDENTIALS_PATH, scopes=['https://www.googleapis.com/auth/drive'])
-drive_service = build('drive', 'v3', credentials=drive_creds)
+DRIVE_SCOPES = ['https://www.googleapis.com/auth/drive']
+TOKEN_PATH = 'token.pickle'
 
+def get_drive_service():
+    creds = None
+    if os.path.exists(TOKEN_PATH):
+        with open(TOKEN_PATH, 'rb') as token:
+            creds = pickle.load(token)
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file('client_secret.json', DRIVE_SCOPES)
+            creds = flow.run_local_server(port=0)
+        with open(TOKEN_PATH, 'wb') as token:
+            pickle.dump(creds, token)
+    service = build('drive', 'v3', credentials=creds)
+    return service
+
+drive_service = get_drive_service()
+
+# ---------------- Helper Functions ----------------
 def username_exists(username):
     return username in sheet.col_values(3)[1:]
 
@@ -94,6 +120,7 @@ def mute_video(file_storage, filename):
     except Exception:
         return io.BytesIO(open(input_path, 'rb').read())
 
+# ---------------- Routes ----------------
 @app.route('/')
 def home():
     return redirect(url_for('splash'))
