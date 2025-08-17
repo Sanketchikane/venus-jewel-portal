@@ -1,13 +1,12 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory, jsonify, make_response
 import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+from google.oauth2 import service_account
 from datetime import datetime
 import os
 import io
 import tempfile
 import subprocess
 from werkzeug.utils import secure_filename
-from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseUpload
 
@@ -20,29 +19,44 @@ def enforce_https_on_render():
     if request.headers.get('X-Forwarded-Proto', 'http') != 'https':
         return redirect(request.url.replace("http://", "https://", 1))
 
+# Google Credentials Path
 CREDENTIALS_PATH = '/etc/secrets/Credentials.json' if os.environ.get('RENDER') else 'Credentials.json'
 
-scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-creds = ServiceAccountCredentials.from_json_keyfile_name(CREDENTIALS_PATH, scope)
+# Define scopes
+SCOPES = [
+    'https://www.googleapis.com/auth/spreadsheets',
+    'https://www.googleapis.com/auth/drive'
+]
+
+# Load credentials (new library only)
+creds = service_account.Credentials.from_service_account_file(CREDENTIALS_PATH, scopes=SCOPES)
+
+# Setup Google Sheets
 client = gspread.authorize(creds)
 SHEET_ID = '19c2tlUmzSQsQhqNvWRuKMgdw86M0PLsKrWk51m7apA4'
 sheet = client.open_by_key(SHEET_ID).worksheet('Sheet1')
 
+# Setup Google Drive
+DRIVE_FOLDER_ID = '1Yjvp5TMg7mERWxq4dsYJq748CcQIucLK'
+drive_service = build('drive', 'v3', credentials=creds)
+
+# Upload folder for local temp storage
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+# Admin / Venus login
 ADMIN_USERNAME = 'admin'
 ADMIN_PASSWORD = 'Admin@2211'
 VENUSFILES_USERNAME = 'Venusfiles'
 VENUSFILES_PASSWORD = 'Natural@1969'
 
-DRIVE_FOLDER_ID = '1Yjvp5TMg7mERWxq4dsYJq748CcQIucLK'
-drive_creds = service_account.Credentials.from_service_account_file(CREDENTIALS_PATH, scopes=['https://www.googleapis.com/auth/drive'])
-drive_service = build('drive', 'v3', credentials=drive_creds)
+
+# ------------------- Utility Functions -------------------
 
 def username_exists(username):
     return username in sheet.col_values(3)[1:]
+
 
 def get_user(username):
     for i, u in enumerate(sheet.col_values(3)[1:], start=2):
@@ -59,6 +73,7 @@ def get_user(username):
             }
     return None
 
+
 def get_or_create_folder(name, parent_id):
     query = f"name='{name}' and mimeType='application/vnd.google-apps.folder' and '{parent_id}' in parents and trashed=false"
     results = drive_service.files().list(q=query, fields="files(id, name)").execute()
@@ -69,10 +84,12 @@ def get_or_create_folder(name, parent_id):
     folder = drive_service.files().create(body=folder_metadata, fields='id').execute()
     return folder.get('id')
 
+
 def file_exists_in_folder(filename, folder_id):
     query = f"name='{filename}' and '{folder_id}' in parents and trashed=false"
     results = drive_service.files().list(q=query, fields="files(id, name)").execute()
     return len(results.get('files', [])) > 0
+
 
 def get_unique_filename(base_filename, folder_id):
     name, ext = os.path.splitext(base_filename)
@@ -81,6 +98,7 @@ def get_unique_filename(base_filename, folder_id):
         base_filename = f"{name}(new{count}){ext}"
         count += 1
     return base_filename
+
 
 def mute_video(file_storage, filename):
     ext = os.path.splitext(filename)[1]
@@ -93,6 +111,9 @@ def mute_video(file_storage, filename):
         return io.BytesIO(open(output_path, 'rb').read())
     except Exception:
         return io.BytesIO(open(input_path, 'rb').read())
+
+
+# ------------------- Routes -------------------
 
 @app.route('/')
 def home():
@@ -109,18 +130,21 @@ def login():
         password = request.form['password'].strip()
         remember = request.form.get('remember')
         response = make_response(redirect(url_for('dashboard')))
+
         if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
             session.update({'username': username, 'admin': True})
             if remember:
                 response.set_cookie('username', username, max_age=2592000)
                 response.set_cookie('password', password, max_age=2592000)
             return redirect(url_for('admin_dashboard'))
+
         if username == VENUSFILES_USERNAME and password == VENUSFILES_PASSWORD:
             session.update({'username': username, 'venus_user': True})
             if remember:
                 response.set_cookie('username', username, max_age=2592000)
                 response.set_cookie('password', password, max_age=2592000)
             return redirect(url_for('venus_upload_dashboard'))
+
         user = get_user(username)
         if user and user['Password'] == password:
             session.update({'username': username, 'admin': False})
@@ -128,8 +152,10 @@ def login():
                 response.set_cookie('username', username, max_age=2592000)
                 response.set_cookie('password', password, max_age=2592000)
             return response
+
         flash('Invalid credentials.', 'danger')
     return render_template('login.html')
+
 
 @app.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
@@ -152,6 +178,7 @@ def forgot_password():
             return redirect(url_for('login') + '?showSplash=1')
     return render_template('forgot_password.html')
 
+
 @app.route('/venus-upload')
 def venus_upload_dashboard():
     if not session.get('venus_user'):
@@ -159,12 +186,14 @@ def venus_upload_dashboard():
         return redirect(url_for('login'))
     return render_template('Venus_Upload.html')
 
+
 @app.route('/dashboard')
 def dashboard():
     if not session.get('username') or session.get('admin'):
         flash('Access denied.', 'danger')
         return redirect(url_for('login'))
     return render_template('dashboard.html', user=session['username'])
+
 
 @app.route('/upload', methods=['POST'])
 def upload():
@@ -202,6 +231,7 @@ def upload():
     except Exception as e:
         return jsonify({'success': False, 'message': f'Upload failed: {e}'}), 500
 
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -219,12 +249,14 @@ def register():
         return redirect(url_for('login') + '?showSplash=1')
     return render_template('register.html')
 
+
 @app.route('/admin-dashboard')
 def admin_dashboard():
     if not session.get('admin'):
         flash('Admin access only.', 'danger')
         return redirect(url_for('login'))
     return render_template('admin_dashboard.html', user=session['username'])
+
 
 @app.route('/admin/users')
 def admin_users():
@@ -235,6 +267,7 @@ def admin_users():
     headers = records[0]
     users = [dict(zip(headers, row)) for row in records[1:]]
     return render_template('admin_users.html', users=users)
+
 
 @app.route('/admin/user/<username>')
 def view_user(username):
@@ -247,6 +280,7 @@ def view_user(username):
         return redirect(url_for('admin_users'))
     files = [f for f in os.listdir(UPLOAD_FOLDER) if username in f]
     return render_template('user_profile.html', user=user, files=files)
+
 
 @app.route('/admin/user/<username>/change-password', methods=['POST'])
 def change_user_password(username):
@@ -262,6 +296,7 @@ def change_user_password(username):
     flash(f"Password updated for {username}.", 'success')
     return redirect(url_for('view_user', username=username))
 
+
 @app.route('/admin/venus-files')
 def admin_files():
     if not session.get('admin'):
@@ -269,9 +304,11 @@ def admin_files():
         return redirect(url_for('login'))
     return redirect("https://drive.google.com/drive/u/0/folders/1Yjvp5TMg7mERWxq4dsYJq748CcQIucLK")
 
+
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
 
 @app.route('/logout')
 def logout():
@@ -280,6 +317,7 @@ def logout():
     resp.set_cookie('username', '', expires=0)
     resp.set_cookie('password', '', expires=0)
     return resp
+
 
 if __name__ == '__main__':
     from waitress import serve
