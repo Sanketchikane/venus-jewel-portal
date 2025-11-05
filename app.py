@@ -1,4 +1,4 @@
-# ✅ Full Updated app.py with Shared Drive Support + In-Dashboard File Browser, Downloads, Search/Sort, MP4 Preview
+# ✅ app.py — Shared Drive Upload + In-App Files Browser (separate Files page) + Search/Sort + MP4 Preview
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, abort, send_file
 import gspread
@@ -115,12 +115,12 @@ def mute_video(file_storage, filename):
     except Exception:
         return io.BytesIO(open(input_path, 'rb').read())
 
-def list_packet_folders():
+def list_packet_folders(order="modifiedTime desc"):
     """All Packet No folders directly under DRIVE_FOLDER_ID."""
     results = drive_service.files().list(
         q=f"'{DRIVE_FOLDER_ID}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false",
         fields="files(id,name,modifiedTime)",
-        orderBy="modifiedTime desc, name_natural",  # newest first by default
+        orderBy=order,  # 'modifiedTime desc' or 'name_natural'
         includeItemsFromAllDrives=True,
         supportsAllDrives=True
     ).execute()
@@ -130,7 +130,7 @@ def list_files_in_folder(folder_id, order="modifiedTime desc"):
     results = drive_service.files().list(
         q=f"'{folder_id}' in parents and trashed=false",
         fields="files(id,name,mimeType,size,modifiedTime)",
-        orderBy=order,  # name_natural or modifiedTime desc
+        orderBy=order,
         includeItemsFromAllDrives=True,
         supportsAllDrives=True
     ).execute()
@@ -151,7 +151,7 @@ def download_file_to_bytes(file_id):
     fh.seek(0)
     return meta['name'], meta.get('mimeType', 'application/octet-stream'), fh
 
-# ========= Routes =========
+# ========= Routes (auth + pages) =========
 
 @app.route('/')
 def home():
@@ -187,6 +187,15 @@ def venus_upload_dashboard():
         return redirect('/login')
     return render_template('Venus_Upload.html')
 
+# 👉 NEW: Files page (locked behind login)
+@app.route('/files')
+def files_page():
+    if not session.get('username'):
+        return redirect('/login')
+    return render_template('File.html', user=session['username'])
+
+# ========= Upload API =========
+
 @app.route('/upload', methods=['POST'])
 def upload():
     try:
@@ -218,20 +227,22 @@ def upload():
     except Exception as e:
         return jsonify({'success':False,'message':f'Upload failed: {e}'}),500
 
-# ======== NEW: Dashboard File APIs (login required; all users see all Packet No) ========
+# ========= Files APIs (used by Files page) =========
 
 @app.route('/api/packet-folders')
 def api_packet_folders():
     if not session.get('username'):
         return abort(401)
-    folders = list_packet_folders()
+    # optional sort
+    sort = request.args.get('sort', 'newest')
+    order = 'modifiedTime desc' if sort == 'newest' else 'name_natural'
+    folders = list_packet_folders(order=order)
     return jsonify({'folders': folders})
 
 @app.route('/api/folder/<folder_id>/files')
 def api_folder_files(folder_id):
     if not session.get('username'):
         return abort(401)
-    # allow client to pass ?sort=name or ?sort=newest
     sort = request.args.get('sort', 'newest')
     order = 'modifiedTime desc' if sort == 'newest' else 'name_natural'
     files = list_files_in_folder(folder_id, order=order)
@@ -266,13 +277,12 @@ def download_folder(folder_id):
 
     return send_file(tmp_path, as_attachment=True, download_name=f'{packet_name}.zip')
 
-# NEW: Inline preview (no attachment) for MP4 (and other previewables)
+# Inline preview stream (no attachment) for MP4 (and browser-previewable)
 @app.route('/preview/file/<file_id>')
 def preview_file(file_id):
     if not session.get('username'):
         return abort(401)
     name, mime, fh = download_file_to_bytes(file_id)
-    # Stream without forcing download; browser will preview if it can (e.g., video/mp4)
     return send_file(fh, mimetype=mime or 'application/octet-stream', as_attachment=False, download_name=name)
 
 @app.route('/logout')
