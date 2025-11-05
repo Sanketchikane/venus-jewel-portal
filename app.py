@@ -1,4 +1,4 @@
-# ✅ app.py — Shared Drive Upload + In-App Files Browser (separate Files page) + Search/Sort + MP4 Preview
+# ✅ app.py — Shared Drive Upload + Files page (search/sort/preview) — FINAL
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, abort, send_file
 import gspread
@@ -21,22 +21,22 @@ def enforce_https_on_render():
     if request.headers.get('X-Forwarded-Proto', 'https') != 'https':
         return redirect(request.url.replace("http://", "https://", 1))
 
-# ✅ Service Account JSON path
+# Service Account JSON path
 CREDENTIALS_PATH = '/etc/secrets/Credentials.json' if os.environ.get('RENDER') else 'Credentials.json'
 
-# ✅ Google Auth
+# Google Auth
 SCOPES = ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/spreadsheets']
 creds = service_account.Credentials.from_service_account_file(CREDENTIALS_PATH, scopes=SCOPES)
 
-# ✅ Sheets Setup
+# Sheets Setup
 SHEET_ID = '19c2tlUmzSQsQhqNvWRuKMgdw86M0PLsKrWk51m7apA4'
 client = gspread.authorize(creds)
 sheet = client.open_by_key(SHEET_ID).worksheet('Sheet1')
 
-# ✅ Shared Drive Root (Packet No folders live directly under this)
+# Shared Drive root folder (Packet No folders live directly under this)
 DRIVE_FOLDER_ID = '0AEZXjYA5wFlSUk9PVA'
 
-# ✅ Google Drive API
+# Google Drive API
 drive_service = build('drive', 'v3', credentials=creds)
 
 ADMIN_USERNAME = 'admin'
@@ -116,7 +116,6 @@ def mute_video(file_storage, filename):
         return io.BytesIO(open(input_path, 'rb').read())
 
 def list_packet_folders(order="modifiedTime desc"):
-    """All Packet No folders directly under DRIVE_FOLDER_ID."""
     results = drive_service.files().list(
         q=f"'{DRIVE_FOLDER_ID}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false",
         fields="files(id,name,modifiedTime)",
@@ -137,13 +136,14 @@ def list_files_in_folder(folder_id, order="modifiedTime desc"):
     return results.get('files', [])
 
 def download_file_to_bytes(file_id):
-    """Return (name, mimetype, BytesIO) from Drive."""
     meta = drive_service.files().get(
-        fileId=file_id, fields='id,name,mimeType',
+        fileId=file_id,
+        fields='id,name,mimeType',
         supportsAllDrives=True
     ).execute()
+
     fh = io.BytesIO()
-    request = drive_service.files().get_media(fileId=file_id)
+    request = drive_service.files().get_media(fileId=file_id, supportsAllDrives=True)
     downloader = MediaIoBaseDownload(fh, request)
     done = False
     while not done:
@@ -187,45 +187,47 @@ def venus_upload_dashboard():
         return redirect('/login')
     return render_template('Venus_Upload.html')
 
-# 👉 NEW: Files page (locked behind login)
+# Files page (locked)
 @app.route('/files')
 def files_page():
     if not session.get('username'):
         return redirect('/login')
-    return render_template('File.html', user=session['username'])
+    # IMPORTANT: template name is files.html (lowercase plural)
+    return render_template('files.html', user=session['username'])
 
 # ========= Upload API =========
 
 @app.route('/upload', methods=['POST'])
 def upload():
     try:
-        packet_no=request.form.get('packetNo','').strip()
+        packet_no = request.form.get('packetNo','').strip()
         if not packet_no:
-            return jsonify({'success':False,'message':'Packet number required'}),400
+            return jsonify({'success':False,'message':'Packet number required'}), 400
 
-        folder_id=get_or_create_folder(packet_no, DRIVE_FOLDER_ID)
+        folder_id = get_or_create_folder(packet_no, DRIVE_FOLDER_ID)
+
         for key in request.files:
-            name=key.replace('file_','')
+            sub = key.replace('file_','')
             for file in request.files.getlist(key):
                 if file and file.filename:
-                    ext=os.path.splitext(file.filename)[1]
-                    fname=get_unique_filename(f"{name}{ext}",folder_id)
-                    # If video → mute, else passthrough
+                    ext = os.path.splitext(file.filename)[1]
+                    fname = get_unique_filename(f"{sub}{ext}", folder_id)
+                    # mute videos
                     if fname.lower().endswith(('.mp4','.mov','.avi','.mkv','.webm')):
-                        stream=mute_video(file,fname); mime='video/mp4'
+                        stream = mute_video(file, fname); mime = 'video/mp4'
                     else:
-                        stream=io.BytesIO(file.read()); mime=file.mimetype
+                        stream = io.BytesIO(file.read()); mime = file.mimetype or 'application/octet-stream'
                     stream.seek(0)
-                    media=MediaIoBaseUpload(stream,mimetype=mime)
+                    media = MediaIoBaseUpload(stream, mimetype=mime)
                     drive_service.files().create(
-                        body={'name':fname,'parents':[folder_id]},
+                        body={'name': fname, 'parents': [folder_id]},
                         media_body=media,
                         fields='id',
                         supportsAllDrives=True
                     ).execute()
-        return jsonify({'success':True,'message':'✅ Uploaded to Shared Drive'})
+        return jsonify({'success': True, 'message': '✅ Uploaded to Shared Drive'})
     except Exception as e:
-        return jsonify({'success':False,'message':f'Upload failed: {e}'}),500
+        return jsonify({'success': False, 'message': f'Upload failed: {e}'}), 500
 
 # ========= Files APIs (used by Files page) =========
 
@@ -233,7 +235,6 @@ def upload():
 def api_packet_folders():
     if not session.get('username'):
         return abort(401)
-    # optional sort
     sort = request.args.get('sort', 'newest')
     order = 'modifiedTime desc' if sort == 'newest' else 'name_natural'
     folders = list_packet_folders(order=order)
@@ -259,7 +260,6 @@ def download_file(file_id):
 def download_folder(folder_id):
     if not session.get('username'):
         return abort(401)
-    # Zip all immediate files in the packet folder (no deep recursion)
     files = list_files_in_folder(folder_id, order='name_natural')
     packet_meta = drive_service.files().get(fileId=folder_id, fields='name', supportsAllDrives=True).execute()
     packet_name = packet_meta.get('name', 'packet')
@@ -271,13 +271,12 @@ def download_folder(folder_id):
     with zipfile.ZipFile(tmp_path, 'w', zipfile.ZIP_DEFLATED) as zf:
         for f in files:
             if f.get('mimeType') == 'application/vnd.google-apps.folder':
-                continue  # skip nested
+                continue
             fname, _, fh = download_file_to_bytes(f['id'])
             zf.writestr(fname, fh.read())
 
     return send_file(tmp_path, as_attachment=True, download_name=f'{packet_name}.zip')
 
-# Inline preview stream (no attachment) for MP4 (and browser-previewable)
 @app.route('/preview/file/<file_id>')
 def preview_file(file_id):
     if not session.get('username'):
@@ -299,4 +298,4 @@ def admin_dashboard():
 
 if __name__=='__main__':
     from waitress import serve
-    serve(app,host='0.0.0.0',port=int(os.environ.get('PORT',10000)))
+    serve(app, host='0.0.0.0', port=int(os.environ.get('PORT', 10000)))
