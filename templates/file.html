@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Files • VENUS JEWEL FILE PORTAL</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Favicons -->
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='images/apple-touch-icon.png') }}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/favicon-32x32.png') }}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='images/favicon-16x16.png') }}">
+  <link rel="manifest" href="{{ url_for('static', filename='images/site.webmanifest') }}">
+  <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+
+  <!-- Fonts & Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Poppins', sans-serif; background: url('/static/images/dimension.jpg') no-repeat center center fixed; background-size: cover; }
+
+    .topbar {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 20px; background: rgba(255,255,255,.9); border-bottom:1px solid #eaeaea;
+    }
+    .brand { display:flex; align-items:center; gap:12px; }
+    .brand img { height:48px; }
+    .brand h1 { font-size:20px; color:#003366; font-weight:700; letter-spacing:.5px; }
+    .userbox { color:#003366; font-weight:600; }
+
+    .container { max-width:1200px; margin:24px auto; background: rgba(255,255,255,.85); backdrop-filter: blur(8px);
+      border-radius:14px; box-shadow:0 8px 24px rgba(0,0,0,.12); padding:20px; }
+
+    .controls { display:flex; gap:12px; align-items:center; margin-bottom:16px; }
+    .controls input[type="text"] { flex:1; padding:12px 14px; border:1px solid #dcdcdc; border-radius:10px; background:#fff; }
+    .controls select, .controls button { padding:12px 14px; border-radius:10px; border:1px solid #dcdcdc; background:#fff; cursor:pointer; }
+    .controls button:hover { background:#f4f6ff; }
+
+    .browser { display:grid; grid-template-columns: 320px 1fr; gap:18px; }
+    .panel { background:#fff; border-radius:12px; padding:14px; box-shadow:0 4px 14px rgba(0,0,0,.08); }
+    .panel h3 { font-size:16px; color:#003366; margin-bottom:10px; }
+    .list { max-height: 520px; overflow:auto; border:1px solid #eee; border-radius:10px; }
+    .list-item { padding:10px 12px; border-bottom:1px solid #f0f0f0; display:flex; justify-content:space-between; align-items:center; }
+    .list-item:hover { background:#f8fbff; cursor:pointer; }
+    .pill { font-size:12px; padding:4px 8px; border-radius:20px; background:#eef4ff; color:#0045b5; }
+
+    .grid { width:100%; border-collapse:collapse; }
+    .grid th, .grid td { border-bottom:1px solid #eee; padding:10px; text-align:left; font-size:14px; }
+    .muted { color:#666; font-size:12px; }
+    .actions { display:flex; gap:8px; }
+    .btn { display:inline-flex; align-items:center; gap:6px; padding:8px 10px; border-radius:8px; border:1px solid #e0e0e0; background:#fff; cursor:pointer; text-decoration:none; color:inherit; }
+    .btn:hover { background:#f6f8ff; }
+    .btn-primary { background:#0b5fff; color:#fff; border:none; }
+
+    /* Preview Modal */
+    #previewModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:3000; align-items:center; justify-content:center; }
+    #previewBox { background:#000; border-radius:12px; max-width:90vw; width:900px; padding:10px; box-shadow:0 10px 30px rgba(0,0,0,.4); position:relative; }
+    #previewVideo { width:100%; height:auto; max-height:80vh; background:#000; }
+    #previewClose { position:absolute; top:-40px; right:0; background:#fff; border:none; border-radius:6px; padding:8px 10px; cursor:pointer; }
+
+    @media (max-width: 1024px) { .browser { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+
+<!-- Top Bar with logo & user -->
+<div class="topbar">
+  <div class="brand">
+    <img src="{{ url_for('static', filename='images/vj_logo_new.png') }}" alt="Venus Jewel">
+    <h1>VENUS JEWEL — Files</h1>
+  </div>
+  <div class="userbox">
+    <i class="fas fa-user-shield"></i> {{ user }}
+    &nbsp; | &nbsp;
+    <a class="btn" href="/dashboard"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+    <a class="btn" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+  </div>
+</div>
+
+<div class="container">
+  <!-- Controls -->
+  <div class="controls">
+    <input type="text" id="searchBox" placeholder="Search Packet No or File name..." />
+    <select id="sortSelect">
+      <option value="newest" selected>Newest first</option>
+      <option value="name">Name A–Z</option>
+    </select>
+    <button id="refreshBtn"><i class="fas fa-rotate"></i> Refresh</button>
+  </div>
+
+  <!-- Browser -->
+  <div class="browser">
+    <div class="panel">
+      <h3><i class="fas fa-box-archive"></i> Packet No Folders</h3>
+      <div id="packetList" class="list"></div>
+    </div>
+
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <h3 id="filesTitle"><i class="fas fa-file"></i> Files</h3>
+        <button id="downloadFolderBtn" class="btn" disabled><i class="fas fa-download"></i> Download Folder (ZIP)</button>
+      </div>
+      <table class="grid" id="filesTable">
+        <thead><tr><th>Name</th><th class="muted">Type</th><th class="muted">Modified</th><th>Actions</th></tr></thead>
+        <tbody id="filesBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Preview Modal -->
+<div id="previewModal">
+  <div id="previewBox">
+    <button id="previewClose" onclick="closePreview()">Close ✕</button>
+    <video id="previewVideo" controls playsinline></video>
+  </div>
+</div>
+
+<script>
+  // ======== File Browser Logic (same behavior as earlier, enhanced UI) ========
+  const packetList = document.getElementById('packetList');
+  const filesBody = document.getElementById('filesBody');
+  const filesTitle = document.getElementById('filesTitle');
+  const downloadFolderBtn = document.getElementById('downloadFolderBtn');
+  const searchBox = document.getElementById('searchBox');
+  const sortSelect = document.getElementById('sortSelect');
+  const refreshBtn = document.getElementById('refreshBtn');
+
+  let allFolders = [];
+  let shownFolders = [];
+  let currentFolder = null;
+  let currentFiles = [];
+  let shownFiles = [];
+
+  function loadPacketFolders(){
+    packetList.innerHTML = '<div class="list-item"><span>Loading…</span></div>';
+    const qs = sortSelect.value === 'name' ? 'name' : 'newest';
+    fetch(`/api/packet-folders?sort=${qs}`)
+      .then(r=>r.json())
+      .then(({folders})=>{
+        allFolders = folders || [];
+        applyFolderFilterSort();
+      })
+      .catch(()=>{ packetList.innerHTML = '<div class="list-item"><span>Failed to load folders.</span></div>'; });
+  }
+
+  function applyFolderFilterSort(){
+    const q = searchBox.value.trim().toLowerCase();
+    shownFolders = allFolders.filter(f => !q || (f.name || '').toLowerCase().includes(q));
+    // order is already server-sorted; keep as-is for newest, for name sort we can ensure
+    if (sortSelect.value === 'name') {
+      shownFolders.sort((a,b) => (a.name||'').localeCompare(b.name||'', undefined, {numeric:true, sensitivity:'base'}));
+    }
+    renderFolderList();
+  }
+
+  function renderFolderList(){
+    packetList.innerHTML = '';
+    if (!shownFolders.length){
+      packetList.innerHTML = '<div class="list-item"><span>No folders found.</span></div>';
+      filesBody.innerHTML = '';
+      filesTitle.innerHTML = '<i class="fas fa-file"></i> Files';
+      downloadFolderBtn.disabled = true;
+      return;
+    }
+    shownFolders.forEach(f=>{
+      const row = document.createElement('div');
+      row.className='list-item';
+      const date = f.modifiedTime ? new Date(f.modifiedTime).toLocaleString() : '';
+      row.innerHTML = `<span><i class="fas fa-folder"></i> ${f.name}</span><span class="pill">${date || '—'}</span>`;
+      row.onclick = ()=> selectFolder(f.id, f.name);
+      packetList.appendChild(row);
+    });
+  }
+
+  function selectFolder(folderId, name){
+    currentFolder = {id: folderId, name};
+    filesTitle.innerHTML = `<i class="fas fa-file"></i> Files — ${name}`;
+    downloadFolderBtn.disabled = false;
+    loadFiles(folderId);
+  }
+
+  function loadFiles(folderId){
+    filesBody.innerHTML = '<tr><td colspan="4">Loading…</td></tr>';
+    const qs = sortSelect.value === 'name' ? 'name' : 'newest';
+    fetch(`/api/folder/${folderId}/files?sort=${qs}`)
+      .then(r=>r.json())
+      .then(({files})=>{
+        currentFiles = files || [];
+        applyFileFilterSort();
+      })
+      .catch(()=>{ filesBody.innerHTML = '<tr><td colspan="4">Failed to load files.</td></tr>'; });
+  }
+
+  function applyFileFilterSort(){
+    const q = searchBox.value.trim().toLowerCase();
+    shownFiles = currentFiles.filter(f => !q || (f.name || '').toLowerCase().includes(q));
+    if (sortSelect.value === 'name'){
+      shownFiles.sort((a,b) => (a.name||'').localeCompare(b.name||'', undefined, {numeric:true, sensitivity:'base'}));
+    } else {
+      shownFiles.sort((a,b) => new Date(b.modifiedTime||0) - new Date(a.modifiedTime||0));
+    }
+    renderFiles();
+  }
+
+  function renderFiles(){
+    filesBody.innerHTML = '';
+    if (!shownFiles.length){
+      filesBody.innerHTML = '<tr><td colspan="4">No files found.</td></tr>';
+      return;
+    }
+    shownFiles.forEach(f=>{
+      const type = f.mimeType || '-';
+      const date = f.modifiedTime ? new Date(f.modifiedTime).toLocaleString() : '';
+      const isVideo = (type.startsWith('video/')) || f.name.toLowerCase().endswith('.mp4');
+      const previewBtn = isVideo ? `<button class="btn" onclick="openPreview('${f.id}'); return false;"><i class="fas fa-play"></i> Preview</button>` : '';
+      const dlBtn = `<a class="btn" href="/download/file/${f.id}"><i class="fas fa-download"></i> Download</a>`;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${f.name}</td><td class="muted">${type.replace('application/','')}</td><td class="muted">${date}</td><td class="actions">${previewBtn} ${dlBtn}</td>`;
+      filesBody.appendChild(tr);
+    });
+  }
+
+  // Preview modal
+  function openPreview(fileId){
+    const video = document.getElementById('previewVideo');
+    video.src = `/preview/file/${fileId}`;
+    document.getElementById('previewModal').style.display = 'flex';
+    video.play().catch(()=>{});
+  }
+  function closePreview(){
+    const video = document.getElementById('previewVideo');
+    video.pause(); video.src = '';
+    document.getElementById('previewModal').style.display = 'none';
+  }
+
+  // Controls
+  searchBox.addEventListener('input', ()=>{
+    applyFolderFilterSort();
+    applyFileFilterSort();
+  });
+  sortSelect.addEventListener('change', ()=>{
+    loadPacketFolders();
+    if (currentFolder) loadFiles(currentFolder.id);
+  });
+  downloadFolderBtn.addEventListener('click', ()=>{
+    if (!currentFolder) return;
+    window.location.href = `/download/folder/${currentFolder.id}`;
+  });
+  refreshBtn.addEventListener('click', (e)=>{
+    e.preventDefault();
+    loadPacketFolders();
+    if (currentFolder) loadFiles(currentFolder.id);
+  });
+
+  // Initial load
+  loadPacketFolders();
+</script>
+
+</body>
+</html>
