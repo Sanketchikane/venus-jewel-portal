@@ -101,15 +101,14 @@
   <ul class="nav-links">
     <li><a href="#"><i class="fas fa-user"></i> {{ user }}</a></li>
     <li><a href="#" onclick="showPasswordModal()"><i class="fas a fa-lock"></i> Change Password</a></li>
-    <!-- NEW: Locked Files page -->
     <li><a href="/files"><i class="fas fa-lock"></i> Files</a></li>
     <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
   </ul>
 </div>
 
-<!-- Main (Upload only, unchanged) -->
+<!-- Main (Upload only, unchanged except MULTIPLE ✅) -->
 <div class="main-content">
-  <form id="uploadForm">
+  <form id="uploadForm" enctype="multipart/form-data">
     <label for="packetNo">Packet Number</label>
     <input type="text" id="packetNo" name="packetNo" placeholder="Enter Packet Number" required>
     <div id="subpoints"></div>
@@ -130,13 +129,21 @@
 </div>
 
 <script>
-  // Subpoints (unchanged)
-  const SUBPOINTS = ["Front Hand","Back Hand","Tweezer","Shade Card","Face Up Shade Card","Profile","In Dabbi","Daylight"];
+  const SUBPOINTS = [
+    "Front Hand","Back Hand","Tweezer","Shade Card",
+    "Face Up Shade Card","Profile","In Dabbi","Daylight"
+  ];
   const subpointContainer = document.getElementById('subpoints');
+
+  // ✅ Multi file select enabled here
   SUBPOINTS.forEach(point => {
     const label = document.createElement('label'); label.textContent = point;
-    const input = document.createElement('input'); input.type = 'file'; input.name = 'file_' + point;
-    subpointContainer.appendChild(label); subpointContainer.appendChild(input);
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.name = 'file_' + point;
+    input.multiple = true;  // ✅ ENABLED
+    subpointContainer.appendChild(label);
+    subpointContainer.appendChild(input);
   });
 
   document.getElementById("uploadForm").addEventListener("submit", function(e) {
