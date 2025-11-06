@@ -4,223 +4,445 @@
   <meta charset="UTF-8">
   <title>Files • VENUS JEWEL FILE PORTAL</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Brand & Icons -->
   <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='images/apple-touch-icon.png') }}">
   <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/favicon-32x32.png') }}">
   <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='images/favicon-16x16.png') }}">
   <link rel="manifest" href="{{ url_for('static', filename='images/site.webmanifest') }}">
   <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Preview libraries (DOCX + XLSX) -->
+  <script src="https://cdn.jsdelivr.net/npm/docx-preview@0.3.2/dist/docx-preview.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
   <style>
+    :root{
+      --vj-primary:#003366;
+      --vj-accent:#0B5FFF;
+      --vj-bg: rgba(255,255,255,.88);
+      --vj-card: #ffffff;
+      --vj-soft: #f5f7fb;
+      --vj-border:#e6e9f2;
+      --vj-text:#203040;
+      --vj-muted:#6b7280;
+    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Poppins', sans-serif; background: url('/static/images/dimension.jpg') no-repeat center center fixed; background-size: cover; }
-    .topbar { display:flex; align-items:center; justify-content:space-between; padding:14px 20px; background: rgba(255,255,255,.9); border-bottom:1px solid #eaeaea; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      color: var(--vj-text);
+      background: url('/static/images/dimension.jpg') no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    .topbar {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 20px; background: var(--vj-bg); border-bottom:1px solid var(--vj-border);
+      backdrop-filter: blur(8px);
+    }
     .brand { display:flex; align-items:center; gap:12px; }
     .brand img { height:48px; }
-    .brand h1 { font-size:20px; color:#003366; font-weight:700; letter-spacing:.5px; }
-    .userbox { color:#003366; font-weight:600; }
-    .container { max-width:1200px; margin:24px auto; background: rgba(255,255,255,.85); backdrop-filter: blur(8px); border-radius:14px; box-shadow:0 8px 24px rgba(0,0,0,.12); padding:20px; }
-    .controls { display:flex; gap:12px; align-items:center; margin-bottom:16px; }
-    .controls input[type="text"] { flex:1; padding:12px 14px; border:1px solid #dcdcdc; border-radius:10px; background:#fff; }
-    .controls select, .controls button { padding:12px 14px; border-radius:10px; border:1px solid #dcdcdc; background:#fff; cursor:pointer; }
-    .controls button:hover { background:#f4f6ff; }
-    .browser { display:grid; grid-template-columns: 320px 1fr; gap:18px; }
-    .panel { background:#fff; border-radius:12px; padding:14px; box-shadow:0 4px 14px rgba(0,0,0,.08); }
-    .panel h3 { font-size:16px; color:#003366; margin-bottom:10px; }
-    .list { max-height: 520px; overflow:auto; border:1px solid #eee; border-radius:10px; }
-    .list-item { padding:10px 12px; border-bottom:1px solid #f0f0f0; display:flex; justify-content:space-between; align-items:center; }
-    .list-item:hover { background:#f8fbff; cursor:pointer; }
+    .brand h1 { font-size:20px; color:var(--vj-primary); font-weight:700; letter-spacing:.4px; }
+    .userbox { display:flex; align-items:center; gap:10px; color:var(--vj-primary); font-weight:600; }
+    .btn {
+      display:inline-flex; align-items:center; gap:8px; padding:10px 12px; border-radius:10px;
+      border:1px solid var(--vj-border); background:#fff; cursor:pointer; text-decoration:none; color:inherit;
+      transition: transform .05s ease, background .2s ease;
+    }
+    .btn:hover { background: var(--vj-soft); }
+    .btn-primary { background: var(--vj-accent); border-color: var(--vj-accent); color:#fff; }
+    .btn-primary:hover { filter: brightness(0.95); }
+
+    .container {
+      max-width: 1300px; margin:24px auto; background: var(--vj-bg);
+      border:1px solid var(--vj-border); border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.12);
+      padding:18px; backdrop-filter: blur(10px);
+    }
+    .controls { display:flex; gap:12px; align-items:center; margin-bottom:16px; flex-wrap:wrap; }
+    .controls input[type="text"]{
+      flex:1; padding:12px 14px; border:1px solid var(--vj-border); border-radius:12px; background:#fff; outline:none;
+    }
+    .controls select { padding:12px 14px; border-radius:12px; border:1px solid var(--vj-border); background:#fff; }
+    .browser { display:grid; grid-template-columns: 360px 1fr; gap:18px; }
+    .panel { background: var(--vj-card); border:1px solid var(--vj-border); border-radius:14px; padding:14px; box-shadow:0 4px 18px rgba(0,0,0,.06); }
+    .panel h3 { font-size:16px; color:var(--vj-primary); margin-bottom:10px; }
+    .list { max-height: 560px; overflow:auto; border:1px solid var(--vj-border); border-radius:12px; background:#fff; }
+    .list-item {
+      padding:12px 14px; border-bottom:1px solid var(--vj-border);
+      display:flex; justify-content:space-between; align-items:center;
+      transition: background .15s ease;
+    }
+    .list-item:hover { background:#f9fbff; cursor:pointer; }
     .pill { font-size:12px; padding:4px 8px; border-radius:20px; background:#eef4ff; color:#0045b5; }
-    .grid { width:100%; border-collapse:collapse; }
-    .grid th, .grid td { border-bottom:1px solid #eee; padding:10px; text-align:left; font-size:14px; }
-    .muted { color:#666; font-size:12px; }
-    .actions { display:flex; gap:8px; }
-    .btn { display:inline-flex; align-items:center; gap:6px; padding:8px 10px; border-radius:8px; border:1px solid #e0e0e0; background:#fff; cursor:pointer; text-decoration:none; color:inherit; }
-    .btn:hover { background:#f6f8ff; }
-    #previewModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:3000; align-items:center; justify-content:center; }
-    #previewBox { background:#000; border-radius:12px; max-width:90vw; width:900px; padding:10px; box-shadow:0 10px 30px rgba(0,0,0,.4); position:relative; }
-    #previewVideo { width:100%; height:auto; max-height:80vh; background:#000; }
-    #previewClose { position:absolute; top:-40px; right:0; background:#fff; border:none; border-radius:6px; padding:8px 10px; cursor:pointer; }
-    @media (max-width: 1024px) { .browser { grid-template-columns:1fr; } }
+    .grid { width:100%; border-collapse:collapse; overflow:hidden; border-radius:12px; border:1px solid var(--vj-border); }
+    .grid th, .grid td { border-bottom:1px solid var(--vj-border); padding:12px; text-align:left; font-size:14px; }
+    .grid th { background: #f7f9fe; color:#334155; }
+    .muted { color: var(--vj-muted); font-size:12px; }
+    .actions { display:flex; gap:8px; flex-wrap:wrap; }
+
+    /* Preview modal */
+    #previewModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.72); z-index:3000; align-items:center; justify-content:center; }
+    #previewCard {
+      background:#0a0a0a; color:#eaeaea; border-radius:14px; width:min(94vw, 1100px);
+      max-height:90vh; display:flex; flex-direction:column; overflow:hidden; position:relative;
+      box-shadow:0 20px 50px rgba(0,0,0,.5);
+    }
+    #previewHeader {
+      display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:#111827; border-bottom:1px solid #1f2937;
+    }
+    #previewTitle { font-size:14px; color:#e5e7eb; }
+    #previewBody { padding:0; background:#0a0a0a; display:flex; align-items:center; justify-content:center; }
+    #previewBody > .pad { width:100%; height:100%; padding:16px; overflow:auto; }
+    #previewClose { background:#fff; color:#111; border:none; border-radius:8px; padding:8px 12px; cursor:pointer; }
+    #previewVideo { width:100%; height:auto; max-height:78vh; background:#000; display:block; }
+    #previewImg { max-width:100%; max-height:78vh; display:block; margin:auto; }
+    #previewFrame { width:100%; height:78vh; border:0; background:#111; }
+
+    .no-preview {
+      color:#e5e7eb; text-align:center; padding:24px;
+    }
+    .no-preview p{ margin-bottom:12px; color:#c7c9ce;}
+    .badge {
+      display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; font-size:12px; border:1px solid #374151; color:#e5e7eb;
+    }
+
+    @media (max-width: 1100px) { .browser { grid-template-columns:1fr; } }
   </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div class="brand">
-    <img src="{{ url_for('static', filename='images/vj_logo_new.png') }}" alt="Venus Jewel">
-    <h1>VENUS JEWEL — Files</h1>
-  </div>
-  <div class="userbox">
-    <i class="fas fa-user-shield"></i> {{ user }}
-    &nbsp; | &nbsp;
-    <a class="btn" href="/dashboard"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
-    <a class="btn" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
-  </div>
-</div>
-
-<div class="container">
-  <div class="controls">
-    <input type="text" id="searchBox" placeholder="Search Packet No or File name..." />
-    <select id="sortSelect">
-      <option value="newest" selected>Newest first</option>
-      <option value="name">Name A–Z</option>
-    </select>
-    <button id="refreshBtn"><i class="fas fa-rotate"></i> Refresh</button>
+  <div class="topbar">
+    <div class="brand">
+      <img src="{{ url_for('static', filename='images/vj_logo_new.png') }}" alt="Venus Jewel">
+      <h1>VENUS JEWEL — Files</h1>
+    </div>
+    <div class="userbox">
+      <i class="fas fa-user-circle"></i> {{ user }}
+      <a class="btn" href="/dashboard"><i class="fas fa-arrow-left"></i> Dashboard</a>
+      <a class="btn" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
   </div>
 
-  <div class="browser">
-    <div class="panel">
-      <h3><i class="fas fa-box-archive"></i> Packet No Folders</h3>
-      <div id="packetList" class="list"></div>
+  <div class="container">
+    <div class="controls">
+      <input type="text" id="searchBox" placeholder="Search Packet No or File name..." />
+      <select id="sortSelect">
+        <option value="newest" selected>Newest first</option>
+        <option value="name">Name A–Z</option>
+      </select>
+      <button id="refreshBtn" class="btn"><i class="fas fa-rotate"></i> Refresh</button>
     </div>
 
-    <div class="panel">
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <h3 id="filesTitle"><i class="fas fa-file"></i> Files</h3>
-        <button id="downloadFolderBtn" class="btn" disabled><i class="fas fa-download"></i> Download Folder (ZIP)</button>
+    <div class="browser">
+      <div class="panel">
+        <h3><i class="fas fa-box-archive"></i> Packet No Folders</h3>
+        <div id="packetList" class="list"></div>
       </div>
-      <table class="grid" id="filesTable">
-        <thead><tr><th>Name</th><th class="muted">Type</th><th class="muted">Modified</th><th>Actions</th></tr></thead>
-        <tbody id="filesBody"></tbody>
-      </table>
+
+      <div class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <h3 id="filesTitle"><i class="fas fa-file"></i> Files</h3>
+          <button id="downloadFolderBtn" class="btn btn-primary" disabled>
+            <i class="fas fa-download"></i> Download Folder (ZIP)
+          </button>
+        </div>
+        <table class="grid" id="filesTable">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th class="muted">Type</th>
+              <th class="muted">Modified</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="filesBody"></tbody>
+        </table>
+      </div>
     </div>
   </div>
-</div>
 
-<div id="previewModal">
-  <div id="previewBox">
-    <button id="previewClose" onclick="closePreview()">Close ✕</button>
-    <video id="previewVideo" controls playsinline></video>
+  <!-- Preview Modal -->
+  <div id="previewModal">
+    <div id="previewCard" role="dialog" aria-modal="true">
+      <div id="previewHeader">
+        <div id="previewTitle">Preview</div>
+        <div style="display:flex;gap:8px;">
+          <a id="previewDownload" class="btn" href="#" target="_blank"><i class="fas fa-download"></i> Download</a>
+          <button id="previewClose" onclick="closePreview()">Close ✕</button>
+        </div>
+      </div>
+      <div id="previewBody">
+        <!-- Dynamic content containers -->
+        <video id="previewVideo" controls playsinline style="display:none"></video>
+        <img id="previewImg" alt="Preview" style="display:none" />
+        <iframe id="previewFrame" style="display:none"></iframe>
+
+        <!-- For DOCX / XLSX we render into these pads -->
+        <div id="docxPad" class="pad" style="display:none; background:#fff; color:#111;"></div>
+        <div id="xlsxPad" class="pad" style="display:none; background:#fff; color:#111;"></div>
+
+        <!-- Fallback -->
+        <div id="noPreview" class="no-preview" style="display:none;">
+          <div class="badge"><i class="fas fa-eye-slash"></i> No inline preview available</div>
+          <p>You can download and open this file on your device.</p>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
 
-<script>
-  const packetList = document.getElementById('packetList');
-  const filesBody = document.getElementById('filesBody');
-  const filesTitle = document.getElementById('filesTitle');
-  const downloadFolderBtn = document.getElementById('downloadFolderBtn');
-  const searchBox = document.getElementById('searchBox');
-  const sortSelect = document.getElementById('sortSelect');
-  const refreshBtn = document.getElementById('refreshBtn');
+  <script>
+    const packetList = document.getElementById('packetList');
+    const filesBody = document.getElementById('filesBody');
+    const filesTitle = document.getElementById('filesTitle');
+    const downloadFolderBtn = document.getElementById('downloadFolderBtn');
+    const searchBox = document.getElementById('searchBox');
+    const sortSelect = document.getElementById('sortSelect');
+    const refreshBtn = document.getElementById('refreshBtn');
 
-  let allFolders = [];
-  let shownFolders = [];
-  let currentFolder = null;
-  let currentFiles = [];
-  let shownFiles = [];
+    let allFolders = [];
+    let shownFolders = [];
+    let currentFolder = null;
+    let currentFiles = [];
+    let shownFiles = [];
 
-  function loadPacketFolders(){
-    packetList.innerHTML = '<div class="list-item"><span>Loading…</span></div>';
-    const qs = sortSelect.value === 'name' ? 'name' : 'newest';
-    fetch(`/api/packet-folders?sort=${qs}`)
-      .then(r=>r.json())
-      .then(({folders})=>{
-        allFolders = folders || [];
-        applyFolderFilterSort();
-      })
-      .catch(()=>{ packetList.innerHTML = '<div class="list-item"><span>Failed to load folders.</span></div>'; });
-  }
+    function extOf(name){ const i = (name||'').lastIndexOf('.'); return i>=0 ? name.slice(i+1).toLowerCase() : ''; }
+    function typeBadge(type){ return (type||'').replace('application/','') || '-'; }
 
-  function applyFolderFilterSort(){
-    const q = searchBox.value.trim().toLowerCase();
-    shownFolders = allFolders.filter(f => !q || (f.name || '').toLowerCase().includes(q));
-    if (sortSelect.value === 'name') {
-      shownFolders.sort((a,b) => (a.name||'').localeCompare(b.name||'', undefined, {numeric:true, sensitivity:'base'}));
-    } else {
-      shownFolders.sort((a,b) => new Date(b.modifiedTime||0) - new Date(a.modifiedTime||0));
+    function loadPacketFolders(){
+      packetList.innerHTML = '<div class="list-item"><span>Loading…</span></div>';
+      const qs = sortSelect.value === 'name' ? 'name' : 'newest';
+      fetch(`/api/packet-folders?sort=${qs}`)
+        .then(r=>r.json())
+        .then(({folders})=>{
+          allFolders = folders || [];
+          applyFolderFilterSort();
+        })
+        .catch(()=>{ packetList.innerHTML = '<div class="list-item"><span>Failed to load folders.</span></div>'; });
     }
-    renderFolderList();
-  }
 
-  function renderFolderList(){
-    packetList.innerHTML = '';
-    if (!shownFolders.length){
-      packetList.innerHTML = '<div class="list-item"><span>No folders found.</span></div>';
+    function applyFolderFilterSort(){
+      const q = searchBox.value.trim().toLowerCase();
+      shownFolders = allFolders.filter(f => !q || (f.name || '').toLowerCase().includes(q));
+      if (sortSelect.value === 'name') {
+        shownFolders.sort((a,b) => (a.name||'').localeCompare(b.name||'', undefined, {numeric:true, sensitivity:'base'}));
+      } else {
+        shownFolders.sort((a,b) => new Date(b.modifiedTime||0) - new Date(a.modifiedTime||0));
+      }
+      renderFolderList();
+    }
+
+    function renderFolderList(){
+      packetList.innerHTML = '';
+      if (!shownFolders.length){
+        packetList.innerHTML = '<div class="list-item"><span>No folders found.</span></div>';
+        filesBody.innerHTML = '';
+        filesTitle.innerHTML = '<i class="fas fa-file"></i> Files';
+        downloadFolderBtn.disabled = true;
+        return;
+      }
+      shownFolders.forEach(f=>{
+        const row = document.createElement('div');
+        row.className='list-item';
+        const date = f.modifiedTime ? new Date(f.modifiedTime).toLocaleString() : '';
+        row.innerHTML = `<span><i class="fas fa-folder"></i> ${f.name}</span><span class="pill">${date || '—'}</span>`;
+        row.onclick = ()=> selectFolder(f.id, f.name);
+        packetList.appendChild(row);
+      });
+    }
+
+    function selectFolder(folderId, name){
+      currentFolder = {id: folderId, name};
+      filesTitle.innerHTML = `<i class="fas fa-file"></i> Files — ${name}`;
+      downloadFolderBtn.disabled = false;
+      loadFiles(folderId);
+    }
+
+    function loadFiles(folderId){
+      filesBody.innerHTML = '<tr><td colspan="4">Loading…</td></tr>';
+      const qs = sortSelect.value === 'name' ? 'name' : 'newest';
+      fetch(`/api/folder/${folderId}/files?sort=${qs}`)
+        .then(r=>r.json())
+        .then(({files})=>{
+          currentFiles = files || [];
+          applyFileFilterSort();
+        })
+        .catch(()=>{ filesBody.innerHTML = '<tr><td colspan="4">Failed to load files.</td></tr>'; });
+    }
+
+    function applyFileFilterSort(){
+      const q = searchBox.value.trim().toLowerCase();
+      shownFiles = currentFiles.filter(f => !q || (f.name || '').toLowerCase().includes(q));
+      if (sortSelect.value === 'name'){
+        shownFiles.sort((a,b) => (a.name||'').localeCompare(b.name||'', undefined, {numeric:true, sensitivity:'base'}));
+      } else {
+        shownFiles.sort((a,b) => new Date(b.modifiedTime||0) - new Date(a.modifiedTime||0));
+      }
+      renderFiles();
+    }
+
+    function renderFiles(){
       filesBody.innerHTML = '';
-      filesTitle.innerHTML = '<i class="fas fa-file"></i> Files';
-      downloadFolderBtn.disabled = true;
-      return;
+      if (!shownFiles.length){
+        filesBody.innerHTML = '<tr><td colspan="4">No files found.</td></tr>';
+        return;
+      }
+      shownFiles.forEach(f=>{
+        const type = f.mimeType || '-';
+        const date = f.modifiedTime ? new Date(f.modifiedTime).toLocaleString() : '';
+        const tr = document.createElement('tr');
+
+        const previewCapable = canPreview(type, f.name);
+        const previewBtn = previewCapable
+          ? `<button class="btn" onclick="openPreview('${f.id}', '${encodeURIComponent(f.name)}', '${type}')"><i class="fas fa-eye"></i> Preview</button>`
+          : `<button class="btn" onclick="openPreview('${f.id}', '${encodeURIComponent(f.name)}', '${type}')"><i class="fas fa-eye-slash"></i> Try Preview</button>`;
+
+        const dlBtn = `<a class="btn" href="/download/file/${f.id}"><i class="fas fa-download"></i> Download</a>`;
+
+        tr.innerHTML = `
+          <td>${f.name}</td>
+          <td class="muted">${typeBadge(type)}</td>
+          <td class="muted">${date}</td>
+          <td class="actions">${previewBtn} ${dlBtn}</td>
+        `;
+        filesBody.appendChild(tr);
+      });
     }
-    shownFolders.forEach(f=>{
-      const row = document.createElement('div');
-      row.className='list-item';
-      const date = f.modifiedTime ? new Date(f.modifiedTime).toLocaleString() : '';
-      row.innerHTML = `<span><i class="fas fa-folder"></i> ${f.name}</span><span class="pill">${date || '—'}</span>`;
-      row.onclick = ()=> selectFolder(f.id, f.name);
-      packetList.appendChild(row);
-    });
-  }
 
-  function selectFolder(folderId, name){
-    currentFolder = {id: folderId, name};
-    filesTitle.innerHTML = `<i class="fas fa-file"></i> Files — ${name}`;
-    downloadFolderBtn.disabled = false;
-    loadFiles(folderId);
-  }
-
-  function loadFiles(folderId){
-    filesBody.innerHTML = '<tr><td colspan="4">Loading…</td></tr>';
-    const qs = sortSelect.value === 'name' ? 'name' : 'newest';
-    fetch(`/api/folder/${folderId}/files?sort=${qs}`)
-      .then(r=>r.json())
-      .then(({files})=>{
-        currentFiles = files || [];
-        applyFileFilterSort();
-      })
-      .catch(()=>{ filesBody.innerHTML = '<tr><td colspan="4">Failed to load files.</td></tr>'; });
-  }
-
-  function applyFileFilterSort(){
-    const q = searchBox.value.trim().toLowerCase();
-    shownFiles = currentFiles.filter(f => !q || (f.name || '').toLowerCase().includes(q));
-    if (sortSelect.value === 'name'){
-      shownFiles.sort((a,b) => (a.name||'').localeCompare(b.name||'', undefined, {numeric:true, sensitivity:'base'}));
-    } else {
-      shownFiles.sort((a,b) => new Date(b.modifiedTime||0) - new Date(a.modifiedTime||0));
+    function canPreview(mime, name){
+      const e = extOf(name);
+      if ((mime||'').startsWith('image/') || ['jpg','jpeg','png','gif','webp'].includes(e)) return true;
+      if ((mime||'').startsWith('video/') || ['mp4','mov','webm','mkv','hevc','h265'].includes(e)) return true;
+      if (mime === 'application/pdf' || e === 'pdf') return true;
+      if (['docx'].includes(e)) return true;   // docx-preview
+      if (['xlsx'].includes(e)) return true;   // SheetJS
+      return false;
     }
-    renderFiles();
-  }
 
-  function renderFiles(){
-    filesBody.innerHTML = '';
-    if (!shownFiles.length){
-      filesBody.innerHTML = '<tr><td colspan="4">No files found.</td></tr>';
-      return;
+    // ---------- Preview Handling ----------
+    const modal = document.getElementById('previewModal');
+    const titleEl = document.getElementById('previewTitle');
+    const videoEl = document.getElementById('previewVideo');
+    const imgEl = document.getElementById('previewImg');
+    const frameEl = document.getElementById('previewFrame');
+    const docxPad = document.getElementById('docxPad');
+    const xlsxPad = document.getElementById('xlsxPad');
+    const noPreview = document.getElementById('noPreview');
+    const previewDownload = document.getElementById('previewDownload');
+
+    function resetPreview(){
+      [videoEl, imgEl, frameEl, docxPad, xlsxPad, noPreview].forEach(el=>{
+        el.style.display = 'none';
+      });
+      try { videoEl.pause(); videoEl.src=''; } catch(e){}
+      imgEl.src = '';
+      frameEl.src = 'about:blank';
+      docxPad.innerHTML = '';
+      xlsxPad.innerHTML = '';
     }
-    shownFiles.forEach(f=>{
-      const type = f.mimeType || '-';
-      const date = f.modifiedTime ? new Date(f.modifiedTime).toLocaleString() : '';
-      const isVideo = (type.startsWith('video/')) || f.name.toLowerCase().endswith('.mp4');
-      const previewBtn = isVideo ? `<button class="btn" onclick="openPreview('${f.id}'); return false;"><i class="fas fa-play"></i> Preview</button>` : '';
-      const dlBtn = `<a class="btn" href="/download/file/${f.id}"><i class="fas fa-download"></i> Download</a>`;
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${f.name}</td><td class="muted">${type.replace('application/','')}</td><td class="muted">${date}</td><td class="actions">${previewBtn} ${dlBtn}</td>`;
-      filesBody.appendChild(tr);
-    });
-  }
 
-  function openPreview(fileId){
-    const video = document.getElementById('previewVideo');
-    video.src = `/preview/file/${fileId}`;
-    document.getElementById('previewModal').style.display = 'flex';
-    video.play().catch(()=>{});
-  }
-  function closePreview(){
-    const video = document.getElementById('previewVideo');
-    video.pause(); video.src = '';
-    document.getElementById('previewModal').style.display = 'none';
-  }
+    function openPreview(fileId, encName, mime){
+      const name = decodeURIComponent(encName);
+      const url = `/preview/file/${fileId}`;
+      const ext = extOf(name);
 
-  // Controls
-  searchBox.addEventListener('input', ()=>{ applyFolderFilterSort(); applyFileFilterSort(); });
-  sortSelect.addEventListener('change', ()=>{ loadPacketFolders(); if (currentFolder) loadFiles(currentFolder.id); });
-  downloadFolderBtn.addEventListener('click', ()=>{ if (currentFolder) window.location.href = `/download/folder/${currentFolder.id}`; });
-  refreshBtn.addEventListener('click', (e)=>{ e.preventDefault(); loadPacketFolders(); if (currentFolder) loadFiles(currentFolder.id); });
+      resetPreview();
+      titleEl.textContent = name;
+      previewDownload.href = `/download/file/${fileId}`;
 
-  // Initial load
-  loadPacketFolders();
-</script>
+      // Images
+      if ((mime||'').startsWith('image/') || ['jpg','jpeg','png','gif','webp'].includes(ext)){
+        imgEl.src = url;
+        imgEl.style.display = 'block';
+        modal.style.display = 'flex';
+        return;
+      }
+
+      // Video
+      if ((mime||'').startsWith('video/') || ['mp4','mov','webm','mkv','hevc','h265'].includes(ext)){
+        videoEl.src = url;
+        videoEl.style.display = 'block';
+        modal.style.display = 'flex';
+        // If browser cannot decode, the controls still show; user can download
+        return;
+      }
+
+      // PDF
+      if (mime === 'application/pdf' || ext === 'pdf'){
+        frameEl.src = url; // native PDF viewer
+        frameEl.style.display = 'block';
+        modal.style.display = 'flex';
+        return;
+      }
+
+      // DOCX → render with docx-preview (client-side)
+      if (ext === 'docx'){
+        modal.style.display = 'flex';
+        docxPad.style.display = 'block';
+        fetch(url)
+          .then(r => r.blob())
+          .then(blob => window.docx.renderAsync(blob, docxPad, docxOptions()))
+          .catch(()=>showNoPreview());
+        return;
+      }
+
+      // XLSX → render with SheetJS (first sheet)
+      if (ext === 'xlsx'){
+        modal.style.display = 'flex';
+        xlsxPad.style.display = 'block';
+        fetch(url)
+          .then(r=>r.arrayBuffer())
+          .then(buf=>{
+            const wb = XLSX.read(buf, {type:'array'});
+            const wsname = wb.SheetNames[0];
+            if (!wsname) return showNoPreview();
+            const ws = wb.Sheets[wsname];
+            const html = XLSX.utils.sheet_to_html(ws, { editable:false, header:`<h3 style="margin:0 0 12px;">${wsname}</h3>` });
+            xlsxPad.innerHTML = html;
+          })
+          .catch(()=>showNoPreview());
+        return;
+      }
+
+      // Fallback
+      showNoPreview();
+    }
+
+    function docxOptions(){
+      return {
+        className: "docx", // default
+        inWrapper: true,
+        ignoreWidth: false,
+        ignoreHeight: false,
+        breakPages: false,
+        useBase64URL: false,
+        useMathMLPolyfill: false
+      };
+    }
+
+    function showNoPreview(){
+      resetPreview();
+      noPreview.style.display = 'block';
+      modal.style.display = 'flex';
+    }
+
+    function closePreview(){
+      resetPreview();
+      modal.style.display = 'none';
+    }
+    window.closePreview = closePreview;
+    document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closePreview(); });
+
+    // Controls
+    searchBox.addEventListener('input', ()=>{ applyFolderFilterSort(); applyFileFilterSort(); });
+    sortSelect.addEventListener('change', ()=>{ loadPacketFolders(); if (currentFolder) loadFiles(currentFolder.id); });
+    downloadFolderBtn.addEventListener('click', ()=>{ if (currentFolder) window.location.href = `/download/folder/${currentFolder.id}`; });
+    refreshBtn.addEventListener('click', (e)=>{ e.preventDefault(); loadPacketFolders(); if (currentFolder) loadFiles(currentFolder.id); });
+
+    // Initial load
+    loadPacketFolders();
+  </script>
 
 </body>
 </html>
