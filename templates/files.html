@@ -25,93 +25,61 @@
       min-height: 100vh;
     }
     .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 18px;
-      background: var(--vj-bg);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 18px; background: var(--vj-bg);
       border-bottom: 1px solid var(--vj-border);
-      position: sticky;
-      top: 0;
-      z-index: 100;
+      position: sticky; top: 0; z-index: 100;
     }
     .brand img { height: 46px; }
-    .userbox { display: flex; align-items: center; gap: 10px; }
+    .userbox { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
     .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 10px;
-      border-radius: 8px;
-      border: 1px solid var(--vj-border);
-      background: #fff;
-      color: var(--vj-primary);
-      font-size: 14px;
-      cursor: pointer;
-      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 10px; border-radius: 8px; border: 1px solid var(--vj-border);
+      background: #fff; color: var(--vj-primary);
+      font-size: 14px; cursor: pointer; text-decoration: none;
       transition: 0.2s;
     }
     .btn:hover { background: #eef4ff; }
     .btn-primary { background: var(--vj-accent); color: #fff; border-color: var(--vj-accent); }
     .container {
-      max-width: 1200px;
-      margin: 24px auto;
-      background: var(--vj-bg);
-      border-radius: 14px;
+      max-width: 1200px; margin: 24px auto;
+      background: var(--vj-bg); border-radius: 14px;
       box-shadow: 0 10px 30px rgba(0, 0, 0, .06);
       padding: 20px;
     }
     .controls {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 16px;
+      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;
     }
     .controls input, .controls select {
-      padding: 10px 12px;
-      border-radius: 8px;
+      padding: 10px 12px; border-radius: 8px;
       border: 1px solid var(--vj-border);
-      flex: 1;
-      min-width: 180px;
+      flex: 1; min-width: 180px;
     }
     .browser { display: grid; grid-template-columns: 300px 1fr; gap: 16px; }
     .panel {
       background: var(--vj-card);
       border: 1px solid var(--vj-border);
-      border-radius: 10px;
-      padding: 12px;
+      border-radius: 10px; padding: 12px;
     }
     .panel h3 { font-size: 15px; color: var(--vj-primary); margin-bottom: 8px; }
     .list {
-      max-height: 55vh;
-      overflow: auto;
-      border-radius: 8px;
-      border: 1px solid var(--vj-border);
+      max-height: 55vh; overflow: auto;
+      border-radius: 8px; border: 1px solid var(--vj-border);
       background: #fff;
     }
     .list-item {
-      padding: 10px 12px;
-      border-bottom: 1px solid var(--vj-border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-      transition: background 0.2s;
+      padding: 10px 12px; border-bottom: 1px solid var(--vj-border);
+      display: flex; justify-content: space-between; align-items: center;
+      cursor: pointer; transition: background 0.2s;
     }
     .list-item:hover { background: #f0f6ff; }
-    .grid {
-      width: 100%;
-      border-collapse: collapse;
-    }
+    .grid { width: 100%; border-collapse: collapse; }
     .grid th, .grid td {
-      padding: 10px;
-      border-bottom: 1px solid var(--vj-border);
-      text-align: left;
-      font-size: 14px;
+      padding: 10px; border-bottom: 1px solid var(--vj-border);
+      text-align: left; font-size: 14px;
     }
     .grid th {
-      background: #f7f9fe;
-      font-weight: 600;
+      background: #f7f9fe; font-weight: 600;
       color: var(--vj-primary);
     }
     .actions { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -119,45 +87,29 @@
 
     /* Preview Modal */
     #previewModal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.75);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-      padding: 10px;
+      display: none; position: fixed; inset: 0;
+      background: rgba(0, 0, 0, 0.75); z-index: 1000;
+      align-items: center; justify-content: center; padding: 10px;
     }
     #previewBox {
-      background: #000;
-      border-radius: 10px;
-      width: min(95vw, 900px);
-      height: auto;
-      overflow: hidden;
-      position: relative;
+      background: #000; border-radius: 10px;
+      width: min(95vw, 900px); height: auto;
+      overflow: hidden; position: relative;
     }
     #previewBox video, #previewBox img, #previewBox iframe {
-      width: 100%;
-      height: auto;
-      max-height: 85vh;
-      display: none;
+      width: 100%; height: auto; max-height: 85vh; display: none;
     }
     #previewClose {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: rgba(255,255,255,0.9);
-      border: none;
-      border-radius: 50%;
-      width: 32px;
-      height: 32px;
-      cursor: pointer;
+      position: absolute; top: 8px; right: 8px;
+      background: rgba(255,255,255,0.9); border: none;
+      border-radius: 50%; width: 32px; height: 32px; cursor: pointer;
     }
 
     @media (max-width: 900px) {
       .browser { grid-template-columns: 1fr; }
       .list { max-height: 35vh; }
       .btn { font-size: 13px; padding: 6px 8px; }
+      .topbar { flex-wrap: wrap; gap: 8px; }
     }
   </style>
 </head>
@@ -165,7 +117,7 @@
 
   <div class="topbar">
     <div class="brand">
-      <img src="{{ url_for('static', filename='images/venus_black_logo.jpg') }}" alt="Logo">
+      <img src="{{ url_for('static', filename='images/venus_black_logo.jpg') }}" alt="Venus Jewel">
     </div>
     <div class="userbox">
       <span><i class="fas fa-user-circle"></i> {{ user }}</span>
@@ -217,10 +169,11 @@ const filesTitle=document.getElementById('filesTitle');
 const downloadFolderBtn=document.getElementById('downloadFolderBtn');
 const searchBox=document.getElementById('searchBox');
 const sortSelect=document.getElementById('sortSelect');
+const refreshBtn=document.getElementById('refreshBtn');
 
-let currentFolder=null;
-let allFolders=[];let currentFiles=[];
+let currentFolder=null, allFolders=[], currentFiles=[];
 
+// Load all folders
 function loadFolders(){
   packetList.innerHTML='<div class="list-item">Loading…</div>';
   fetch(`/api/packet-folders?sort=${sortSelect.value}`)
@@ -234,13 +187,14 @@ function loadFolders(){
 
 function renderFolders(){
   const q=searchBox.value.toLowerCase();
-  const fltrs=allFolders.filter(f=>!q||(f.name||'').toLowerCase().includes(q));
+  const filtered=allFolders.filter(f=>!q||(f.name||'').toLowerCase().includes(q));
   packetList.innerHTML='';
-  if(!fltrs.length){packetList.innerHTML='<div class="list-item">No folders found</div>';return;}
-  fltrs.forEach(f=>{
+  if(!filtered.length){packetList.innerHTML='<div class="list-item">No folders found</div>';return;}
+  filtered.forEach(f=>{
     const row=document.createElement('div');
     row.className='list-item';
-    row.innerHTML=`<span><i class="fas fa-folder"></i> ${f.name}</span><span class="muted">${new Date(f.modifiedTime).toLocaleString()}</span>`;
+    row.innerHTML=`<span><i class="fas fa-folder"></i> ${f.name}</span>
+      <span class="muted">${new Date(f.modifiedTime).toLocaleString()}</span>`;
     row.onclick=()=>selectFolder(f.id,f.name);
     packetList.appendChild(row);
   });
@@ -267,10 +221,10 @@ function loadFiles(folderId){
 
 function renderFiles(){
   const q=searchBox.value.toLowerCase();
-  const fltrs=currentFiles.filter(f=>!q||(f.name||'').toLowerCase().includes(q));
+  const filtered=currentFiles.filter(f=>!q||(f.name||'').toLowerCase().includes(q));
   filesBody.innerHTML='';
-  if(!fltrs.length){filesBody.innerHTML='<tr><td colspan="4">No files found</td></tr>';return;}
-  fltrs.forEach(f=>{
+  if(!filtered.length){filesBody.innerHTML='<tr><td colspan="4">No files found</td></tr>';return;}
+  filtered.forEach(f=>{
     const tr=document.createElement('tr');
     const mime=f.mimeType||'';
     const ext=(f.name.split('.').pop()||'').toLowerCase();
@@ -282,13 +236,13 @@ function renderFiles(){
       <td class="actions">
         <button class="btn" onclick="openPreview('${f.id}','${mime}','${ext}')"><i class="fas fa-eye"></i> Preview</button>
         <a class="btn" href="/download/file/${f.id}"><i class="fas fa-download"></i> Download</a>
-        <button class="btn" onclick="shareFile('${f.id}')"><i class="fas fa-share-alt"></i> Share</button>
+        <button class="btn" onclick="shareFile('${f.id}','${f.name}')"><i class="fas fa-share-alt"></i> Share</button>
       </td>`;
     filesBody.appendChild(tr);
   });
 }
 
-// Preview logic
+// ---------------- Preview ----------------
 const modal=document.getElementById('previewModal');
 const video=document.getElementById('previewVideo');
 const img=document.getElementById('previewImage');
@@ -306,7 +260,6 @@ function openPreview(id,mime,ext){
   if(mime==='application/pdf'||ext==='pdf'){
     frame.src=url;frame.style.display='block';modal.style.display='flex';return;
   }
-  // fallback
   alert('Preview not supported for this file. Please download.');
 }
 
@@ -314,21 +267,35 @@ function closePreview(){
   modal.style.display='none';video.pause();video.src='';
 }
 
-// Share file
-function shareFile(id){
-  fetch(`/api/share-link?id=${id}`).then(r=>r.json()).then(d=>{
-    if(!d.link)return alert('Failed to get share link');
-    if(navigator.share){
-      navigator.share({title:'Venus File',text:'File Share',url:d.link}).catch(()=>{});
-    }else{
-      navigator.clipboard.writeText(d.link);
-      alert('Link copied to clipboard:\n'+d.link);
+// ---------------- Share ----------------
+async function shareFile(id, filename){
+  const res = await fetch(`/api/share-link?id=${id}`);
+  const data = await res.json();
+  const link = data.link;
+  const fileRes = await fetch(`/download/file/${id}`);
+  const blob = await fileRes.blob();
+  const file = new File([blob], filename, {type: blob.type});
+
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    try {
+      await navigator.share({
+        title: filename,
+        text: "Sharing file from Venus Jewel Portal",
+        files: [file]
+      });
+    } catch(err) {
+      console.log("Share cancelled or failed:", err);
     }
-  });
+  } else {
+    await navigator.clipboard.writeText(link);
+    alert("Link copied to clipboard:\n" + link);
+  }
 }
 
+// ---------------- UI Binding ----------------
 searchBox.oninput=()=>{renderFolders();renderFiles();};
 sortSelect.onchange=()=>{loadFolders();if(currentFolder)loadFiles(currentFolder.id);};
+refreshBtn.onclick=()=>loadFolders();
 loadFolders();
 </script>
 </body>
