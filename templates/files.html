@@ -2,17 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Files • VENUS JEWEL FILE PORTAL</title>
+  <title>Files</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='images/apple-touch-icon.png') }}">
-  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/favicon-32x32.png') }}">
+  <link rel="icon" href="{{ url_for('static', filename='images/favicon-32x32.png') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --vj-primary: #003366;
       --vj-accent: #0B5FFF;
-      --vj-bg: rgba(255, 255, 255, .95);
+      --vj-bg: rgba(255, 255, 255, .96);
       --vj-card: #ffffff;
       --vj-border: #e2e8f0;
       --vj-muted: #6b7280;
@@ -20,144 +19,72 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Poppins', sans-serif;
-      background: linear-gradient(to bottom right, #f6f8fc, #ffffff);
+      background: linear-gradient(to bottom right, #f3f6fb, #ffffff);
       color: var(--vj-primary);
       min-height: 100vh;
     }
     .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 18px;
-      background: var(--vj-bg);
-      border-bottom: 1px solid var(--vj-border);
-      position: sticky;
-      top: 0;
-      z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 18px; background: var(--vj-bg); border-bottom: 1px solid var(--vj-border);
+      position: sticky; top: 0; z-index: 50;
     }
     .brand img { height: 46px; }
     .userbox { display: flex; align-items: center; gap: 10px; }
     .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 10px;
-      border-radius: 8px;
-      border: 1px solid var(--vj-border);
-      background: #fff;
-      color: var(--vj-primary);
-      font-size: 14px;
-      cursor: pointer;
-      text-decoration: none;
-      transition: 0.2s;
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 10px; border-radius: 8px; border: 1px solid var(--vj-border);
+      background: #fff; color: var(--vj-primary); cursor: pointer; font-size: 14px;
+      text-decoration: none; transition: background .2s;
     }
     .btn:hover { background: #eef4ff; }
     .btn-primary { background: var(--vj-accent); color: #fff; border-color: var(--vj-accent); }
-    .container {
-      max-width: 1200px;
-      margin: 24px auto;
-      background: var(--vj-bg);
-      border-radius: 14px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, .06);
-      padding: 20px;
-    }
-    .controls {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 16px;
-    }
+    .container { max-width: 1200px; margin: 24px auto; background: var(--vj-bg);
+      border-radius: 14px; box-shadow: 0 10px 30px rgba(0, 0, 0, .08); padding: 18px; }
+    .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
     .controls input, .controls select {
-      padding: 10px 12px;
-      border-radius: 8px;
-      border: 1px solid var(--vj-border);
-      flex: 1;
-      min-width: 180px;
+      padding: 10px 12px; border-radius: 8px; border: 1px solid var(--vj-border);
+      flex: 1; min-width: 180px;
     }
     .browser { display: grid; grid-template-columns: 300px 1fr; gap: 16px; }
-    .panel {
-      background: var(--vj-card);
-      border: 1px solid var(--vj-border);
-      border-radius: 10px;
-      padding: 12px;
-    }
+    .panel { background: var(--vj-card); border: 1px solid var(--vj-border);
+      border-radius: 10px; padding: 12px; }
     .panel h3 { font-size: 15px; color: var(--vj-primary); margin-bottom: 8px; }
-    .list {
-      max-height: 55vh;
-      overflow: auto;
-      border-radius: 8px;
-      border: 1px solid var(--vj-border);
-      background: #fff;
-    }
+    .list { max-height: 55vh; overflow: auto; border-radius: 8px; border: 1px solid var(--vj-border); background: #fff; }
     .list-item {
-      padding: 10px 12px;
-      border-bottom: 1px solid var(--vj-border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-      transition: background 0.2s;
+      padding: 10px 12px; border-bottom: 1px solid var(--vj-border);
+      display: flex; justify-content: space-between; align-items: center;
+      cursor: pointer; transition: background 0.2s;
     }
     .list-item:hover { background: #f0f6ff; }
-    .grid {
-      width: 100%;
-      border-collapse: collapse;
-    }
+    .grid { width: 100%; border-collapse: collapse; }
     .grid th, .grid td {
-      padding: 10px;
-      border-bottom: 1px solid var(--vj-border);
-      text-align: left;
-      font-size: 14px;
+      padding: 10px; border-bottom: 1px solid var(--vj-border);
+      text-align: left; font-size: 14px;
     }
-    .grid th {
-      background: #f7f9fe;
-      font-weight: 600;
-      color: var(--vj-primary);
-    }
+    .grid th { background: #f7f9fe; font-weight: 600; color: var(--vj-primary); }
     .actions { display: flex; gap: 6px; flex-wrap: wrap; }
     .muted { color: var(--vj-muted); font-size: 13px; }
 
     /* Preview Modal */
     #previewModal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.75);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-      padding: 10px;
+      display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75);
+      z-index: 1000; align-items: center; justify-content: center; padding: 10px;
     }
     #previewBox {
-      background: #000;
-      border-radius: 10px;
-      width: min(95vw, 900px);
-      height: auto;
-      overflow: hidden;
-      position: relative;
+      background: #000; border-radius: 10px; width: min(95vw, 900px);
+      overflow: hidden; position: relative;
     }
     #previewBox video, #previewBox img, #previewBox iframe {
-      width: 100%;
-      height: auto;
-      max-height: 85vh;
-      display: none;
+      width: 100%; height: auto; max-height: 85vh; display: none;
     }
     #previewClose {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: rgba(255,255,255,0.9);
-      border: none;
-      border-radius: 50%;
-      width: 32px;
-      height: 32px;
-      cursor: pointer;
+      position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9);
+      border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer;
     }
 
     @media (max-width: 900px) {
       .browser { grid-template-columns: 1fr; }
       .list { max-height: 35vh; }
-      .btn { font-size: 13px; padding: 6px 8px; }
     }
   </style>
 </head>
@@ -176,7 +103,7 @@
 
   <div class="container">
     <div class="controls">
-      <input id="searchBox" type="text" placeholder="Search Packet No or File..." />
+      <input id="searchBox" type="text" placeholder="Search Packet or File..." />
       <select id="sortSelect">
         <option value="newest">Newest First</option>
         <option value="name">Name A–Z</option>
@@ -205,7 +132,7 @@
     <div id="previewBox">
       <button id="previewClose" onclick="closePreview()">✕</button>
       <video id="previewVideo" controls></video>
-      <img id="previewImage" alt="Preview Image">
+      <img id="previewImage" alt="Preview">
       <iframe id="previewFrame"></iframe>
     </div>
   </div>
@@ -217,21 +144,15 @@ const filesTitle=document.getElementById('filesTitle');
 const downloadFolderBtn=document.getElementById('downloadFolderBtn');
 const searchBox=document.getElementById('searchBox');
 const sortSelect=document.getElementById('sortSelect');
-
-let currentFolder=null;
-let allFolders=[];let currentFiles=[];
+let currentFolder=null; let allFolders=[]; let currentFiles=[];
 
 function loadFolders(){
   packetList.innerHTML='<div class="list-item">Loading…</div>';
   fetch(`/api/packet-folders?sort=${sortSelect.value}`)
-  .then(r=>r.json())
-  .then(({folders})=>{
-    allFolders=folders||[];
-    renderFolders();
-  })
-  .catch(()=>packetList.innerHTML='<div class="list-item">Failed to load folders</div>');
+  .then(r=>r.json()).then(({folders})=>{
+    allFolders=folders||[];renderFolders();
+  }).catch(()=>packetList.innerHTML='<div class="list-item">Failed to load folders</div>');
 }
-
 function renderFolders(){
   const q=searchBox.value.toLowerCase();
   const fltrs=allFolders.filter(f=>!q||(f.name||'').toLowerCase().includes(q));
@@ -245,7 +166,6 @@ function renderFolders(){
     packetList.appendChild(row);
   });
 }
-
 function selectFolder(id,name){
   currentFolder={id,name};
   filesTitle.textContent=`Files — ${name}`;
@@ -253,28 +173,22 @@ function selectFolder(id,name){
   downloadFolderBtn.href=`/download/folder/${id}`;
   loadFiles(id);
 }
-
 function loadFiles(folderId){
   filesBody.innerHTML='<tr><td colspan="4">Loading…</td></tr>';
   fetch(`/api/folder/${folderId}/files?sort=${sortSelect.value}`)
-  .then(r=>r.json())
-  .then(({files})=>{
-    currentFiles=files||[];
-    renderFiles();
-  })
-  .catch(()=>filesBody.innerHTML='<tr><td colspan="4">Failed to load files</td></tr>');
+  .then(r=>r.json()).then(({files})=>{
+    currentFiles=files||[];renderFiles();
+  }).catch(()=>filesBody.innerHTML='<tr><td colspan="4">Failed to load files</td></tr>');
 }
-
 function renderFiles(){
   const q=searchBox.value.toLowerCase();
   const fltrs=currentFiles.filter(f=>!q||(f.name||'').toLowerCase().includes(q));
   filesBody.innerHTML='';
   if(!fltrs.length){filesBody.innerHTML='<tr><td colspan="4">No files found</td></tr>';return;}
   fltrs.forEach(f=>{
-    const tr=document.createElement('tr');
-    const mime=f.mimeType||'';
-    const ext=(f.name.split('.').pop()||'').toLowerCase();
+    const mime=f.mimeType||'';const ext=(f.name.split('.').pop()||'').toLowerCase();
     const date=f.modifiedTime?new Date(f.modifiedTime).toLocaleString():'';
+    const tr=document.createElement('tr');
     tr.innerHTML=`
       <td>${f.name}</td>
       <td>${mime.replace('application/','')}</td>
@@ -288,12 +202,11 @@ function renderFiles(){
   });
 }
 
-// Preview logic
+// --- Preview ---
 const modal=document.getElementById('previewModal');
 const video=document.getElementById('previewVideo');
 const img=document.getElementById('previewImage');
 const frame=document.getElementById('previewFrame');
-
 function openPreview(id,mime,ext){
   video.style.display=img.style.display=frame.style.display='none';
   const url=`/preview/file/${id}`;
@@ -306,27 +219,50 @@ function openPreview(id,mime,ext){
   if(mime==='application/pdf'||ext==='pdf'){
     frame.src=url;frame.style.display='block';modal.style.display='flex';return;
   }
-  // fallback
-  alert('Preview not supported for this file. Please download.');
+  alert('Preview not supported. Please download.');
 }
+function closePreview(){modal.style.display='none';video.pause();video.src='';}
 
-function closePreview(){
-  modal.style.display='none';video.pause();video.src='';
-}
+// --- Dual Share (file + link) ---
+async function shareFile(id){
+  try {
+    // fetch secure link
+    const linkRes = await fetch(`/api/share-link?id=${id}`);
+    const linkData = await linkRes.json();
+    const shareLink = linkData.link || '';
 
-// Share file
-function shareFile(id){
-  fetch(`/api/share-link?id=${id}`).then(r=>r.json()).then(d=>{
-    if(!d.link)return alert('Failed to get share link');
-    if(navigator.share){
-      navigator.share({title:'Venus File',text:'File Share',url:d.link}).catch(()=>{});
-    }else{
-      navigator.clipboard.writeText(d.link);
-      alert('Link copied to clipboard:\n'+d.link);
+    // download file blob
+    const res = await fetch(`/download/file/${id}`);
+    const blob = await res.blob();
+    let filename = res.headers.get('Content-Disposition');
+    if(filename && filename.includes('filename=')){
+      filename = filename.split('filename=')[1].replace(/["']/g, '');
+    } else { filename = 'venus_file'; }
+
+    const file = new File([blob], filename, {type: blob.type || 'application/octet-stream'});
+
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({
+        files:[file],
+        title:'Venus File',
+        text:`Sharing ${filename}`,
+        url: shareLink
+      });
+    } else {
+      // Fallback
+      navigator.clipboard.writeText(shareLink);
+      alert(`File download started. Share link copied:\n${shareLink}`);
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(blob);a.download=filename;
+      document.body.appendChild(a);a.click();a.remove();
     }
-  });
+  } catch (err){
+    console.error(err);
+    alert('Failed to share the file.');
+  }
 }
 
+// Controls
 searchBox.oninput=()=>{renderFolders();renderFiles();};
 sortSelect.onchange=()=>{loadFolders();if(currentFolder)loadFiles(currentFolder.id);};
 loadFolders();
