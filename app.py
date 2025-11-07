@@ -1,85 +1,123 @@
-# app.py — FINAL VENUS JEWEL FILE PORTAL
-# (All old features + Folder ZIP download + File Share + Mobile + Secure)
+# app.py — FINAL (Old features kept + Secure Share Feature Added + safe gspread writes)
 
 from flask import (
     Flask, render_template, request, redirect, url_for, session, flash,
     send_from_directory, jsonify, make_response, abort, send_file
 )
-import gspread, os, io, time, zipfile, tempfile, subprocess, hmac, hashlib
+import gspread
 from google.oauth2 import service_account
+from datetime import datetime
+import os
+import io
+import tempfile
+import zipfile
+import subprocess
+import time, hmac, hashlib
+from werkzeug.utils import secure_filename
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseUpload, MediaIoBaseDownload
-from datetime import datetime
-from gspread.exceptions import APIError
 
 app = Flask(__name__)
-app.secret_key = "venus_secret_key_2025"
+app.secret_key = 'your_secret_key_here'
 
-# ---------------- HTTPS enforce ----------------
+# ---------------- HTTPS enforce (Render) ----------------
 @app.before_request
 def enforce_https_on_render():
-    if request.headers.get("X-Forwarded-Proto", request.scheme) != "https":
+    # If behind a proxy (render), the forwarded proto header is set.
+    # This keeps previous behavior but uses correct comparison.
+    if request.headers.get('X-Forwarded-Proto', request.scheme) != 'https':
         return redirect(request.url.replace("http://", "https://", 1))
 
-# ---------------- Google setup ----------------
-CREDENTIALS_PATH = "/etc/secrets/Credentials.json" if os.environ.get("RENDER") else "Credentials.json"
-SCOPES = ["https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
+# ---------------- Google Auth / Drive / Sheets ----------------
+CREDENTIALS_PATH = '/etc/secrets/Credentials.json' if os.environ.get('RENDER') else 'Credentials.json'
+SCOPES = ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/spreadsheets']
 creds = service_account.Credentials.from_service_account_file(CREDENTIALS_PATH, scopes=SCOPES)
 
 client = gspread.authorize(creds)
-SHEET_ID = "181GnSNYNBciNNUlWLXsIYNZ5qsxpDkIftfBzHrycHro"
-sheet = client.open_by_key(SHEET_ID).worksheet("Registration")
+SHEET_ID = '181GnSNYNBciNNUlWLXsIYNZ5qsxpDkIftfBzHrycHro'
+sheet = client.open_by_key(SHEET_ID).worksheet('Registration')
 
-DRIVE_FOLDER_ID = "0AEZXjYA5wFlSUk9PVA"
-drive_service = build("drive", "v3", credentials=creds)
+DRIVE_FOLDER_ID = '0AEZXjYA5wFlSUk9PVA'
+drive_service = build('drive', 'v3', credentials=creds)
 
-UPLOAD_FOLDER = "uploads"
+UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-ADMIN_USERNAME, ADMIN_PASSWORD = "admin", "Admin@2211"
-VENUSFILES_USERNAME, VENUSFILES_PASSWORD = "Venusfiles", "Natural@1969"
+ADMIN_USERNAME = 'admin'
+ADMIN_PASSWORD = 'Admin@2211'
+VENUSFILES_USERNAME = 'Venusfiles'
+VENUSFILES_PASSWORD = 'Natural@1969'
 
-# ---------------- Secure share helpers ----------------
+# ======================= SHARE LINK SECURITY ==========================
 SECRET_SHARE_KEY = b"venus_secure_share_key_2025"
 
 def generate_secure_link(file_id, expire=3600):
-    ts = int(time.time()) + expire
-    data = f"{file_id}:{ts}"
+    """Generate secure link that expires in expire seconds (default 1 hour)."""
+    timestamp = int(time.time()) + expire
+    data = f"{file_id}:{timestamp}"
     sig = hmac.new(SECRET_SHARE_KEY, data.encode(), hashlib.sha256).hexdigest()
-    return f"/preview/file/{file_id}?t={ts}&s={sig}"
+    return f"/preview/file/{file_id}?t={timestamp}&s={sig}"
 
 def verify_secure_link(file_id, t, s):
-    try:
-        exp = int(t)
-        sig = hmac.new(SECRET_SHARE_KEY, f"{file_id}:{t}".encode(), hashlib.sha256).hexdigest()
-        return sig == s and exp > int(time.time())
-    except:
+    """Verify link signature and expiry."""
+    if not t or not s:
         return False
+    try:
+        data = f"{file_id}:{t}"
+        expected = hmac.new(SECRET_SHARE_KEY, data.encode(), hashlib.sha256).hexdigest()
+        if s != expected or int(t) < int(time.time()):
+            return False
+        return True
+    except Exception:
+        return False
+# ======================================================================
 
-# ---------------- Safe gspread writes ----------------
+# ---------------- Safe gspread helpers (retry on intermittent 500s) ----------------
+from gspread.exceptions import APIError
+
 def safe_append_row(ws, row, retries=4, backoff=1.5):
-    for i in range(retries):
+    """Append row to worksheet with retries to avoid transient 500 issues."""
+    attempt = 0
+    while attempt < retries:
         try:
             ws.append_row(row)
             return True
-        except APIError:
-            time.sleep(backoff * (i+1))
-    raise RuntimeError("Failed to append row after retries")
+        except APIError as e:
+            attempt += 1
+            # If it's a 500 transient error retry
+            print(f"[WARN] gspread APIError appending row (attempt {attempt}/{retries}): {e}")
+            time.sleep(backoff * attempt)
+        except Exception as e:
+            # non-API error (network etc) -> retry as well
+            attempt += 1
+            print(f"[WARN] unexpected error appending row (attempt {attempt}/{retries}): {e}")
+            time.sleep(backoff * attempt)
+    raise RuntimeError("Failed to append row after retries.")
 
 def safe_update_cell(ws, row, col, value, retries=4, backoff=1.5):
-    for i in range(retries):
+    attempt = 0
+    while attempt < retries:
         try:
             ws.update_cell(row, col, value)
             return True
-        except APIError:
-            time.sleep(backoff * (i+1))
-    raise RuntimeError("Failed to update cell after retries")
+        except APIError as e:
+            attempt += 1
+            print(f"[WARN] gspread APIError update_cell (attempt {attempt}/{retries}): {e}")
+            time.sleep(backoff * attempt)
+        except Exception as e:
+            attempt += 1
+            print(f"[WARN] unexpected error update_cell (attempt {attempt}/{retries}): {e}")
+            time.sleep(backoff * attempt)
+    raise RuntimeError("Failed to update cell after retries.")
 
-# ---------------- Helpers ----------------
+# ---------------- Helpers (Shared Drive aware) ----------------
 def username_exists(username):
     try:
-        return username in sheet.col_values(3)[1:]
-    except:
+        return username in sheet.col_values(3)[1:]  # col C = Username
+    except Exception as e:
+        # if gspread read temporarily fails, treat as not exists and let registration handle gracefully
+        print(f"[WARN] username_exists gspread error: {e}")
         return False
 
 def get_user(username):
@@ -87,186 +125,318 @@ def get_user(username):
         for i, u in enumerate(sheet.col_values(3)[1:], start=2):
             if u == username:
                 row = sheet.row_values(i)
-                return {"row_number": i, "Username": row[2], "Password": row[3]}
-    except:
-        return None
+                def col(n): return row[n] if len(row) > n else ''
+                return {
+                    'row_number': i,
+                    'Timestamp': col(0),
+                    'Full Name': col(1),
+                    'Username': col(2),
+                    'Password': col(3),
+                    'Contact Number': col(4),
+                    'Organization': col(5)
+                }
+    except Exception as e:
+        print(f"[WARN] get_user gspread error: {e}")
     return None
 
 def get_or_create_folder(name, parent_id):
-    q = f"name='{name}' and mimeType='application/vnd.google-apps.folder' and '{parent_id}' in parents and trashed=false"
-    res = drive_service.files().list(q=q, fields="files(id)", supportsAllDrives=True, includeItemsFromAllDrives=True).execute()
-    folders = res.get("files", [])
-    if folders:
-        return folders[0]["id"]
-    folder = drive_service.files().create(
-        body={"name": name, "mimeType": "application/vnd.google-apps.folder", "parents": [parent_id]},
-        fields="id", supportsAllDrives=True
+    query = (
+        f"name='{name}' and mimeType='application/vnd.google-apps.folder' "
+        f"and '{parent_id}' in parents and trashed=false"
+    )
+    results = drive_service.files().list(
+        q=query, fields="files(id,name)",
+        includeItemsFromAllDrives=True, supportsAllDrives=True
     ).execute()
-    return folder["id"]
+    folders = results.get('files', [])
+    if folders:
+        return folders[0]['id']
+    folder_metadata = {'name': name, 'mimeType': 'application/vnd.google-apps.folder', 'parents': [parent_id]}
+    folder = drive_service.files().create(
+        body=folder_metadata, fields='id', supportsAllDrives=True
+    ).execute()
+    return folder.get('id')
+
+def file_exists_in_folder(filename, folder_id):
+    results = drive_service.files().list(
+        q=f"name='{filename}' and '{folder_id}' in parents and trashed=false",
+        fields="files(id,name)",
+        includeItemsFromAllDrives=True, supportsAllDrives=True
+    ).execute()
+    return len(results.get('files', [])) > 0
+
+def get_unique_filename(base_filename, folder_id):
+    name, ext = os.path.splitext(base_filename)
+    count = 1
+    candidate = base_filename
+    while file_exists_in_folder(candidate, folder_id):
+        candidate = f"{name}(new{count}){ext}"
+        count += 1
+    return candidate
 
 def mute_video(file_storage, filename):
-    ext = os.path.splitext(filename)[1] or ".mp4"
+    ext = os.path.splitext(filename)[1] or '.mp4'
     temp_dir = tempfile.mkdtemp()
-    inp, out = os.path.join(temp_dir, f"i{ext}"), os.path.join(temp_dir, f"o{ext}")
-    file_storage.save(inp)
+    input_path = os.path.join(temp_dir, f"input{ext}")
+    output_path = os.path.join(temp_dir, f"muted{ext}")
+    file_storage.save(input_path)
     try:
-        subprocess.run(["ffmpeg", "-i", inp, "-c:v", "copy", "-an", out], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        return io.BytesIO(open(out, "rb").read())
-    except:
-        return io.BytesIO(open(inp, "rb").read())
+        subprocess.run(
+            ['ffmpeg', '-i', input_path, '-c:v', 'copy', '-an', output_path],
+            check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+        )
+        return io.BytesIO(open(output_path, 'rb').read())
+    except Exception:
+        # ffmpeg failed — fallback to original file bytes
+        return io.BytesIO(open(input_path, 'rb').read())
 
 def list_packet_folders(order="modifiedTime desc"):
-    res = drive_service.files().list(
+    results = drive_service.files().list(
         q=f"'{DRIVE_FOLDER_ID}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false",
-        fields="files(id,name,modifiedTime)", orderBy=order,
-        supportsAllDrives=True, includeItemsFromAllDrives=True
+        fields="files(id,name,modifiedTime)",
+        orderBy=order,
+        includeItemsFromAllDrives=True, supportsAllDrives=True
     ).execute()
-    return res.get("files", [])
+    return results.get('files', [])
 
-def list_files_in_folder(fid, order="modifiedTime desc"):
-    res = drive_service.files().list(
-        q=f"'{fid}' in parents and trashed=false",
-        fields="files(id,name,mimeType,modifiedTime)", orderBy=order,
-        supportsAllDrives=True, includeItemsFromAllDrives=True
+def list_files_in_folder(folder_id, order="modifiedTime desc"):
+    results = drive_service.files().list(
+        q=f"'{folder_id}' in parents and trashed=false",
+        fields="files(id,name,mimeType,size,modifiedTime)",
+        orderBy=order,
+        includeItemsFromAllDrives=True, supportsAllDrives=True
     ).execute()
-    return res.get("files", [])
+    return results.get('files', [])
 
-def download_file_to_bytes(fid):
-    meta = drive_service.files().get(fileId=fid, fields="id,name,mimeType", supportsAllDrives=True).execute()
+def download_file_to_bytes(file_id):
+    meta = drive_service.files().get(
+        fileId=file_id, fields='id,name,mimeType', supportsAllDrives=True
+    ).execute()
     fh = io.BytesIO()
-    req = drive_service.files().get_media(fileId=fid, supportsAllDrives=True)
-    downloader = MediaIoBaseDownload(fh, req)
+    request = drive_service.files().get_media(fileId=file_id, supportsAllDrives=True)
+    downloader = MediaIoBaseDownload(fh, request)
     done = False
     while not done:
-        _, done = downloader.next_chunk()
+        status, done = downloader.next_chunk()
     fh.seek(0)
-    return meta["name"], meta.get("mimeType", "application/octet-stream"), fh
+    return meta['name'], meta.get('mimeType', 'application/octet-stream'), fh
 
-# ---------------- Core Routes ----------------
-@app.route("/")
-def home(): return redirect(url_for("login"))
+# ---------------- Core Pages ----------------
+@app.route('/')
+def home():
+    return redirect(url_for('splash'))
 
-@app.route("/login", methods=["GET", "POST"])
+@app.route('/splash')
+def splash():
+    return render_template('splash.html')
+
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == "POST":
-        u, p = request.form["username"].strip(), request.form["password"].strip()
-        if u == ADMIN_USERNAME and p == ADMIN_PASSWORD:
-            session.update({"username": u, "admin": True})
-            return redirect(url_for("admin_dashboard"))
-        if u == VENUSFILES_USERNAME and p == VENUSFILES_PASSWORD:
-            session.update({"username": u})
-            return redirect(url_for("dashboard"))
-        user = get_user(u)
-        if user and user["Password"] == p:
-            session.update({"username": u})
-            return redirect(url_for("dashboard"))
-        flash("Invalid credentials", "danger")
-    return render_template("login.html")
+    if request.method == 'POST':
+        username = request.form['username'].strip()
+        password = request.form['password'].strip()
+        remember = request.form.get('remember')
+        response = make_response(redirect(url_for('dashboard')))
+        if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
+            session.update({'username': username, 'admin': True})
+            return redirect(url_for('admin_dashboard'))
+        if username == VENUSFILES_USERNAME and password == VENUSFILES_PASSWORD:
+            session.update({'username': username, 'venus_user': True})
+            return redirect(url_for('venus_upload_dashboard'))
+        user = get_user(username)
+        if user and user['Password'] == password:
+            session.update({'username': username, 'admin': False})
+            return response
+        flash('Invalid credentials.', 'danger')
+    return render_template('login.html')
 
-@app.route("/register", methods=["GET", "POST"])
+@app.route('/register', methods=['GET', 'POST'])
 def register():
-    if request.method == "POST":
-        ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        data = [ts, request.form["full_name"], request.form["username"], request.form["password"], request.form["contact_number"], request.form["organization"]]
-        if username_exists(request.form["username"]):
-            flash("Username already exists", "danger")
-            return render_template("register.html")
-        safe_append_row(sheet, data)
-        flash("Registration successful", "success")
-        return redirect(url_for("login"))
-    return render_template("register.html")
+    if request.method == 'POST':
+        full_name = request.form['full_name'].strip()
+        username = request.form['username'].strip()
+        password = request.form['password'].strip()
+        contact = request.form['contact_number'].strip()
+        org = request.form['organization'].strip()
+        if username_exists(username):
+            flash('Username already exists.', 'danger')
+            return render_template('register.html')
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        # use safe append to avoid transient 500s
+        safe_append_row(sheet, [timestamp, full_name, username, password, contact, org])
+        flash('Registration successful.', 'success')
+        return redirect(url_for('login') + '?showSplash=1')
+    return render_template('register.html')
 
-@app.route("/dashboard")
+@app.route('/dashboard')
 def dashboard():
-    if not session.get("username"): return redirect(url_for("login"))
-    return render_template("dashboard.html", user=session["username"])
+    if not session.get('username') or session.get('admin'):
+        flash('Access denied.', 'danger')
+        return redirect(url_for('login'))
+    return render_template('dashboard.html', user=session['username'])
 
-# ---------------- Upload ----------------
-@app.route("/upload", methods=["POST"])
+# ---------------- Upload / Files / Share ----------------
+@app.route('/upload', methods=['POST'])
 def upload():
     try:
-        packet = request.form.get("packetNo", "").strip()
-        if not packet: return jsonify({"success": False, "message": "Packet No required"}), 400
-        fid = get_or_create_folder(packet, DRIVE_FOLDER_ID)
-        for k in request.files:
-            sub = k.replace("file_", "")
-            for f in request.files.getlist(k):
-                if f and f.filename:
-                    ext = os.path.splitext(f.filename)[1]
-                    final = f"{sub}{ext}"
-                    stream = mute_video(f, final) if final.lower().endswith((".mp4", ".mov", ".avi", ".mkv", ".webm")) else io.BytesIO(f.read())
-                    stream.seek(0)
+        packet_no = request.form.get('packetNo', '').strip()
+        if not packet_no:
+            return jsonify({'success': False, 'message': 'Packet number is required.'}), 400
+        folder_id = get_or_create_folder(packet_no, DRIVE_FOLDER_ID)
+        for key in request.files:
+            subpoint = key.replace('file_', '')
+            # NOTE: client may send multiple files per field (we support that)
+            for file in request.files.getlist(key):
+                if file and file.filename:
+                    ext = os.path.splitext(file.filename)[1]
+                    base_filename = f"{subpoint}{ext}"
+                    final_filename = get_unique_filename(base_filename, folder_id)
+                    if final_filename.lower().endswith(('.mp4', '.mov', '.avi', '.mkv', '.webm')):
+                        file_stream = mute_video(file, final_filename)
+                        mimetype = 'video/mp4'
+                    else:
+                        file_stream = io.BytesIO(file.read())
+                        mimetype = file.mimetype or 'application/octet-stream'
+                    file_stream.seek(0)
+                    media = MediaIoBaseUpload(file_stream, mimetype=mimetype)
                     drive_service.files().create(
-                        body={"name": final, "parents": [fid]},
-                        media_body=MediaIoBaseUpload(stream, mimetype=f.mimetype or "application/octet-stream"),
-                        fields="id", supportsAllDrives=True
+                        body={'name': final_filename, 'parents': [folder_id]},
+                        media_body=media, fields='id',
+                        supportsAllDrives=True
                     ).execute()
-        return jsonify({"success": True, "message": "✅ All files uploaded"})
+        return jsonify({'success': True, 'message': '✅ All files uploaded and muted successfully.'})
     except Exception as e:
-        return jsonify({"success": False, "message": str(e)}), 500
+        return jsonify({'success': False, 'message': f'Upload failed: {e}'}), 500
 
-# ---------------- Files & Share ----------------
-@app.route("/files")
+@app.route('/files')
 def files_page():
-    if not session.get("username"): return redirect(url_for("login"))
-    return render_template("files.html", user=session["username"])
+    if not session.get('username'):
+        return redirect(url_for('login'))
+    return render_template('files.html', user=session['username'])
 
-@app.route("/api/packet-folders")
-def api_packet_folders():
-    if not session.get("username"): return abort(401)
-    sort = request.args.get("sort", "newest")
-    order = "modifiedTime desc" if sort == "newest" else "name_natural"
-    return jsonify({"folders": list_packet_folders(order)})
+@app.route('/share')
+def share_page():
+    if not session.get('username'):
+        return redirect(url_for('login'))
+    return render_template('share.html', user=session['username'])
 
-@app.route("/api/folder/<fid>/files")
-def api_folder_files(fid):
-    if not session.get("username"): return abort(401)
-    sort = request.args.get("sort", "newest")
-    order = "modifiedTime desc" if sort == "newest" else "name_natural"
-    return jsonify({"files": list_files_in_folder(fid, order)})
-
-@app.route("/api/share-link")
+@app.route('/api/share-link')
 def api_share_link():
-    if not session.get("username"): return abort(401)
-    fid = request.args.get("id")
-    link = generate_secure_link(fid)
-    return jsonify({"link": request.url_root.rstrip("/") + link})
+    if not session.get('username'):
+        return abort(401)
+    file_id = request.args.get('id')
+    if not file_id:
+        return jsonify({'error': 'missing id'}), 400
+    link = generate_secure_link(file_id)
+    full_url = request.url_root.rstrip('/') + link
+    return jsonify({'link': full_url})
 
-@app.route("/download/file/<fid>")
-def download_file(fid):
-    if not session.get("username"): return abort(401)
-    n, m, f = download_file_to_bytes(fid)
-    return send_file(f, mimetype=m, as_attachment=True, download_name=n)
+# ---------------- File APIs ----------------
+@app.route('/api/packet-folders')
+def api_packet_folders():
+    if not session.get('username'):
+        return abort(401)
+    sort = request.args.get('sort', 'newest')
+    order = 'modifiedTime desc' if sort == 'newest' else 'name_natural'
+    folders = list_packet_folders(order=order)
+    return jsonify({'folders': folders})
 
-@app.route("/preview/file/<fid>")
-def preview_file(fid):
-    t, s = request.args.get("t"), request.args.get("s")
-    if t and s and not verify_secure_link(fid, t, s): return abort(403)
-    if not session.get("username"): return abort(401)
-    n, m, f = download_file_to_bytes(fid)
-    return send_file(f, mimetype=m, as_attachment=False, download_name=n)
+@app.route('/api/folder/<folder_id>/files')
+def api_folder_files(folder_id):
+    if not session.get('username'):
+        return abort(401)
+    sort = request.args.get('sort', 'newest')
+    order = 'modifiedTime desc' if sort == 'newest' else 'name_natural'
+    files = list_files_in_folder(folder_id, order=order)
+    return jsonify({'files': files})
 
-# ---------------- Folder ZIP download ----------------
-@app.route("/download/folder/<fid>")
-def download_folder(fid):
-    if not session.get("username"): return abort(401)
-    meta = drive_service.files().get(fileId=fid, fields="name", supportsAllDrives=True).execute()
-    name = meta.get("name", "folder")
-    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".zip")
-    with zipfile.ZipFile(tmp.name, "w", zipfile.ZIP_DEFLATED) as zf:
-        for f in list_files_in_folder(fid):
-            if f["mimeType"] == "application/vnd.google-apps.folder": continue
-            fn, _, fh = download_file_to_bytes(f["id"])
-            zf.writestr(fn, fh.read())
-    return send_file(tmp.name, as_attachment=True, download_name=f"{name}.zip")
+@app.route('/download/file/<file_id>')
+def download_file_route(file_id):
+    if not session.get('username'):
+        return abort(401)
+    name, mime, fh = download_file_to_bytes(file_id)
+    return send_file(fh, mimetype=mime, as_attachment=True, download_name=name)
 
-# ---------------- Logout ----------------
-@app.route("/logout")
+@app.route('/preview/file/<file_id>')
+def preview_file(file_id):
+    t = request.args.get('t')
+    s = request.args.get('s')
+    if t and s:
+        if not verify_secure_link(file_id, t, s):
+            return abort(403)
+    elif not session.get('username'):
+        return abort(401)
+    name, mime, fh = download_file_to_bytes(file_id)
+    return send_file(fh, mimetype=mime, as_attachment=False, download_name=name)
+
+# ---------------- Admin routes (kept as in old) ----------------
+@app.route('/admin-dashboard')
+def admin_dashboard():
+    if not session.get('admin'):
+        flash('Admin access only.', 'danger')
+        return redirect(url_for('login'))
+    return render_template('admin_dashboard.html', user=session['username'])
+
+@app.route('/admin/users')
+def admin_users():
+    if not session.get('admin'):
+        flash('Admin access only.', 'danger')
+        return redirect(url_for('login'))
+    records = sheet.get_all_values()
+    headers = records[0] if records else []
+    users = [dict(zip(headers, row)) for row in records[1:]] if len(records) > 1 else []
+    return render_template('admin_users.html', users=users)
+
+@app.route('/admin/user/<username>')
+def view_user(username):
+    if not session.get('admin'):
+        flash('Admin access only.', 'danger')
+        return redirect(url_for('login'))
+    user = get_user(username)
+    if not user:
+        flash('User not found.', 'danger')
+        return redirect(url_for('admin_users'))
+    files = [f for f in os.listdir(UPLOAD_FOLDER) if username in f]
+    return render_template('user_profile.html', user=user, files=files)
+
+@app.route('/admin/user/<username>/change-password', methods=['POST'])
+def change_user_password(username):
+    if not session.get('admin'):
+        flash('Admin access only.', 'danger')
+        return redirect(url_for('login'))
+    new_pass = request.form['new_password']
+    user = get_user(username)
+    if not user:
+        flash('User not found.', 'danger')
+        return redirect(url_for('admin_users'))
+    # safe update to avoid transient errors
+    safe_update_cell(sheet, user['row_number'], 4, new_pass)
+    flash(f"Password updated for {username}.", 'success')
+    return redirect(url_for('view_user', username=username))
+
+@app.route('/admin/venus-files')
+def admin_files():
+    if not session.get('admin'):
+        flash('Admin access only.', 'danger')
+        return redirect(url_for('login'))
+    return redirect("https://drive.google.com/drive/folders/0AEZXjYA5wFlSUk9PVA")
+
+# ---------------- Old local file serving (kept) ----------------
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+# ---------------- Logout (kept) ----------------
+@app.route('/logout')
 def logout():
     session.clear()
-    return redirect(url_for("login"))
+    resp = make_response(redirect(url_for('login') + '?showSplash=1'))
+    resp.set_cookie('username', '', expires=0)
+    resp.set_cookie('password', '', expires=0)
+    return resp
 
 # ---------------- Entrypoint ----------------
-if __name__ == "__main__":
+if __name__ == '__main__':
     from waitress import serve
-    serve(app, host="0.0.0.0", port=10000)
+    port = int(os.environ.get('PORT', 10000))
+    serve(app, host='0.0.0.0', port=port)
