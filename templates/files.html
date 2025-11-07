@@ -173,15 +173,12 @@ const refreshBtn=document.getElementById('refreshBtn');
 
 let currentFolder=null, allFolders=[], currentFiles=[];
 
-// Load all folders
+// Load Folders
 function loadFolders(){
   packetList.innerHTML='<div class="list-item">Loading…</div>';
   fetch(`/api/packet-folders?sort=${sortSelect.value}`)
   .then(r=>r.json())
-  .then(({folders})=>{
-    allFolders=folders||[];
-    renderFolders();
-  })
+  .then(({folders})=>{allFolders=folders||[];renderFolders();})
   .catch(()=>packetList.innerHTML='<div class="list-item">Failed to load folders</div>');
 }
 
@@ -212,10 +209,7 @@ function loadFiles(folderId){
   filesBody.innerHTML='<tr><td colspan="4">Loading…</td></tr>';
   fetch(`/api/folder/${folderId}/files?sort=${sortSelect.value}`)
   .then(r=>r.json())
-  .then(({files})=>{
-    currentFiles=files||[];
-    renderFiles();
-  })
+  .then(({files})=>{currentFiles=files||[];renderFiles();})
   .catch(()=>filesBody.innerHTML='<tr><td colspan="4">Failed to load files</td></tr>');
 }
 
@@ -236,13 +230,13 @@ function renderFiles(){
       <td class="actions">
         <button class="btn" onclick="openPreview('${f.id}','${mime}','${ext}')"><i class="fas fa-eye"></i> Preview</button>
         <a class="btn" href="/download/file/${f.id}"><i class="fas fa-download"></i> Download</a>
-        <button class="btn" onclick="shareFile('${f.id}','${f.name}')"><i class="fas fa-share-alt"></i> Share</button>
+        <button class="btn" onclick="shareFile('${f.id}')"><i class="fas fa-share-alt"></i> Share</button>
       </td>`;
     filesBody.appendChild(tr);
   });
 }
 
-// ---------------- Preview ----------------
+// Preview
 const modal=document.getElementById('previewModal');
 const video=document.getElementById('previewVideo');
 const img=document.getElementById('previewImage');
@@ -260,39 +254,13 @@ function openPreview(id,mime,ext){
   if(mime==='application/pdf'||ext==='pdf'){
     frame.src=url;frame.style.display='block';modal.style.display='flex';return;
   }
-  alert('Preview not supported for this file. Please download.');
+  alert('Preview not supported for this file.');
 }
+function closePreview(){modal.style.display='none';video.pause();video.src='';}
 
-function closePreview(){
-  modal.style.display='none';video.pause();video.src='';
-}
+// Share
+function shareFile(id){window.open(`/share?id=${id}`,'_blank');}
 
-// ---------------- Share ----------------
-async function shareFile(id, filename){
-  const res = await fetch(`/api/share-link?id=${id}`);
-  const data = await res.json();
-  const link = data.link;
-  const fileRes = await fetch(`/download/file/${id}`);
-  const blob = await fileRes.blob();
-  const file = new File([blob], filename, {type: blob.type});
-
-  if(navigator.canShare && navigator.canShare({files:[file]})){
-    try {
-      await navigator.share({
-        title: filename,
-        text: "Sharing file from Venus Jewel Portal",
-        files: [file]
-      });
-    } catch(err) {
-      console.log("Share cancelled or failed:", err);
-    }
-  } else {
-    await navigator.clipboard.writeText(link);
-    alert("Link copied to clipboard:\n" + link);
-  }
-}
-
-// ---------------- UI Binding ----------------
 searchBox.oninput=()=>{renderFolders();renderFiles();};
 sortSelect.onchange=()=>{loadFolders();if(currentFolder)loadFiles(currentFolder.id);};
 refreshBtn.onclick=()=>loadFolders();
