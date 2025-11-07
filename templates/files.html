@@ -1,241 +1,152 @@
-<!-- paste/replace entire files.html with this version -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Files • VENUS JEWEL FILE PORTAL</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    /* minimal styles - keep your existing theme if you like */
-    body { font-family: 'Poppins', sans-serif; margin:0; background:#f6f9fc; color:#203040; }
-    .topbar { display:flex; justify-content:space-between; padding:12px 18px; background:#fff; border-bottom:1px solid #e6e9f2; position:sticky; top:0; z-index:20; }
-    .container { max-width:1200px; margin:18px auto; padding:12px; }
-    .browser { display:grid; grid-template-columns:320px 1fr; gap:12px; }
-    .list { background:#fff; border:1px solid #e6e9f2; border-radius:8px; max-height:60vh; overflow:auto; }
-    .list-item { display:flex; align-items:center; justify-content:space-between; padding:10px; border-bottom:1px solid #f1f5f9; }
-    .list-item label { display:flex; align-items:center; gap:8px; cursor:pointer; width:100%; }
-    .controls { display:flex; gap:8px; margin-bottom:10px; align-items:center; flex-wrap:wrap; }
-    .btn { padding:8px 10px; border-radius:8px; border:1px solid #dbe6ff; background:#fff; cursor:pointer; }
-    .btn-primary { background:#0B5FFF; color:#fff; border-color:#0B5FFF; }
-    .grid { width:100%; border-collapse:collapse; background:#fff; border:1px solid #e6e9f2; border-radius:8px; overflow:hidden; }
-    .grid th, .grid td { padding:10px; border-bottom:1px solid #f1f5f9; }
-    @media(max-width:900px){ .browser{ grid-template-columns:1fr;} .list{ max-height:35vh;} }
-  </style>
+<meta charset="UTF-8">
+<title>Venus Jewel | Files</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  :root {
+    --vj-primary:#003366;
+    --vj-accent:#0B5FFF;
+    --vj-bg:#f4f7fb;
+    --vj-card:#fff;
+  }
+  body {
+    margin:0; font-family:'Poppins',sans-serif; background:var(--vj-bg);
+    color:#203040;
+  }
+  header {
+    background:#fff; display:flex; justify-content:space-between; align-items:center;
+    padding:10px 18px; border-bottom:1px solid #e5e8ef; position:sticky; top:0; z-index:50;
+  }
+  header img { height:50px; }
+  header .actions a { text-decoration:none; color:#203040; margin-left:12px; font-weight:500; }
+  .container { max-width:1200px; margin:20px auto; padding:0 10px; }
+  .controls { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:10px; }
+  .controls input, .controls select { padding:8px 10px; border-radius:8px; border:1px solid #d3d8e2; }
+  .controls button, .controls a {
+    padding:8px 12px; border:none; border-radius:8px; cursor:pointer;
+    background:var(--vj-accent); color:#fff; font-weight:500;
+  }
+  .browser { display:grid; grid-template-columns:300px 1fr; gap:16px; }
+  .list { background:var(--vj-card); border-radius:10px; border:1px solid #e5e8ef; overflow:auto; max-height:70vh; }
+  .list-item { padding:10px 12px; border-bottom:1px solid #f0f0f0; cursor:pointer; display:flex; align-items:center; justify-content:space-between; }
+  .list-item:hover { background:#eef4ff; }
+  .grid { width:100%; background:var(--vj-card); border-radius:10px; border-collapse:collapse; overflow:hidden; }
+  .grid th, .grid td { padding:10px; border-bottom:1px solid #f0f0f0; text-align:left; }
+  .grid th { background:#f8fafc; }
+  @media(max-width:900px){
+    .browser{ grid-template-columns:1fr; }
+    .list{ max-height:40vh; }
+  }
+</style>
 </head>
 <body>
-  <div class="topbar">
-    <div><strong>VENUS FILES</strong></div>
+<header>
+  <img src="{{ url_for('static', filename='images/logo_blue_font.jpg') }}" alt="Venus Jewel">
+  <div class="actions">
+    <span><i class="fas fa-user"></i> {{ user }}</span>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+  </div>
+</header>
+
+<div class="container">
+  <div class="controls">
+    <input id="searchBox" placeholder="Search folder or file...">
+    <select id="sortSelect">
+      <option value="newest">Newest First</option>
+      <option value="name">Name A–Z</option>
+    </select>
+    <a id="downloadSingleBtn" href="#" disabled>Download Selected Folder</a>
+    <button id="downloadMultiBtn" disabled>Download Selected (ZIP)</button>
+  </div>
+
+  <div class="browser">
     <div>
-      <span>{{ user }}</span>
-      <a href="/dashboard" class="btn">Dashboard</a>
-      <a href="/logout" class="btn">Logout</a>
+      <h3><i class="fas fa-folder"></i> Packet Folders</h3>
+      <div id="packetList" class="list"></div>
+    </div>
+    <div>
+      <h3 id="filesTitle"><i class="fas fa-file"></i> Files</h3>
+      <table class="grid">
+        <thead><tr><th>Name</th><th>Type</th><th>Modified</th><th>Actions</th></tr></thead>
+        <tbody id="filesBody"></tbody>
+      </table>
     </div>
   </div>
-
-  <div class="container">
-    <div class="controls">
-      <input id="searchBox" placeholder="Search..." style="padding:8px;border-radius:8px;border:1px solid #e6e9f2;flex:1" />
-      <select id="sortSelect" style="padding:8px;border-radius:8px;border:1px solid #e6e9f2;">
-        <option value="newest">Newest</option>
-        <option value="name">Name A–Z</option>
-      </select>
-
-      <!-- Single download button (uses GET /download/folder/<id>) -->
-      <a id="downloadSingleBtn" class="btn btn-primary" href="#" disabled>Download Selected Folder</a>
-
-      <!-- Multi download (POST) -->
-      <button id="downloadMultiBtn" class="btn" type="button" disabled>Download Selected (zip multiple)</button>
-    </div>
-
-    <div class="browser">
-      <div>
-        <h3>Packet Folders</h3>
-        <div id="packetList" class="list">
-          <!-- folder items injected here -->
-        </div>
-      </div>
-
-      <div>
-        <h3 id="filesTitle">Files</h3>
-        <table class="grid" aria-describedby="filesTitle">
-          <thead><tr><th>Name</th><th>Type</th><th>Modified</th><th>Actions</th></tr></thead>
-          <tbody id="filesBody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
+</div>
 
 <script>
-  const packetList = document.getElementById('packetList');
-  const filesBody = document.getElementById('filesBody');
-  const downloadSingleBtn = document.getElementById('downloadSingleBtn');
-  const downloadMultiBtn = document.getElementById('downloadMultiBtn');
-  const searchBox = document.getElementById('searchBox');
-  const sortSelect = document.getElementById('sortSelect');
+const packetList=document.getElementById('packetList');
+const filesBody=document.getElementById('filesBody');
+const searchBox=document.getElementById('searchBox');
+const sortSelect=document.getElementById('sortSelect');
+const downloadSingleBtn=document.getElementById('downloadSingleBtn');
+const downloadMultiBtn=document.getElementById('downloadMultiBtn');
+let folders=[],files=[],selected=new Set(),current=null;
 
-  let allFolders = [], currentFolder = null, currentFiles = [];
-  let selectedFolderIds = new Set(); // for multi download
-
-  function loadFolders(){
-    packetList.innerHTML = '<div class="list-item">Loading…</div>';
-    fetch(`/api/packet-folders?sort=${sortSelect.value}`)
-      .then(r=>r.json()).then(({folders})=>{
-        allFolders = folders || [];
-        renderFolderList();
-      }).catch(()=>packetList.innerHTML='<div class="list-item">Failed to load folders</div>');
-  }
-
-  function renderFolderList(){
-    const q = (searchBox.value || '').toLowerCase();
-    packetList.innerHTML = '';
-    const items = allFolders.filter(f => !q || (f.name||'').toLowerCase().includes(q));
-    if(!items.length){
-      packetList.innerHTML = '<div class="list-item">No folders</div>'; return;
-    }
-    items.forEach(f=>{
-      const row = document.createElement('div'); row.className='list-item';
-      const id = f.id;
-      row.innerHTML = `
-        <label>
-          <input type="checkbox" class="folder-checkbox" value="${id}" />
-          <span style="flex:1">${f.name}</span>
-          <small style="color:#6b7280">${f.modifiedTime ? new Date(f.modifiedTime).toLocaleString() : ''}</small>
-        </label>
-      `;
-      // single-click to open (when clicking label but not the checkbox)
-      row.querySelector('label').addEventListener('click', (ev)=>{
-        if (ev.target.classList && ev.target.classList.contains('folder-checkbox')) return;
-        selectFolder(id, f.name);
-      });
-      // checkbox handling
-      const cb = row.querySelector('.folder-checkbox');
-      cb.addEventListener('change', (e)=>{
-        if(e.target.checked){ selectedFolderIds.add(id); } else { selectedFolderIds.delete(id); }
-        updateDownloadButtons();
-      });
-      packetList.appendChild(row);
-    });
-  }
-
-  function selectFolder(folderId, name){
-    currentFolder = { id: folderId, name };
-    document.getElementById('filesTitle').textContent = `Files — ${name}`;
-    downloadSingleBtn.removeAttribute('disabled');
-    downloadSingleBtn.href = `/download/folder/${encodeURIComponent(folderId)}`;
-    // clear selectedFolderIds and check only the single if needed
-    // option: keep separate checkboxes for multi selection
-    loadFiles(folderId);
-  }
-
-  function updateDownloadButtons(){
-    if(selectedFolderIds.size === 0){
-      downloadMultiBtn.setAttribute('disabled','disabled');
-    } else {
-      downloadMultiBtn.removeAttribute('disabled');
-    }
-    // if exactly 1 selected, allow single button too
-    if(selectedFolderIds.size === 1){
-      const onlyId = Array.from(selectedFolderIds)[0];
-      downloadSingleBtn.href = `/download/folder/${encodeURIComponent(onlyId)}`;
-      downloadSingleBtn.removeAttribute('disabled');
-    }
-  }
-
-  function loadFiles(folderId){
-    filesBody.innerHTML = '<tr><td colspan="4">Loading…</td></tr>';
-    fetch(`/api/folder/${folderId}/files?sort=${sortSelect.value}`)
-      .then(r=>r.json()).then(({files})=>{
-        currentFiles = files || []; renderFiles();
-      }).catch(()=>filesBody.innerHTML = '<tr><td colspan="4">Failed to load files</td></tr>');
-  }
-
-  function renderFiles(){
-    filesBody.innerHTML = '';
-    if(!currentFiles.length){ filesBody.innerHTML='<tr><td colspan="4">No files</td></tr>'; return; }
-    currentFiles.forEach(f=>{
-      const date = f.modifiedTime ? new Date(f.modifiedTime).toLocaleString() : '';
-      const mime = f.mimeType || '';
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${f.name}</td>
-        <td>${mime.replace('application/','')}</td>
-        <td>${date}</td>
-        <td>
-          <button class="btn" onclick="openPreview('${f.id}','${mime}','${encodeURIComponent(f.name)}')">Preview</button>
-          <a class="btn" href="/download/file/${f.id}">Download</a>
-          <button class="btn" onclick="shareFile('${f.id}')">Share</button>
-        </td>
-      `;
-      filesBody.appendChild(tr);
-    });
-  }
-
-  // Multi-download POST: send form to /download/folders (will return zip)
-  downloadMultiBtn.addEventListener('click', ()=>{
-    if(selectedFolderIds.size === 0) return alert('Choose one or more folders first');
-    // Create form and submit as POST
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '/download/folders';
-    // append each folder id
-    selectedFolderIds.forEach(id=>{
-      const inp = document.createElement('input');
-      inp.type = 'hidden'; inp.name = 'folder_ids[]'; inp.value = id;
-      form.appendChild(inp);
-    });
-    document.body.appendChild(form);
-    form.submit();
-    form.remove();
+function loadFolders(){
+  packetList.innerHTML='<div class="list-item">Loading...</div>';
+  fetch(`/api/packet-folders?sort=${sortSelect.value}`).then(r=>r.json()).then(d=>{
+    folders=d.folders||[]; renderFolders();
   });
-
-  // --- preview and share (reuse your existing logic) ---
-  window.openPreview = function(id, mime, encName){
-    const name = decodeURIComponent(encName);
-    const url = `/preview/file/${id}`;
-    // You already have preview modal in your page; for simplicity use window.open for unsupported
-    // Implement full preview if you already have modal logic (I kept it minimal here)
-    if(mime.startsWith('image/') || mime.startsWith('video/') || mime === 'application/pdf'){
-      window.open(url, '_blank');
-    } else {
-      // fallback
-      const win = window.open('', '_blank');
-      win.document.write(`<p>Preview not available. <a href="/download/file/${id}">Download</a></p>`);
-    }
-  };
-
-  // shareFile uses your /api/share-link as fallback and navigator.share if available
-  async function shareFile(id){
-    try {
-      const linkRes = await fetch(`/api/share-link?id=${id}`);
-      const linkData = await linkRes.json();
-      const shareLink = linkData.link || '';
-      // attempt to download blob and use Web Share
-      const res = await fetch(`/download/file/${id}`);
-      const blob = await res.blob();
-      const filename = (res.headers.get('Content-Disposition') || '').split('filename=')[1] || 'file';
-      const fileObj = new File([blob], filename.replace(/["']/g,''), { type: blob.type || 'application/octet-stream' });
-
-      if(navigator.canShare && navigator.canShare({ files: [fileObj] })){
-        await navigator.share({ files: [fileObj], title: filename, text: 'Sharing file from Venus' });
-        return;
-      } else {
-        // fallback: copy link and trigger download
-        await navigator.clipboard.writeText(shareLink);
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download=filename; document.body.appendChild(a); a.click(); a.remove();
-        alert('Share link copied to clipboard and file is downloading as fallback.');
-      }
-    } catch (e){
-      console.error(e); alert('Share failed.');
-    }
-  }
-
-  // initial load
-  loadFolders();
-  searchBox.addEventListener('input', renderFolderList);
-  sortSelect.addEventListener('change', ()=>{ loadFolders(); if(currentFolder) loadFiles(currentFolder.id); });
-
+}
+function renderFolders(){
+  const q=searchBox.value.toLowerCase(); packetList.innerHTML='';
+  folders.filter(f=>!q||(f.name||'').toLowerCase().includes(q)).forEach(f=>{
+    const el=document.createElement('div');
+    el.className='list-item';
+    el.innerHTML=`<label style="flex:1;"><input type="checkbox" value="${f.id}"> ${f.name}</label><small>${new Date(f.modifiedTime).toLocaleDateString()}</small>`;
+    const cb=el.querySelector('input');
+    cb.onchange=()=>{cb.checked?selected.add(f.id):selected.delete(f.id);updateBtns();};
+    el.onclick=(e)=>{if(e.target.tagName!=='INPUT')selectFolder(f.id,f.name);};
+    packetList.appendChild(el);
+  });
+}
+function selectFolder(id,name){
+  current={id,name}; downloadSingleBtn.href=`/download/folder/${id}`; downloadSingleBtn.removeAttribute('disabled');
+  fetch(`/api/folder/${id}/files?sort=${sortSelect.value}`).then(r=>r.json()).then(d=>{
+    files=d.files||[]; renderFiles();
+  });
+}
+function renderFiles(){
+  filesBody.innerHTML='';
+  files.forEach(f=>{
+    const tr=document.createElement('tr');
+    const date=f.modifiedTime?new Date(f.modifiedTime).toLocaleString():'';
+    tr.innerHTML=`<td>${f.name}</td><td>${f.mimeType||''}</td><td>${date}</td>
+    <td>
+      <button onclick="openPreview('${f.id}','${f.mimeType||''}')"><i class="fas fa-eye"></i></button>
+      <a href="/download/file/${f.id}"><i class="fas fa-download"></i></a>
+      <button onclick="shareFile('${f.id}')"><i class="fas fa-share-alt"></i></button>
+    </td>`;
+    filesBody.appendChild(tr);
+  });
+}
+function updateBtns(){
+  downloadMultiBtn.disabled=selected.size===0;
+  downloadSingleBtn.disabled=selected.size===0;
+}
+downloadMultiBtn.onclick=()=>{
+  const form=document.createElement('form');form.method='POST';form.action='/download/folders';
+  selected.forEach(id=>{const i=document.createElement('input');i.type='hidden';i.name='folder_ids[]';i.value=id;form.appendChild(i);});
+  document.body.appendChild(form);form.submit();form.remove();
+};
+function openPreview(id,mime){
+  window.open(`/preview/file/${id}`,'_blank');
+}
+async function shareFile(id){
+  const linkRes=await fetch(`/api/share-link?id=${id}`);const link=(await linkRes.json()).link;
+  const file=await fetch(`/download/file/${id}`);const blob=await file.blob();
+  const name=file.headers.get('Content-Disposition')?.split('filename=')[1]?.replace(/["']/g,'')||'file';
+  const f=new File([blob],name,{type:blob.type});
+  if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:name,text:'Venus File'});}
+  else{await navigator.clipboard.writeText(link);alert('Share link copied & file downloaded.');const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();}
+}
+searchBox.oninput=renderFolders;sortSelect.onchange=loadFolders;loadFolders();
 </script>
 </body>
 </html>
