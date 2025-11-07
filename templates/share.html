@@ -18,120 +18,69 @@
       font-family: 'Poppins', sans-serif;
       background: var(--vj-bg);
       color: var(--vj-primary);
-      margin: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 20px;
+      margin: 0; display: flex; align-items: center;
+      justify-content: center; min-height: 100vh; padding: 20px;
     }
     .card {
       background: var(--vj-card);
       border-radius: 14px;
       box-shadow: 0 10px 30px rgba(0,0,0,.08);
-      max-width: 400px;
-      width: 100%;
-      padding: 24px;
-      text-align: center;
+      max-width: 420px; width: 100%;
+      padding: 24px; text-align: center;
       border: 1px solid var(--vj-border);
     }
-    .card img {
-      height: 48px;
-      margin-bottom: 10px;
-    }
-    h2 {
-      font-size: 18px;
-      margin-bottom: 10px;
-      color: var(--vj-primary);
-    }
-    p {
-      color: #555;
-      font-size: 14px;
-      margin-bottom: 20px;
-    }
+    .card img { height: 48px; margin-bottom: 10px; }
+    h2 { font-size: 18px; margin-bottom: 10px; color: var(--vj-primary); }
+    p { color: #555; font-size: 14px; margin-bottom: 20px; }
     .apps {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-      justify-content: center;
-      margin-top: 10px;
+      display: flex; flex-wrap: wrap;
+      gap: 15px; justify-content: center;
     }
     .app {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-decoration: none;
-      color: var(--vj-primary);
-      font-size: 13px;
-      width: 70px;
+      display: flex; flex-direction: column; align-items: center;
+      text-decoration: none; color: var(--vj-primary);
+      font-size: 13px; width: 70px;
       transition: transform 0.2s;
     }
-    .app:hover { transform: scale(1.05); }
-    .app img {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
-      margin-bottom: 6px;
-    }
+    .app:hover { transform: scale(1.08); }
+    .app img { width: 48px; height: 48px; border-radius: 12px; margin-bottom: 6px; }
     .btn {
-      margin-top: 20px;
-      padding: 10px 14px;
-      border: none;
-      border-radius: 8px;
-      background: var(--vj-accent);
-      color: #fff;
-      font-weight: 600;
-      cursor: pointer;
+      margin-top: 20px; padding: 10px 14px;
+      border: none; border-radius: 8px;
+      background: var(--vj-accent); color: #fff;
+      font-weight: 600; cursor: pointer;
     }
     .linkbox {
-      background: #f0f2f8;
-      padding: 8px;
-      border-radius: 8px;
-      word-break: break-all;
-      font-size: 13px;
-      margin-top: 12px;
+      background: #f0f2f8; padding: 8px;
+      border-radius: 8px; word-break: break-all;
+      font-size: 13px; margin-top: 12px;
     }
-    @media (max-width:500px){
-      .card{padding:18px;}
-      .app{width:60px;}
-    }
+    @media (max-width:500px){.card{padding:18px;}.app{width:60px;}}
   </style>
 </head>
 <body>
   <div class="card">
     <img src="{{ url_for('static', filename='images/venus_black_logo.jpg') }}" alt="Venus Jewel">
     <h2>Share this file</h2>
-    <p>Select an app below to share directly or copy the link.</p>
-    <div class="apps" id="appsList">
+    <p>Choose an app to share or copy the link.</p>
+
+    <div class="apps">
       <a class="app" id="whatsapp" target="_blank">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg">
-        WhatsApp
-      </a>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg">WhatsApp</a>
       <a class="app" id="telegram" target="_blank">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg">
-        Telegram
-      </a>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg">Telegram</a>
       <a class="app" id="instagram" target="_blank">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png">
-        Instagram
-      </a>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png">Instagram</a>
       <a class="app" id="gmail" target="_blank">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Gmail_Icon.png">
-        Gmail
-      </a>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Gmail_Icon.png">Gmail</a>
       <a class="app" id="bluetooth" target="_blank">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/3/30/Bluetooth.svg">
-        Bluetooth
-      </a>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/3/30/Bluetooth.svg">Bluetooth</a>
       <a class="app" id="quickshare" target="_blank">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/4/4a/Share_icon.png">
-        Quick Share
-      </a>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/4/4a/Share_icon.png">Quick Share</a>
       <a class="app" id="copylink" href="#">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/8/8c/Link_icon.png">
-        Copy Link
-      </a>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/8/8c/Link_icon.png">Copy Link</a>
     </div>
+
     <div class="linkbox" id="shareLinkBox">Loading link…</div>
     <button class="btn" onclick="window.close()">Close</button>
   </div>
@@ -152,7 +101,6 @@
 
     function buildLinks(){
       if(!shareLink) return;
-
       document.getElementById("whatsapp").href = `https://wa.me/?text=${encodeURIComponent("Venus Jewel File:\n" + shareLink)}`;
       document.getElementById("telegram").href = `tg://msg?text=${encodeURIComponent("Venus Jewel File:\n" + shareLink)}`;
       document.getElementById("instagram").href = `https://www.instagram.com/direct/inbox/?text=${encodeURIComponent(shareLink)}`;
