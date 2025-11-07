@@ -1,167 +1,173 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Share • VENUS JEWEL FILE PORTAL</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- Brand & Fonts -->
-  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon-32x32.png') }}">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <title>Share File • Venus Jewel File Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
       --vj-primary:#003366;
       --vj-accent:#0B5FFF;
-      --vj-bg:rgba(255,255,255,0.94);
-      --vj-border:#e6e9f2;
-      --vj-card:#ffffff;
-      --vj-text:#1b2430;
+      --vj-bg:#f7f9fc;
+      --vj-card:#fff;
+      --vj-border:#e5e8ef;
     }
     body {
       font-family: 'Poppins', sans-serif;
-      background: url('/static/images/dimension.jpg') no-repeat center center fixed;
-      background-size: cover;
-      color: var(--vj-text);
-      margin: 0;
-    }
-
-    .container {
-      max-width: 700px;
-      margin: 5% auto;
       background: var(--vj-bg);
-      backdrop-filter: blur(8px);
-      border-radius: 18px;
-      box-shadow: 0 8px 28px rgba(0,0,0,.1);
-      padding: 30px 40px;
-      text-align: center;
-    }
-
-    h1 {
       color: var(--vj-primary);
-      font-weight: 700;
-      margin-bottom: 25px;
-      font-size: 24px;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
     }
-
-    .file-name {
-      font-size: 16px;
-      color: var(--vj-accent);
-      font-weight: 600;
+    .card {
+      background: var(--vj-card);
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.08);
+      max-width: 400px;
+      width: 100%;
+      padding: 24px;
+      text-align: center;
+      border: 1px solid var(--vj-border);
+    }
+    .card img {
+      height: 48px;
       margin-bottom: 10px;
     }
-
-    .share-box {
-      background: var(--vj-card);
-      border: 1px solid var(--vj-border);
-      border-radius: 12px;
-      padding: 18px;
-      text-align: center;
-      margin-bottom: 25px;
+    h2 {
+      font-size: 18px;
+      margin-bottom: 10px;
+      color: var(--vj-primary);
     }
-
-    #shareLink {
-      background: #f3f5fa;
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid var(--vj-border);
+    p {
+      color: #555;
       font-size: 14px;
-      word-break: break-all;
-      margin-bottom: 15px;
-      color: #111;
+      margin-bottom: 20px;
     }
-
-    .share-btns {
+    .apps {
       display: flex;
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 15px;
       justify-content: center;
+      margin-top: 10px;
     }
-
-    .btn {
-      display: inline-flex;
+    .app {
+      display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 8px;
+      text-decoration: none;
+      color: var(--vj-primary);
+      font-size: 13px;
+      width: 70px;
+      transition: transform 0.2s;
+    }
+    .app:hover { transform: scale(1.05); }
+    .app img {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      margin-bottom: 6px;
+    }
+    .btn {
+      margin-top: 20px;
+      padding: 10px 14px;
+      border: none;
+      border-radius: 8px;
       background: var(--vj-accent);
       color: #fff;
-      border: none;
-      padding: 12px 18px;
-      border-radius: 10px;
+      font-weight: 600;
       cursor: pointer;
-      font-weight: 600;
-      font-size: 14px;
-      transition: 0.2s;
     }
-    .btn:hover { filter: brightness(0.92); }
-
-    .btn i { font-size: 15px; }
-
-    a.btn { text-decoration: none; }
-
-    .back-btn {
-      margin-top: 20px;
-      display: inline-block;
-      color: var(--vj-primary);
-      font-weight: 600;
-      text-decoration: none;
+    .linkbox {
+      background: #f0f2f8;
+      padding: 8px;
+      border-radius: 8px;
+      word-break: break-all;
+      font-size: 13px;
+      margin-top: 12px;
     }
-
-    .copied {
-      color: green;
-      font-weight: 600;
-      margin-top: 10px;
-      display: none;
+    @media (max-width:500px){
+      .card{padding:18px;}
+      .app{width:60px;}
     }
   </style>
 </head>
 <body>
-
-  <div class="container">
-    <img src="{{ url_for('static', filename='images/venus_black_logo.jpg') }}" alt="Venus Jewel" height="70" style="margin-bottom:15px;">
-    <h1>Share File Securely</h1>
-    <div class="file-name" id="fileName"></div>
-
-    <div class="share-box">
-      <div id="shareLink">Loading share link...</div>
-      <div class="share-btns">
-        <button class="btn" onclick="copyLink()"><i class="fas fa-copy"></i> Copy</button>
-        <a class="btn" id="whatsappBtn" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a>
-        <a class="btn" id="emailBtn" target="_blank"><i class="fas fa-envelope"></i> Email</a>
-        <a class="btn" id="telegramBtn" target="_blank"><i class="fab fa-telegram"></i> Telegram</a>
-      </div>
-      <div class="copied" id="copyMsg">Link copied!</div>
+  <div class="card">
+    <img src="{{ url_for('static', filename='images/venus_black_logo.jpg') }}" alt="Venus Jewel">
+    <h2>Share this file</h2>
+    <p>Select an app below to share directly or copy the link.</p>
+    <div class="apps" id="appsList">
+      <a class="app" id="whatsapp" target="_blank">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg">
+        WhatsApp
+      </a>
+      <a class="app" id="telegram" target="_blank">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg">
+        Telegram
+      </a>
+      <a class="app" id="instagram" target="_blank">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png">
+        Instagram
+      </a>
+      <a class="app" id="gmail" target="_blank">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Gmail_Icon.png">
+        Gmail
+      </a>
+      <a class="app" id="bluetooth" target="_blank">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/3/30/Bluetooth.svg">
+        Bluetooth
+      </a>
+      <a class="app" id="quickshare" target="_blank">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/4/4a/Share_icon.png">
+        Quick Share
+      </a>
+      <a class="app" id="copylink" href="#">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/8/8c/Link_icon.png">
+        Copy Link
+      </a>
     </div>
-
-    <a href="/files" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Files</a>
+    <div class="linkbox" id="shareLinkBox">Loading link…</div>
+    <button class="btn" onclick="window.close()">Close</button>
   </div>
 
   <script>
     const params = new URLSearchParams(window.location.search);
-    const fileId = params.get('id');
-    const name = decodeURIComponent(params.get('name') || '');
-    document.getElementById('fileName').textContent = name ? `File: ${name}` : 'File';
+    const fileId = params.get("id");
+    const linkBox = document.getElementById("shareLinkBox");
+    let shareLink = "";
 
-    fetch(`/api/share-link?id=${fileId}`)
-      .then(r=>r.json())
-      .then(d=>{
-        const link = d.link;
-        document.getElementById('shareLink').textContent = link;
-        document.getElementById('whatsappBtn').href = `https://wa.me/?text=${encodeURIComponent('Sharing from Venus Jewel File Portal:\n' + link)}`;
-        document.getElementById('emailBtn').href = `mailto:?subject=Venus Jewel File Share&body=${encodeURIComponent('Here is your secure file link:\n' + link)}`;
-        document.getElementById('telegramBtn').href = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=Venus Jewel File Share`;
-      })
-      .catch(()=> document.getElementById('shareLink').textContent = '❌ Failed to generate link.');
-
-    function copyLink(){
-      const link = document.getElementById('shareLink').textContent;
-      navigator.clipboard.writeText(link).then(()=>{
-        const msg=document.getElementById('copyMsg');
-        msg.style.display='block';
-        setTimeout(()=>msg.style.display='none',2000);
-      });
+    async function loadLink(){
+      const res = await fetch(`/api/share-link?id=${fileId}`);
+      const data = await res.json();
+      shareLink = data.link || "";
+      linkBox.textContent = shareLink || "Failed to generate link.";
+      buildLinks();
     }
-  </script>
 
+    function buildLinks(){
+      if(!shareLink) return;
+
+      document.getElementById("whatsapp").href = `https://wa.me/?text=${encodeURIComponent("Venus Jewel File:\n" + shareLink)}`;
+      document.getElementById("telegram").href = `tg://msg?text=${encodeURIComponent("Venus Jewel File:\n" + shareLink)}`;
+      document.getElementById("instagram").href = `https://www.instagram.com/direct/inbox/?text=${encodeURIComponent(shareLink)}`;
+      document.getElementById("gmail").href = `mailto:?subject=Venus Jewel File&body=${encodeURIComponent(shareLink)}`;
+      document.getElementById("bluetooth").href = shareLink;
+      document.getElementById("quickshare").href = shareLink;
+
+      document.getElementById("copylink").onclick = async (e)=>{
+        e.preventDefault();
+        await navigator.clipboard.writeText(shareLink);
+        alert("✅ Link copied to clipboard!");
+      };
+    }
+
+    loadLink();
+  </script>
 </body>
 </html>
