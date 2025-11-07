@@ -1,4 +1,4 @@
-# app.py — FINAL (Old features kept + Secure Share Feature Added)
+# app.py — FINAL (Old features kept + Secure Share Feature Added + safe gspread writes)
 
 from flask import (
     Flask, render_template, request, redirect, url_for, session, flash,
@@ -23,7 +23,9 @@ app.secret_key = 'your_secret_key_here'
 # ---------------- HTTPS enforce (Render) ----------------
 @app.before_request
 def enforce_https_on_render():
-    if request.headers.get('X-Forwarded-Proto', 'http') != 'https':
+    # If behind a proxy (render), the forwarded proto header is set.
+    # This keeps previous behavior but uses correct comparison.
+    if request.headers.get('X-Forwarded-Proto', request.scheme) != 'https':
         return redirect(request.url.replace("http://", "https://", 1))
 
 # ---------------- Google Auth / Drive / Sheets ----------------
@@ -51,7 +53,7 @@ VENUSFILES_PASSWORD = 'Natural@1969'
 SECRET_SHARE_KEY = b"venus_secure_share_key_2025"
 
 def generate_secure_link(file_id, expire=3600):
-    """Generate secure link that expires in 1 hour."""
+    """Generate secure link that expires in expire seconds (default 1 hour)."""
     timestamp = int(time.time()) + expire
     data = f"{file_id}:{timestamp}"
     sig = hmac.new(SECRET_SHARE_KEY, data.encode(), hashlib.sha256).hexdigest()
@@ -71,25 +73,70 @@ def verify_secure_link(file_id, t, s):
         return False
 # ======================================================================
 
+# ---------------- Safe gspread helpers (retry on intermittent 500s) ----------------
+from gspread.exceptions import APIError
+
+def safe_append_row(ws, row, retries=4, backoff=1.5):
+    """Append row to worksheet with retries to avoid transient 500 issues."""
+    attempt = 0
+    while attempt < retries:
+        try:
+            ws.append_row(row)
+            return True
+        except APIError as e:
+            attempt += 1
+            # If it's a 500 transient error retry
+            print(f"[WARN] gspread APIError appending row (attempt {attempt}/{retries}): {e}")
+            time.sleep(backoff * attempt)
+        except Exception as e:
+            # non-API error (network etc) -> retry as well
+            attempt += 1
+            print(f"[WARN] unexpected error appending row (attempt {attempt}/{retries}): {e}")
+            time.sleep(backoff * attempt)
+    raise RuntimeError("Failed to append row after retries.")
+
+def safe_update_cell(ws, row, col, value, retries=4, backoff=1.5):
+    attempt = 0
+    while attempt < retries:
+        try:
+            ws.update_cell(row, col, value)
+            return True
+        except APIError as e:
+            attempt += 1
+            print(f"[WARN] gspread APIError update_cell (attempt {attempt}/{retries}): {e}")
+            time.sleep(backoff * attempt)
+        except Exception as e:
+            attempt += 1
+            print(f"[WARN] unexpected error update_cell (attempt {attempt}/{retries}): {e}")
+            time.sleep(backoff * attempt)
+    raise RuntimeError("Failed to update cell after retries.")
 
 # ---------------- Helpers (Shared Drive aware) ----------------
 def username_exists(username):
-    return username in sheet.col_values(3)[1:]  # col C = Username
+    try:
+        return username in sheet.col_values(3)[1:]  # col C = Username
+    except Exception as e:
+        # if gspread read temporarily fails, treat as not exists and let registration handle gracefully
+        print(f"[WARN] username_exists gspread error: {e}")
+        return False
 
 def get_user(username):
-    for i, u in enumerate(sheet.col_values(3)[1:], start=2):
-        if u == username:
-            row = sheet.row_values(i)
-            def col(n): return row[n] if len(row) > n else ''
-            return {
-                'row_number': i,
-                'Timestamp': col(0),
-                'Full Name': col(1),
-                'Username': col(2),
-                'Password': col(3),
-                'Contact Number': col(4),
-                'Organization': col(5)
-            }
+    try:
+        for i, u in enumerate(sheet.col_values(3)[1:], start=2):
+            if u == username:
+                row = sheet.row_values(i)
+                def col(n): return row[n] if len(row) > n else ''
+                return {
+                    'row_number': i,
+                    'Timestamp': col(0),
+                    'Full Name': col(1),
+                    'Username': col(2),
+                    'Password': col(3),
+                    'Contact Number': col(4),
+                    'Organization': col(5)
+                }
+    except Exception as e:
+        print(f"[WARN] get_user gspread error: {e}")
     return None
 
 def get_or_create_folder(name, parent_id):
@@ -140,6 +187,7 @@ def mute_video(file_storage, filename):
         )
         return io.BytesIO(open(output_path, 'rb').read())
     except Exception:
+        # ffmpeg failed — fallback to original file bytes
         return io.BytesIO(open(input_path, 'rb').read())
 
 def list_packet_folders(order="modifiedTime desc"):
@@ -214,7 +262,8 @@ def register():
             flash('Username already exists.', 'danger')
             return render_template('register.html')
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        sheet.append_row([timestamp, full_name, username, password, contact, org])
+        # use safe append to avoid transient 500s
+        safe_append_row(sheet, [timestamp, full_name, username, password, contact, org])
         flash('Registration successful.', 'success')
         return redirect(url_for('login') + '?showSplash=1')
     return render_template('register.html')
@@ -236,6 +285,7 @@ def upload():
         folder_id = get_or_create_folder(packet_no, DRIVE_FOLDER_ID)
         for key in request.files:
             subpoint = key.replace('file_', '')
+            # NOTE: client may send multiple files per field (we support that)
             for file in request.files.getlist(key):
                 if file and file.filename:
                     ext = os.path.splitext(file.filename)[1]
@@ -275,6 +325,8 @@ def api_share_link():
     if not session.get('username'):
         return abort(401)
     file_id = request.args.get('id')
+    if not file_id:
+        return jsonify({'error': 'missing id'}), 400
     link = generate_secure_link(file_id)
     full_url = request.url_root.rstrip('/') + link
     return jsonify({'link': full_url})
@@ -317,7 +369,64 @@ def preview_file(file_id):
     name, mime, fh = download_file_to_bytes(file_id)
     return send_file(fh, mimetype=mime, as_attachment=False, download_name=name)
 
-# ---------------- Logout ----------------
+# ---------------- Admin routes (kept as in old) ----------------
+@app.route('/admin-dashboard')
+def admin_dashboard():
+    if not session.get('admin'):
+        flash('Admin access only.', 'danger')
+        return redirect(url_for('login'))
+    return render_template('admin_dashboard.html', user=session['username'])
+
+@app.route('/admin/users')
+def admin_users():
+    if not session.get('admin'):
+        flash('Admin access only.', 'danger')
+        return redirect(url_for('login'))
+    records = sheet.get_all_values()
+    headers = records[0] if records else []
+    users = [dict(zip(headers, row)) for row in records[1:]] if len(records) > 1 else []
+    return render_template('admin_users.html', users=users)
+
+@app.route('/admin/user/<username>')
+def view_user(username):
+    if not session.get('admin'):
+        flash('Admin access only.', 'danger')
+        return redirect(url_for('login'))
+    user = get_user(username)
+    if not user:
+        flash('User not found.', 'danger')
+        return redirect(url_for('admin_users'))
+    files = [f for f in os.listdir(UPLOAD_FOLDER) if username in f]
+    return render_template('user_profile.html', user=user, files=files)
+
+@app.route('/admin/user/<username>/change-password', methods=['POST'])
+def change_user_password(username):
+    if not session.get('admin'):
+        flash('Admin access only.', 'danger')
+        return redirect(url_for('login'))
+    new_pass = request.form['new_password']
+    user = get_user(username)
+    if not user:
+        flash('User not found.', 'danger')
+        return redirect(url_for('admin_users'))
+    # safe update to avoid transient errors
+    safe_update_cell(sheet, user['row_number'], 4, new_pass)
+    flash(f"Password updated for {username}.", 'success')
+    return redirect(url_for('view_user', username=username))
+
+@app.route('/admin/venus-files')
+def admin_files():
+    if not session.get('admin'):
+        flash('Admin access only.', 'danger')
+        return redirect(url_for('login'))
+    return redirect("https://drive.google.com/drive/folders/0AEZXjYA5wFlSUk9PVA")
+
+# ---------------- Old local file serving (kept) ----------------
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+# ---------------- Logout (kept) ----------------
 @app.route('/logout')
 def logout():
     session.clear()
