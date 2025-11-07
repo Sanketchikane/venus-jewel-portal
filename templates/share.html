@@ -29,7 +29,7 @@
       padding: 24px; text-align: center;
       border: 1px solid var(--vj-border);
     }
-    .card img { height: 48px; margin-bottom: 10px; }
+    .card img.logo { height: 50px; margin-bottom: 12px; }
     h2 { font-size: 18px; margin-bottom: 10px; color: var(--vj-primary); }
     p { color: #555; font-size: 14px; margin-bottom: 20px; }
     .apps {
@@ -43,7 +43,12 @@
       transition: transform 0.2s;
     }
     .app:hover { transform: scale(1.08); }
-    .app img { width: 48px; height: 48px; border-radius: 12px; margin-bottom: 6px; object-fit: cover; }
+    .app img {
+      width: 50px; height: 50px;
+      border-radius: 12px; margin-bottom: 6px;
+      object-fit: cover;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
     .btn {
       margin-top: 20px; padding: 10px 14px;
       border: none; border-radius: 8px;
@@ -60,25 +65,25 @@
 </head>
 <body>
   <div class="card">
-    <img src="{{ url_for('static', filename='images/venus_black_logo.jpg') }}" alt="Venus Jewel">
+    <img class="logo" src="{{ url_for('static', filename='images/venus_black_logo.jpg') }}" alt="Venus Jewel">
     <h2>Share this file</h2>
-    <p>Choose an app to share or copy the link.</p>
+    <p>Select an app to share directly or copy the link.</p>
 
     <div class="apps">
       <a class="app" id="whatsapp" target="_blank">
-        <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/whatsapp.svg">WhatsApp</a>
+        <img src="{{ url_for('static', filename='images/whatsapp.png') }}">WhatsApp</a>
       <a class="app" id="telegram" target="_blank">
-        <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/telegram.svg">Telegram</a>
+        <img src="{{ url_for('static', filename='images/telegram.jpeg') }}">Telegram</a>
       <a class="app" id="instagram" target="_blank">
-        <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/instagram.svg">Instagram</a>
+        <img src="{{ url_for('static', filename='images/instagram.jpeg') }}">Instagram</a>
       <a class="app" id="gmail" target="_blank">
-        <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/gmail.svg">Gmail</a>
+        <img src="{{ url_for('static', filename='images/favicon-32x32.png') }}">Gmail</a>
       <a class="app" id="bluetooth" target="_blank">
-        <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/bluetooth.svg">Bluetooth</a>
+        <img src="{{ url_for('static', filename='images/bluetooth.jpeg') }}">Bluetooth</a>
       <a class="app" id="quickshare" target="_blank">
-        <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/share.svg">Quick Share</a>
+        <img src="{{ url_for('static', filename='images/quich share.png') }}">Quick Share</a>
       <a class="app" id="copylink" href="#">
-        <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/link.svg">Copy Link</a>
+        <img src="{{ url_for('static', filename='images/copy link.jpeg') }}">Copy Link</a>
     </div>
 
     <div class="linkbox" id="shareLinkBox">Loading link…</div>
@@ -92,11 +97,15 @@
     let shareLink = "";
 
     async function loadLink(){
-      const res = await fetch(`/api/share-link?id=${fileId}`);
-      const data = await res.json();
-      shareLink = data.link || "";
-      linkBox.textContent = shareLink || "Failed to generate link.";
-      buildLinks();
+      try {
+        const res = await fetch(`/api/share-link?id=${fileId}`);
+        const data = await res.json();
+        shareLink = data.link || "";
+        linkBox.textContent = shareLink || "Failed to generate link.";
+        buildLinks();
+      } catch (err) {
+        linkBox.textContent = "Error loading link.";
+      }
     }
 
     function buildLinks(){
