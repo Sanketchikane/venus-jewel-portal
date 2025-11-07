@@ -1,129 +1,174 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Files • VENUS JEWEL FILE PORTAL</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- Brand & Icons -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='images/apple-touch-icon.png') }}">
   <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/favicon-32x32.png') }}">
-  <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='images/favicon-16x16.png') }}">
-  <link rel="manifest" href="{{ url_for('static', filename='images/site.webmanifest') }}">
-  <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-  <!-- Preview libraries (DOCX + XLSX) -->
-  <script src="https://cdn.jsdelivr.net/npm/docx-preview@0.3.2/dist/docx-preview.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-
   <style>
     :root {
-      --vj-primary:#003366;
-      --vj-accent:#0B5FFF;
-      --vj-bg: rgba(255,255,255,.88);
+      --vj-primary: #003366;
+      --vj-accent: #0B5FFF;
+      --vj-bg: rgba(255, 255, 255, .95);
       --vj-card: #ffffff;
-      --vj-soft: #f5f7fb;
-      --vj-border:#e6e9f2;
-      --vj-text:#203040;
-      --vj-muted:#6b7280;
+      --vj-border: #e2e8f0;
+      --vj-muted: #6b7280;
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Poppins', sans-serif;
-      color: var(--vj-text);
-      background: url('/static/images/dimension.jpg') no-repeat center center fixed;
-      background-size: cover;
+      background: linear-gradient(to bottom right, #f6f8fc, #ffffff);
+      color: var(--vj-primary);
+      min-height: 100vh;
     }
-
     .topbar {
-      display:flex; align-items:center; justify-content:space-between;
-      padding:14px 20px; background: var(--vj-bg); border-bottom:1px solid var(--vj-border);
-      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 18px;
+      background: var(--vj-bg);
+      border-bottom: 1px solid var(--vj-border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
-    .brand { display:flex; align-items:center; gap:12px; }
-    .brand img { height:48px; }
-    .brand h1 { font-size:20px; color:var(--vj-primary); font-weight:700; letter-spacing:.4px; }
-    .userbox { display:flex; align-items:center; gap:10px; color:var(--vj-primary); font-weight:600; }
-
+    .brand img { height: 46px; }
+    .userbox { display: flex; align-items: center; gap: 10px; }
     .btn {
-      display:inline-flex; align-items:center; gap:8px; padding:10px 12px; border-radius:10px;
-      border:1px solid var(--vj-border); background:#fff; cursor:pointer; text-decoration:none; color:inherit;
-      transition: transform .05s ease, background .2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--vj-border);
+      background: #fff;
+      color: var(--vj-primary);
+      font-size: 14px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: 0.2s;
     }
-    .btn:hover { background: var(--vj-soft); }
-    .btn-primary { background: var(--vj-accent); border-color: var(--vj-accent); color:#fff; }
-    .btn-primary:hover { filter: brightness(0.95); }
-
+    .btn:hover { background: #eef4ff; }
+    .btn-primary { background: var(--vj-accent); color: #fff; border-color: var(--vj-accent); }
     .container {
-      max-width: 1300px; margin:24px auto; background: var(--vj-bg);
-      border:1px solid var(--vj-border); border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.12);
-      padding:18px; backdrop-filter: blur(10px);
+      max-width: 1200px;
+      margin: 24px auto;
+      background: var(--vj-bg);
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, .06);
+      padding: 20px;
     }
-
-    .controls { display:flex; gap:12px; align-items:center; margin-bottom:16px; flex-wrap:wrap; }
-    .controls input[type="text"]{
-      flex:1; padding:12px 14px; border:1px solid var(--vj-border); border-radius:12px; background:#fff; outline:none;
+    .controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
     }
-    .controls select { padding:12px 14px; border-radius:12px; border:1px solid var(--vj-border); background:#fff; }
-
-    .browser { display:grid; grid-template-columns: 360px 1fr; gap:18px; }
-    .panel { background: var(--vj-card); border:1px solid var(--vj-border); border-radius:14px; padding:14px; box-shadow:0 4px 18px rgba(0,0,0,.06); }
-    .panel h3 { font-size:16px; color:var(--vj-primary); margin-bottom:10px; }
-    .list { max-height: 560px; overflow:auto; border:1px solid var(--vj-border); border-radius:12px; background:#fff; }
+    .controls input, .controls select {
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--vj-border);
+      flex: 1;
+      min-width: 180px;
+    }
+    .browser { display: grid; grid-template-columns: 300px 1fr; gap: 16px; }
+    .panel {
+      background: var(--vj-card);
+      border: 1px solid var(--vj-border);
+      border-radius: 10px;
+      padding: 12px;
+    }
+    .panel h3 { font-size: 15px; color: var(--vj-primary); margin-bottom: 8px; }
+    .list {
+      max-height: 55vh;
+      overflow: auto;
+      border-radius: 8px;
+      border: 1px solid var(--vj-border);
+      background: #fff;
+    }
     .list-item {
-      padding:12px 14px; border-bottom:1px solid var(--vj-border);
-      display:flex; justify-content:space-between; align-items:center;
-      transition: background .15s ease;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--vj-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: background 0.2s;
     }
-    .list-item:hover { background:#f9fbff; cursor:pointer; }
-    .pill { font-size:12px; padding:4px 8px; border-radius:20px; background:#eef4ff; color:#0045b5; }
-    .grid { width:100%; border-collapse:collapse; overflow:hidden; border-radius:12px; border:1px solid var(--vj-border); }
-    .grid th, .grid td { border-bottom:1px solid var(--vj-border); padding:12px; text-align:left; font-size:14px; }
-    .grid th { background: #f7f9fe; color:#334155; }
-    .muted { color: var(--vj-muted); font-size:12px; }
-    .actions { display:flex; gap:8px; flex-wrap:wrap; }
+    .list-item:hover { background: #f0f6ff; }
+    .grid {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .grid th, .grid td {
+      padding: 10px;
+      border-bottom: 1px solid var(--vj-border);
+      text-align: left;
+      font-size: 14px;
+    }
+    .grid th {
+      background: #f7f9fe;
+      font-weight: 600;
+      color: var(--vj-primary);
+    }
+    .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .muted { color: var(--vj-muted); font-size: 13px; }
 
-    /* Preview modal */
-    #previewModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.72); z-index:3000; align-items:center; justify-content:center; }
-    #previewCard {
-      background:#0a0a0a; color:#eaeaea; border-radius:14px; width:min(94vw, 1100px);
-      max-height:90vh; display:flex; flex-direction:column; overflow:hidden; position:relative;
-      box-shadow:0 20px 50px rgba(0,0,0,.5);
+    /* Preview Modal */
+    #previewModal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
     }
-    #previewHeader {
-      display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:#111827; border-bottom:1px solid #1f2937;
+    #previewBox {
+      background: #000;
+      border-radius: 10px;
+      width: min(95vw, 900px);
+      height: auto;
+      overflow: hidden;
+      position: relative;
     }
-    #previewTitle { font-size:14px; color:#e5e7eb; }
-    #previewBody { padding:0; background:#0a0a0a; display:flex; align-items:center; justify-content:center; }
-    #previewBody > .pad { width:100%; height:100%; padding:16px; overflow:auto; }
-    #previewClose { background:#fff; color:#111; border:none; border-radius:8px; padding:8px 12px; cursor:pointer; }
-    #previewVideo { width:100%; height:auto; max-height:78vh; background:#000; display:block; }
-    #previewImg { max-width:100%; max-height:78vh; display:block; margin:auto; }
-    #previewFrame { width:100%; height:78vh; border:0; background:#111; }
+    #previewBox video, #previewBox img, #previewBox iframe {
+      width: 100%;
+      height: auto;
+      max-height: 85vh;
+      display: none;
+    }
+    #previewClose {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(255,255,255,0.9);
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+    }
 
-    .no-preview {
-      color:#e5e7eb; text-align:center; padding:24px;
+    @media (max-width: 900px) {
+      .browser { grid-template-columns: 1fr; }
+      .list { max-height: 35vh; }
+      .btn { font-size: 13px; padding: 6px 8px; }
     }
-    .no-preview p{ margin-bottom:12px; color:#c7c9ce;}
-    .badge {
-      display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; font-size:12px; border:1px solid #374151; color:#e5e7eb;
-    }
-
-    @media (max-width: 1100px) { .browser { grid-template-columns:1fr; } }
   </style>
 </head>
 <body>
 
   <div class="topbar">
     <div class="brand">
-      <img src="{{ url_for('static', filename='images/venus_black_logo.jpg') }}" alt="Venus Jewel">
-      <h1>VENUS JEWEL — Files</h1>
+      <img src="{{ url_for('static', filename='images/venus_black_logo.jpg') }}" alt="Logo">
     </div>
     <div class="userbox">
-      <i class="fas fa-user-circle"></i> {{ user }}
+      <span><i class="fas fa-user-circle"></i> {{ user }}</span>
       <a class="btn" href="/dashboard"><i class="fas fa-arrow-left"></i> Dashboard</a>
       <a class="btn" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
     </div>
@@ -131,36 +176,24 @@
 
   <div class="container">
     <div class="controls">
-      <input type="text" id="searchBox" placeholder="Search Packet No or File name..." />
+      <input id="searchBox" type="text" placeholder="Search Packet No or File..." />
       <select id="sortSelect">
-        <option value="newest" selected>Newest first</option>
+        <option value="newest">Newest First</option>
         <option value="name">Name A–Z</option>
       </select>
       <button id="refreshBtn" class="btn"><i class="fas fa-rotate"></i> Refresh</button>
+      <a id="downloadFolderBtn" class="btn btn-primary" href="#" disabled><i class="fas fa-download"></i> Download Folder</a>
     </div>
 
     <div class="browser">
       <div class="panel">
-        <h3><i class="fas fa-box-archive"></i> Packet No Folders</h3>
+        <h3><i class="fas fa-folder"></i> Packet Folders</h3>
         <div id="packetList" class="list"></div>
       </div>
-
       <div class="panel">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <h3 id="filesTitle"><i class="fas fa-file"></i> Files</h3>
-          <button id="downloadFolderBtn" class="btn btn-primary" disabled>
-            <i class="fas fa-download"></i> Download Folder (ZIP)
-          </button>
-        </div>
-        <table class="grid" id="filesTable">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th class="muted">Type</th>
-              <th class="muted">Modified</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
+        <h3 id="filesTitle"><i class="fas fa-file"></i> Files</h3>
+        <table class="grid">
+          <thead><tr><th>Name</th><th>Type</th><th>Modified</th><th>Actions</th></tr></thead>
           <tbody id="filesBody"></tbody>
         </table>
       </div>
@@ -169,130 +202,134 @@
 
   <!-- Preview Modal -->
   <div id="previewModal">
-    <div id="previewCard" role="dialog" aria-modal="true">
-      <div id="previewHeader">
-        <div id="previewTitle">Preview</div>
-        <div style="display:flex;gap:8px;">
-          <a id="previewDownload" class="btn" href="#" target="_blank"><i class="fas fa-download"></i> Download</a>
-          <button id="previewClose" onclick="closePreview()">Close ✕</button>
-        </div>
-      </div>
-      <div id="previewBody">
-        <video id="previewVideo" controls playsinline style="display:none"></video>
-        <img id="previewImg" alt="Preview" style="display:none" />
-        <iframe id="previewFrame" style="display:none"></iframe>
-        <div id="docxPad" class="pad" style="display:none; background:#fff; color:#111;"></div>
-        <div id="xlsxPad" class="pad" style="display:none; background:#fff; color:#111;"></div>
-        <div id="noPreview" class="no-preview" style="display:none;">
-          <div class="badge"><i class="fas fa-eye-slash"></i> No inline preview available</div>
-          <p>You can download and open this file on your device.</p>
-        </div>
-      </div>
+    <div id="previewBox">
+      <button id="previewClose" onclick="closePreview()">✕</button>
+      <video id="previewVideo" controls></video>
+      <img id="previewImage" alt="Preview Image">
+      <iframe id="previewFrame"></iframe>
     </div>
   </div>
 
 <script>
-const packetList = document.getElementById('packetList');
-const filesBody = document.getElementById('filesBody');
-const filesTitle = document.getElementById('filesTitle');
-const downloadFolderBtn = document.getElementById('downloadFolderBtn');
-const searchBox = document.getElementById('searchBox');
-const sortSelect = document.getElementById('sortSelect');
-const refreshBtn = document.getElementById('refreshBtn');
+const packetList=document.getElementById('packetList');
+const filesBody=document.getElementById('filesBody');
+const filesTitle=document.getElementById('filesTitle');
+const downloadFolderBtn=document.getElementById('downloadFolderBtn');
+const searchBox=document.getElementById('searchBox');
+const sortSelect=document.getElementById('sortSelect');
 
-let allFolders = [], shownFolders = [], currentFolder = null, currentFiles = [], shownFiles = [];
+let currentFolder=null;
+let allFolders=[];let currentFiles=[];
 
-function extOf(name){ const i = (name||'').lastIndexOf('.'); return i>=0 ? name.slice(i+1).toLowerCase() : ''; }
-function typeBadge(type){ return (type||'').replace('application/','') || '-'; }
-
-function loadPacketFolders(){
-  packetList.innerHTML = '<div class="list-item"><span>Loading…</span></div>';
-  const qs = sortSelect.value === 'name' ? 'name' : 'newest';
-  fetch(`/api/packet-folders?sort=${qs}`)
-    .then(r=>r.json()).then(({folders})=>{
-      allFolders = folders || [];
-      applyFolderFilterSort();
-    })
-    .catch(()=> packetList.innerHTML='<div class="list-item"><span>Failed to load folders.</span></div>');
+function loadFolders(){
+  packetList.innerHTML='<div class="list-item">Loading…</div>';
+  fetch(`/api/packet-folders?sort=${sortSelect.value}`)
+  .then(r=>r.json())
+  .then(({folders})=>{
+    allFolders=folders||[];
+    renderFolders();
+  })
+  .catch(()=>packetList.innerHTML='<div class="list-item">Failed to load folders</div>');
 }
 
-function applyFolderFilterSort(){
-  const q = searchBox.value.trim().toLowerCase();
-  shownFolders = allFolders.filter(f => !q || (f.name||'').toLowerCase().includes(q));
-  if (sortSelect.value === 'name')
-    shownFolders.sort((a,b)=>(a.name||'').localeCompare(b.name||'',undefined,{numeric:true,sensitivity:'base'}));
-  else shownFolders.sort((a,b)=>new Date(b.modifiedTime||0)-new Date(a.modifiedTime||0));
-  renderFolderList();
-}
-
-function renderFolderList(){
+function renderFolders(){
+  const q=searchBox.value.toLowerCase();
+  const fltrs=allFolders.filter(f=>!q||(f.name||'').toLowerCase().includes(q));
   packetList.innerHTML='';
-  if(!shownFolders.length){
-    packetList.innerHTML='<div class="list-item"><span>No folders found.</span></div>';
-    filesBody.innerHTML=''; filesTitle.innerHTML='<i class="fas fa-file"></i> Files';
-    downloadFolderBtn.disabled=true; return;
-  }
-  shownFolders.forEach(f=>{
-    const row=document.createElement('div'); row.className='list-item';
-    const date=f.modifiedTime?new Date(f.modifiedTime).toLocaleString():'';
-    row.innerHTML=`<span><i class="fas fa-folder"></i> ${f.name}</span><span class="pill">${date||'—'}</span>`;
-    row.onclick=()=>selectFolder(f.id,f.name); packetList.appendChild(row);
+  if(!fltrs.length){packetList.innerHTML='<div class="list-item">No folders found</div>';return;}
+  fltrs.forEach(f=>{
+    const row=document.createElement('div');
+    row.className='list-item';
+    row.innerHTML=`<span><i class="fas fa-folder"></i> ${f.name}</span><span class="muted">${new Date(f.modifiedTime).toLocaleString()}</span>`;
+    row.onclick=()=>selectFolder(f.id,f.name);
+    packetList.appendChild(row);
   });
 }
 
-function selectFolder(folderId,name){
-  currentFolder={id:folderId,name};
-  filesTitle.innerHTML=`<i class="fas fa-file"></i> Files — ${name}`;
-  downloadFolderBtn.disabled=false; loadFiles(folderId);
+function selectFolder(id,name){
+  currentFolder={id,name};
+  filesTitle.textContent=`Files — ${name}`;
+  downloadFolderBtn.removeAttribute('disabled');
+  downloadFolderBtn.href=`/download/folder/${id}`;
+  loadFiles(id);
 }
 
 function loadFiles(folderId){
   filesBody.innerHTML='<tr><td colspan="4">Loading…</td></tr>';
-  const qs=sortSelect.value==='name'?'name':'newest';
-  fetch(`/api/folder/${folderId}/files?sort=${qs}`)
-    .then(r=>r.json()).then(({files})=>{
-      currentFiles=files||[]; applyFileFilterSort();
-    })
-    .catch(()=> filesBody.innerHTML='<tr><td colspan="4">Failed to load files.</td></tr>');
-}
-
-function applyFileFilterSort(){
-  const q=searchBox.value.trim().toLowerCase();
-  shownFiles=currentFiles.filter(f=>!q||(f.name||'').toLowerCase().includes(q));
-  if(sortSelect.value==='name')
-    shownFiles.sort((a,b)=>(a.name||'').localeCompare(b.name||'',undefined,{numeric:true,sensitivity:'base'}));
-  else shownFiles.sort((a,b)=>new Date(b.modifiedTime||0)-new Date(a.modifiedTime||0));
-  renderFiles();
+  fetch(`/api/folder/${folderId}/files?sort=${sortSelect.value}`)
+  .then(r=>r.json())
+  .then(({files})=>{
+    currentFiles=files||[];
+    renderFiles();
+  })
+  .catch(()=>filesBody.innerHTML='<tr><td colspan="4">Failed to load files</td></tr>');
 }
 
 function renderFiles(){
+  const q=searchBox.value.toLowerCase();
+  const fltrs=currentFiles.filter(f=>!q||(f.name||'').toLowerCase().includes(q));
   filesBody.innerHTML='';
-  if(!shownFiles.length){ filesBody.innerHTML='<tr><td colspan="4">No files found.</td></tr>'; return; }
-  shownFiles.forEach(f=>{
-    const type=f.mimeType||'-'; const date=f.modifiedTime?new Date(f.modifiedTime).toLocaleString():'';
+  if(!fltrs.length){filesBody.innerHTML='<tr><td colspan="4">No files found</td></tr>';return;}
+  fltrs.forEach(f=>{
     const tr=document.createElement('tr');
-    const previewBtn=`<button class="btn" onclick="openPreview('${f.id}','${encodeURIComponent(f.name)}','${type}')"><i class="fas fa-eye"></i> Preview</button>`;
-    const dlBtn=`<a class="btn" href="/download/file/${f.id}"><i class="fas fa-download"></i> Download</a>`;
-    const shareBtn=`<button class="btn" onclick="openShare('${f.id}','${encodeURIComponent(f.name)}')"><i class="fas fa-share-alt"></i> Share</button>`;
-    tr.innerHTML=`<td>${f.name}</td><td class="muted">${typeBadge(type)}</td><td class="muted">${date}</td><td class="actions">${previewBtn} ${dlBtn} ${shareBtn}</td>`;
+    const mime=f.mimeType||'';
+    const ext=(f.name.split('.').pop()||'').toLowerCase();
+    const date=f.modifiedTime?new Date(f.modifiedTime).toLocaleString():'';
+    tr.innerHTML=`
+      <td>${f.name}</td>
+      <td>${mime.replace('application/','')}</td>
+      <td>${date}</td>
+      <td class="actions">
+        <button class="btn" onclick="openPreview('${f.id}','${mime}','${ext}')"><i class="fas fa-eye"></i> Preview</button>
+        <a class="btn" href="/download/file/${f.id}"><i class="fas fa-download"></i> Download</a>
+        <button class="btn" onclick="shareFile('${f.id}')"><i class="fas fa-share-alt"></i> Share</button>
+      </td>`;
     filesBody.appendChild(tr);
   });
 }
 
-function openShare(fileId,encName){
-  const name=decodeURIComponent(encName);
-  window.location.href=`/share?id=${fileId}&name=${encodeURIComponent(name)}`;
+// Preview logic
+const modal=document.getElementById('previewModal');
+const video=document.getElementById('previewVideo');
+const img=document.getElementById('previewImage');
+const frame=document.getElementById('previewFrame');
+
+function openPreview(id,mime,ext){
+  video.style.display=img.style.display=frame.style.display='none';
+  const url=`/preview/file/${id}`;
+  if(mime.startsWith('video/')||['mp4','mov','mkv','webm','hevc'].includes(ext)){
+    video.src=url;video.style.display='block';modal.style.display='flex';video.play();return;
+  }
+  if(mime.startsWith('image/')||['jpg','jpeg','png','gif','webp'].includes(ext)){
+    img.src=url;img.style.display='block';modal.style.display='flex';return;
+  }
+  if(mime==='application/pdf'||ext==='pdf'){
+    frame.src=url;frame.style.display='block';modal.style.display='flex';return;
+  }
+  // fallback
+  alert('Preview not supported for this file. Please download.');
 }
 
-/* Preview functions (unchanged) */
-function closePreview(){document.getElementById('previewModal').style.display='none';}
-searchBox.addEventListener('input',()=>{applyFolderFilterSort();applyFileFilterSort();});
-sortSelect.addEventListener('change',()=>{loadPacketFolders();if(currentFolder)loadFiles(currentFolder.id);});
-downloadFolderBtn.addEventListener('click',()=>{if(currentFolder)window.location.href=`/download/folder/${currentFolder.id}`;});
-refreshBtn.addEventListener('click',e=>{e.preventDefault();loadPacketFolders();if(currentFolder)loadFiles(currentFolder.id);});
+function closePreview(){
+  modal.style.display='none';video.pause();video.src='';
+}
 
-loadPacketFolders();
+// Share file
+function shareFile(id){
+  fetch(`/api/share-link?id=${id}`).then(r=>r.json()).then(d=>{
+    if(!d.link)return alert('Failed to get share link');
+    if(navigator.share){
+      navigator.share({title:'Venus File',text:'File Share',url:d.link}).catch(()=>{});
+    }else{
+      navigator.clipboard.writeText(d.link);
+      alert('Link copied to clipboard:\n'+d.link);
+    }
+  });
+}
+
+searchBox.oninput=()=>{renderFolders();renderFiles();};
+sortSelect.onchange=()=>{loadFolders();if(currentFolder)loadFiles(currentFolder.id);};
+loadFolders();
 </script>
-
 </body>
 </html>
