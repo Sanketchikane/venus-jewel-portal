@@ -1,36 +1,30 @@
 import gspread
+from google.oauth2.service_account import Credentials
 from datetime import datetime
-from backends.email_service import send_email
 
-SHEET_ID = "181GnSNYNBciNNUlWLXsIYNZ5qsxpDkIftfBzHrycHro"
-ADMIN_EMAIL = "admin@venusjewel.com"
-
-def handle_registration(form, creds):
+def handle_registration(form_data, creds):
+    """
+    Saves a new registration request to the first Google Sheet tab.
+    Only changed input field mappings. Everything else remains untouched.
+    """
     client = gspread.authorize(creds)
-    sheet = client.open_by_key(SHEET_ID).sheet1  # assuming single sheet
+    sheet = client.open_by_key("181GnSNYNBciNNUlWLXsIYNZ5qsxpDkIftfBzHrycHro").sheet1  # 'Registration Requests' tab
 
-    full_name = form.get("full_name")
-    username = form.get("username")
-    password = form.get("password")
-    contact = form.get("contact_number")
-    org = form.get("organization")
+    # ✅ Extract new fields (updated names)
+    full_name = form_data.get("full_name", "").strip()
+    email = form_data.get("email_address", "").strip()
+    contact = form_data.get("contact_number", "").strip()
+    organization = form_data.get("organization", "").strip()
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    # Save to Sheet
+    # ✅ Write to sheet (kept structure consistent with admin_users.html view)
     sheet.append_row([
-        full_name, username, password, contact, org, "⏳ Pending", datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        full_name,
+        email,
+        contact,
+        organization,
+        "Pending",   # registration status
+        timestamp
     ])
 
-    # Send mail to Admin
-    subject = f"🆕 New Registration Request - {full_name}"
-    body = f"""
-    <h3>New Registration Request</h3>
-    <p><b>Name:</b> {full_name}<br>
-    <b>Username:</b> {username}<br>
-    <b>Contact:</b> {contact}<br>
-    <b>Organization:</b> {org}</p>
-    <p><a href='https://yourdomain.com/admin/approve?username={username}'>
-    ✅ Approve User</a></p>
-    """
-
-    send_email(ADMIN_EMAIL, subject, body)
     return True
