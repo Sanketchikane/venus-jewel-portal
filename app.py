@@ -1,4 +1,5 @@
 # app.py — FINAL (Old features kept + Secure Share Feature Added + safe gspread writes)
+
 from flask import (
     Flask, render_template, request, redirect, url_for, session, flash,
     send_from_directory, jsonify, make_response, abort, send_file
@@ -37,7 +38,32 @@ creds = service_account.Credentials.from_service_account_file(CREDENTIALS_PATH, 
 
 client = gspread.authorize(creds)
 SHEET_ID = '181GnSNYNBciNNUlWLXsIYNZ5qsxpDkIftfBzHrycHro'
-sheet = client.open_by_key(SHEET_ID).worksheet('Registration')
+
+# NOTE: keep both worksheet handles — Registration (incoming requests) and Credentials (approved users)
+def get_registration_sheet():
+    try:
+        return client.open_by_key(SHEET_ID).worksheet('Registration')
+    except Exception as e:
+        print(f"[WARN] Cannot open Registration worksheet: {e}")
+        raise
+
+def get_credentials_sheet():
+    try:
+        return client.open_by_key(SHEET_ID).worksheet('Credentials')
+    except Exception as e:
+        print(f"[WARN] Cannot open Credentials worksheet: {e}")
+        raise
+
+# For legacy code that referenced `sheet`, we keep a `reg_sheet` reference when needed
+try:
+    reg_sheet = get_registration_sheet()
+except Exception:
+    reg_sheet = None
+
+try:
+    creds_sheet = get_credentials_sheet()
+except Exception:
+    creds_sheet = None
 
 DRIVE_FOLDER_ID = '0AEZXjYA5wFlSUk9PVA'
 drive_service = build('drive', 'v3', credentials=creds)
@@ -80,11 +106,13 @@ def safe_append_row(ws, row, retries=4, backoff=1.5):
         try:
             ws.append_row(row)
             return True
-        except APIError:
+        except APIError as e:
             attempt += 1
+            print(f"[WARN] safe_append_row attempt {attempt}: {e}")
             time.sleep(backoff * attempt)
-        except Exception:
+        except Exception as e:
             attempt += 1
+            print(f"[WARN] safe_append_row unexpected attempt {attempt}: {e}")
             time.sleep(backoff * attempt)
     raise RuntimeError("Failed to append row after retries.")
 
@@ -94,26 +122,35 @@ def safe_update_cell(ws, row, col, value, retries=4, backoff=1.5):
         try:
             ws.update_cell(row, col, value)
             return True
-        except APIError:
+        except APIError as e:
             attempt += 1
+            print(f"[WARN] safe_update_cell attempt {attempt}: {e}")
             time.sleep(backoff * attempt)
-        except Exception:
+        except Exception as e:
             attempt += 1
+            print(f"[WARN] safe_update_cell unexpected attempt {attempt}: {e}")
             time.sleep(backoff * attempt)
     raise RuntimeError("Failed to update cell after retries.")
 
 # ---------------- Helpers (Shared Drive aware) ----------------
 def username_exists(username):
+    """Check in Credentials sheet for an existing username."""
     try:
-        return username in sheet.col_values(3)[1:]
-    except Exception:
+        ws = get_credentials_sheet()
+        values = ws.col_values(3)  # assuming column C is Username in Credentials
+        return username in values[1:]  # skip header
+    except Exception as e:
+        print(f"[WARN] username_exists error: {e}")
         return False
 
 def get_user(username):
+    """Return user record from Credentials sheet (not Registration)."""
     try:
-        for i, u in enumerate(sheet.col_values(3)[1:], start=2):
+        ws = get_credentials_sheet()
+        all_usernames = ws.col_values(3)[1:]  # column C = Username
+        for i, u in enumerate(all_usernames, start=2):
             if u == username:
-                row = sheet.row_values(i)
+                row = ws.row_values(i)
                 def col(n): return row[n] if len(row) > n else ''
                 return {
                     'row_number': i,
@@ -122,10 +159,11 @@ def get_user(username):
                     'Username': col(2),
                     'Password': col(3),
                     'Contact Number': col(4),
-                    'Organization': col(5)
+                    'Organization': col(5),
+                    # include any extra columns if present
                 }
-    except Exception:
-        return None
+    except Exception as e:
+        print(f"[WARN] get_user error: {e}")
     return None
 
 def get_or_create_folder(name, parent_id):
@@ -166,7 +204,8 @@ def mute_video(file_storage, filename):
         subprocess.run(['ffmpeg', '-i', input_path, '-c:v', 'copy', '-an', output_path],
                        check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         return io.BytesIO(open(output_path, 'rb').read())
-    except Exception:
+    except Exception as e:
+        print(f"[WARN] mute_video ffmpeg failed: {e}")
         return io.BytesIO(open(input_path, 'rb').read())
 
 def list_packet_folders(order="modifiedTime desc"):
@@ -218,17 +257,18 @@ def login():
             session.update({'username': username, 'venus_user': True})
             return redirect(url_for('venus_upload_dashboard'))
         user = get_user(username)
-        if user and user['Password'] == password:
+        if user and user.get('Password') == password:
             session.update({'username': username, 'admin': False})
             return response
         flash('Invalid credentials.', 'danger')
     return render_template('login.html')
 
-# ✅ FIXED: Registration for Email-based signup
+# ✅ FIXED: Registration for Email-based signup (stores into Registration sheet via backend)
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
         try:
+            # submit_registration should append to Registration sheet
             submit_registration(request.form, creds)
             flash("✅ Registration request sent successfully. Admin will approve your account.", "success")
             return redirect(url_for('login'))
@@ -349,18 +389,38 @@ def admin_users():
     if not session.get('admin'):
         flash('Admin access only.', 'danger')
         return redirect(url_for('login'))
-    records = sheet.get_all_values()
-    headers = records[0] if records else []
-    users = [dict(zip(headers, row)) for row in records[1:]] if len(records) > 1 else []
-    return render_template('admin_users.html', users=users)
+    try:
+        # Read from Credentials sheet (approved accounts)
+        ws = get_credentials_sheet()
+        records = ws.get_all_values()
+        if not records or len(records) < 2:
+            # no approved users yet
+            return render_template('admin_users.html', users=[])
+        headers = records[0]
+        users = []
+        for row in records[1:]:
+            # pad shorter rows
+            while len(row) < len(headers):
+                row.append("")
+            users.append(dict(zip(headers, row)))
+        return render_template('admin_users.html', users=users)
+    except Exception as e:
+        print(f"[ERROR] admin_users(): {e}")
+        flash(f"Error loading users: {e}", "danger")
+        return render_template('admin_users.html', users=[])
 
 # ✅ NEW: Admin API + actions
 @app.route('/api/pending-registrations')
 def api_pending_registrations():
     if not session.get('admin'):
         return jsonify({"error": "forbidden"}), 403
-    pending = get_pending_requests(creds)
-    return jsonify({"pending": pending})
+    # use backend helper to read Registration entries
+    try:
+        pending = get_pending_requests(creds)
+        return jsonify({"pending": pending})
+    except Exception as e:
+        print(f"[ERROR] api_pending_registrations: {e}")
+        return jsonify({"pending": []})
 
 @app.route('/admin/create-credential', methods=['POST'])
 def admin_create_credential():
@@ -372,8 +432,12 @@ def admin_create_credential():
     if not (reg_email and new_username and new_password):
         flash('Missing required fields.', 'danger')
         return redirect(url_for('admin_users'))
-    ok = create_credentials_from_request(reg_email, new_username, new_password, creds)
-    flash('✅ Credentials created & emailed to user.' if ok else '❌ Failed to create credentials.', 'info')
+    try:
+        ok = create_credentials_from_request(reg_email, new_username, new_password, creds)
+        flash('✅ Credentials created & emailed to user.' if ok else '❌ Failed to create credentials.', 'info')
+    except Exception as e:
+        print(f"[ERROR] admin_create_credential: {e}")
+        flash(f"Error creating credentials: {e}", "danger")
     return redirect(url_for('admin_users'))
 
 @app.route('/admin/reset-password', methods=['POST'])
@@ -385,8 +449,12 @@ def admin_reset_password():
     if not (target and new_password):
         flash('Missing target or password.', 'danger')
         return redirect(url_for('admin_users'))
-    ok = reset_password_for_username(target, new_password, creds)
-    flash('✅ Password reset & emailed to user.' if ok else '❌ User not found.', 'info')
+    try:
+        ok = reset_password_for_username(target, new_password, creds)
+        flash('✅ Password reset & emailed to user.' if ok else '❌ User not found.', 'info')
+    except Exception as e:
+        print(f"[ERROR] admin_reset_password: {e}")
+        flash(f"Error resetting password: {e}", "danger")
     return redirect(url_for('admin_users'))
 
 # ---------------- Old local file serving (kept) ----------------
