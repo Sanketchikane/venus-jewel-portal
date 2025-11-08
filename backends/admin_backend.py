@@ -24,14 +24,36 @@ def create_credentials_from_request(email, username, password, creds):
     row_data = reg_entry["row"]
     row_num = reg_entry["row_number"]
 
-    full_name = row_data.get("Full Name", "")
-    contact = row_data.get("Contact", "")
-    org = row_data.get("Organization", "")
+    # Adjust keys based on your actual Registration Sheet columns
+    full_name = (
+        row_data.get("Full Name") or
+        row_data.get("Name") or
+        row_data.get("Full_Name") or
+        row_data.get("Full name") or
+        ""
+    )
+    email_field = (
+        row_data.get("Email") or
+        row_data.get("Email Address") or
+        row_data.get("E-mail") or
+        email
+    )
+    contact = (
+        row_data.get("Contact") or
+        row_data.get("Contact Number") or
+        row_data.get("Phone") or
+        ""
+    )
+    org = (
+        row_data.get("Organization") or
+        row_data.get("Company") or
+        ""
+    )
 
     # Write credentials to the 'Credentials' sheet
     creds_ws = client.open_by_key(SHEET_KEY).worksheet(CREDS_WS_NAME)
     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    creds_ws.append_row([ts, full_name, username, password, contact, org, email])
+    creds_ws.append_row([ts, full_name, username, password, contact, org, email_field])
 
     # Update registration status
     update_registration_status_by_row(row_num, "✅ Approved", creds)
@@ -48,4 +70,5 @@ def create_credentials_from_request(email, username, password, creds):
         "Please keep your credentials secure.\n\n"
         "Best regards,\nVenus Jewel Admin Team"
     )
-    return send_email(email, subject, body)
+
+    return send_email(email_field, subject, body)
