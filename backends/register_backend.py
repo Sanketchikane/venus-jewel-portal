@@ -1,30 +1,51 @@
+# backends/register_backend.py
 import gspread
-from google.oauth2.service_account import Credentials
 from datetime import datetime
 
-def handle_registration(form_data, creds):
+SHEET_KEY = "181GnSNYNBciNNUlWLXsIYNZ5qsxpDkIftfBzHrycHro"
+# Expected worksheet names:
+REG_WS_NAME = "Registration"    # where raw registration requests go (tab 1)
+CREDS_WS_NAME = "Credentials"   # where approved credentials are stored (tab 2)
+
+def submit_registration(form_data, creds):
     """
-    Saves a new registration request to the first Google Sheet tab.
-    Only changed input field mappings. Everything else remains untouched.
+    Append a registration request row to the Registration worksheet.
+    form_data: a dict-like with full_name, email_address, contact_number, organization
+    creds: google service_account.Credentials instance
     """
     client = gspread.authorize(creds)
-    sheet = client.open_by_key("181GnSNYNBciNNUlWLXsIYNZ5qsxpDkIftfBzHrycHro").sheet1  # 'Registration Requests' tab
+    ws = client.open_by_key(SHEET_KEY).worksheet(REG_WS_NAME)
 
-    # ✅ Extract new fields (updated names)
     full_name = form_data.get("full_name", "").strip()
     email = form_data.get("email_address", "").strip()
     contact = form_data.get("contact_number", "").strip()
-    organization = form_data.get("organization", "").strip()
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    org = form_data.get("organization", "").strip()
+    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    # ✅ Write to sheet (kept structure consistent with admin_users.html view)
-    sheet.append_row([
-        full_name,
-        email,
-        contact,
-        organization,
-        "Pending",   # registration status
-        timestamp
-    ])
+    # Append row (keeps same column order as you planned)
+    ws.append_row([ts, full_name, email, contact, org, "Pending"])
+    return True
 
+def get_pending_requests(creds):
+    """Return list of pending registration rows as dicts (header-based)."""
+    client = gspread.authorize(creds)
+    ws = client.open_by_key(SHEET_KEY).worksheet(REG_WS_NAME)
+    records = ws.get_all_records()
+    pending = [r for r in records if str(r.get("Status", "")).strip().lower() in ("pending", "pending " , "⏳ pending")]
+    return pending
+
+def find_registration_by_email(email, creds):
+    client = gspread.authorize(creds)
+    ws = client.open_by_key(SHEET_KEY).worksheet(REG_WS_NAME)
+    records = ws.get_all_records()
+    email = (email or "").strip().lower()
+    for i, row in enumerate(records, start=2):
+        if str(row.get("Email", "")).strip().lower() == email:
+            return {"row_number": i, "row": row}
+    return None
+
+def update_registration_status_by_row(row_number, status, creds):
+    client = gspread.authorize(creds)
+    ws = client.open_by_key(SHEET_KEY).worksheet(REG_WS_NAME)
+    ws.update_cell(row_number, 6, status)  # assuming Status is column 6 (A=1)
     return True
