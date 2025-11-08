@@ -1,74 +1,51 @@
+# backends/admin_backend.py
 import gspread
 from datetime import datetime
-from google.oauth2 import service_account
-from backends.email_service import send_email_notification
+from backends.email_service import send_email
+from backends.register_backend import find_registration_by_email, update_registration_status_by_row
 
-# Google Sheet ID (same as app.py)
-SHEET_ID = "181GnSNYNBciNNUlWLXsIYNZ5qsxpDkIftfBzHrycHro"
+SHEET_KEY = "181GnSNYNBciNNUlWLXsIYNZ5qsxpDkIftfBzHrycHro"
+REG_WS_NAME = "Registration"
+CREDS_WS_NAME = "Credentials"
 
 def create_credentials_from_request(email, username, password, creds):
     """
-    Creates credentials for a user whose email exists in Registration sheet.
-    Writes to 'Credentials' sheet and marks the request as approved.
-    Sends login details via email.
+    Move a registration from 'Registration' to 'Credentials' after admin approval.
+    Updates both sheets and emails the user their credentials.
     """
-    try:
-        client = gspread.authorize(creds)
-        reg_ws = client.open_by_key(SHEET_ID).worksheet("Registration")
-        cred_ws = client.open_by_key(SHEET_ID).worksheet("Credentials")
+    client = gspread.authorize(creds)
 
-        records = reg_ws.get_all_records()
-        target_row = None
-        reg_data = None
-
-        for i, row in enumerate(records, start=2):  # skip header
-            if str(row.get("Email", "")).strip().lower() == email.strip().lower():
-                target_row = i
-                reg_data = row
-                break
-
-        if not reg_data:
-            print(f"[WARN] No registration found for email: {email}")
-            return False
-
-        # Prepare row for Credentials sheet
-        row_to_insert = [
-            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            reg_data.get("Full Name", ""),
-            username,
-            password,
-            reg_data.get("Contact Number", ""),
-            reg_data.get("Organization", ""),
-            email
-        ]
-
-        cred_ws.append_row(row_to_insert)
-
-        # Mark registration as Approved
-        reg_ws.update_cell(target_row, 6, "Approved")
-
-        # Email user
-        subject = "✅ Venus Jewel File Portal Credentials Approved"
-        message = f"""
-Dear {reg_data.get('Full Name', '')},
-
-Your registration for the Venus Jewel File Portal has been approved.
-
-Here are your login credentials:
-
-🔹 Username: {username}
-🔹 Password: {password}
-
-Please log in at:
-https://venus-file-portal.onrender.com/login
-
-Thank you,
-Venus Jewel Admin Team
-"""
-        send_email_notification(email, subject, message)
-        print(f"[INFO] Credentials created and emailed to {email}")
-        return True
-
-    except Exception as e:
-        print(f"[ERROR] create_credentials_from_request: {e}")
+    # Find registration record
+    reg_entry = find_registration_by_email(email, creds)
+    if not reg_entry:
+        print(f"[ERROR] Registration not found for {email}")
         return False
+
+    row_data = reg_entry["row"]
+    row_num = reg_entry["row_number"]
+
+    full_name = row_data.get("Full Name", "")
+    contact = row_data.get("Contact", "")
+    org = row_data.get("Organization", "")
+
+    # Write credentials to the 'Credentials' sheet
+    creds_ws = client.open_by_key(SHEET_KEY).worksheet(CREDS_WS_NAME)
+    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    creds_ws.append_row([ts, full_name, username, password, contact, org, email])
+
+    # Update registration status
+    update_registration_status_by_row(row_num, "✅ Approved", creds)
+
+    # Send credentials email
+    subject = "Venus Jewel Portal – Account Approved"
+    body = (
+        f"Dear {full_name},\n\n"
+        "Your Venus Jewel File Portal registration has been approved.\n\n"
+        f"Here are your login credentials:\n"
+        f"Username: {username}\n"
+        f"Password: {password}\n\n"
+        "You can now log in at: https://your-venus-file-portal-url\n\n"
+        "Please keep your credentials secure.\n\n"
+        "Best regards,\nVenus Jewel Admin Team"
+    )
+    return send_email(email, subject, body)
