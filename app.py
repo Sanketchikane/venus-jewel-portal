@@ -80,10 +80,10 @@ def safe_append_row(ws, row, retries=4, backoff=1.5):
         try:
             ws.append_row(row)
             return True
-        except APIError as e:
+        except APIError:
             attempt += 1
             time.sleep(backoff * attempt)
-        except Exception as e:
+        except Exception:
             attempt += 1
             time.sleep(backoff * attempt)
     raise RuntimeError("Failed to append row after retries.")
@@ -94,10 +94,10 @@ def safe_update_cell(ws, row, col, value, retries=4, backoff=1.5):
         try:
             ws.update_cell(row, col, value)
             return True
-        except APIError as e:
+        except APIError:
             attempt += 1
             time.sleep(backoff * attempt)
-        except Exception as e:
+        except Exception:
             attempt += 1
             time.sleep(backoff * attempt)
     raise RuntimeError("Failed to update cell after retries.")
@@ -130,8 +130,9 @@ def get_user(username):
 
 def get_or_create_folder(name, parent_id):
     query = f"name='{name}' and mimeType='application/vnd.google-apps.folder' and '{parent_id}' in parents and trashed=false"
-    results = drive_service.files().list(q=query, fields="files(id,name)",
-        includeItemsFromAllDrives=True, supportsAllDrives=True).execute()
+    results = drive_service.files().list(
+        q=query, fields="files(id,name)", includeItemsFromAllDrives=True, supportsAllDrives=True
+    ).execute()
     folders = results.get('files', [])
     if folders:
         return folders[0]['id']
@@ -171,15 +172,17 @@ def mute_video(file_storage, filename):
 def list_packet_folders(order="modifiedTime desc"):
     results = drive_service.files().list(
         q=f"'{DRIVE_FOLDER_ID}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false",
-        fields="files(id,name,modifiedTime)",
-        orderBy=order, includeItemsFromAllDrives=True, supportsAllDrives=True).execute()
+        fields="files(id,name,modifiedTime)", orderBy=order,
+        includeItemsFromAllDrives=True, supportsAllDrives=True
+    ).execute()
     return results.get('files', [])
 
 def list_files_in_folder(folder_id, order="modifiedTime desc"):
     results = drive_service.files().list(
         q=f"'{folder_id}' in parents and trashed=false",
-        fields="files(id,name,mimeType,size,modifiedTime)",
-        orderBy=order, includeItemsFromAllDrives=True, supportsAllDrives=True).execute()
+        fields="files(id,name,mimeType,size,modifiedTime)", orderBy=order,
+        includeItemsFromAllDrives=True, supportsAllDrives=True
+    ).execute()
     return results.get('files', [])
 
 def download_file_to_bytes(file_id):
@@ -242,9 +245,98 @@ def dashboard():
     return render_template('dashboard.html', user=session['username'])
 
 # ---------------- Upload / Files / Share ----------------
-# (all your existing routes stay same)
-# ---------------- Admin routes (existing + new) ----------------
+@app.route('/upload', methods=['POST'])
+def upload():
+    try:
+        packet_no = request.form.get('packetNo', '').strip()
+        if not packet_no:
+            return jsonify({'success': False, 'message': 'Packet number is required.'}), 400
+        folder_id = get_or_create_folder(packet_no, DRIVE_FOLDER_ID)
+        for key in request.files:
+            subpoint = key.replace('file_', '')
+            for file in request.files.getlist(key):
+                if file and file.filename:
+                    ext = os.path.splitext(file.filename)[1]
+                    base_filename = f"{subpoint}{ext}"
+                    final_filename = get_unique_filename(base_filename, folder_id)
+                    if final_filename.lower().endswith(('.mp4', '.mov', '.avi', '.mkv', '.webm')):
+                        file_stream = mute_video(file, final_filename)
+                        mimetype = 'video/mp4'
+                    else:
+                        file_stream = io.BytesIO(file.read())
+                        mimetype = file.mimetype or 'application/octet-stream'
+                    file_stream.seek(0)
+                    media = MediaIoBaseUpload(file_stream, mimetype=mimetype)
+                    drive_service.files().create(
+                        body={'name': final_filename, 'parents': [folder_id]},
+                        media_body=media, fields='id', supportsAllDrives=True
+                    ).execute()
+        return jsonify({'success': True, 'message': '✅ All files uploaded and muted successfully.'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Upload failed: {e}'}), 500
 
+@app.route('/files')
+def files_page():
+    if not session.get('username'):
+        return redirect(url_for('login'))
+    return render_template('files.html', user=session['username'])
+
+@app.route('/share')
+def share_page():
+    if not session.get('username'):
+        return redirect(url_for('login'))
+    return render_template('share.html', user=session['username'])
+
+@app.route('/api/share-link')
+def api_share_link():
+    if not session.get('username'):
+        return abort(401)
+    file_id = request.args.get('id')
+    if not file_id:
+        return jsonify({'error': 'missing id'}), 400
+    link = generate_secure_link(file_id)
+    full_url = request.url_root.rstrip('/') + link
+    return jsonify({'link': full_url})
+
+# ---------------- File APIs ----------------
+@app.route('/api/packet-folders')
+def api_packet_folders():
+    if not session.get('username'):
+        return abort(401)
+    sort = request.args.get('sort', 'newest')
+    order = 'modifiedTime desc' if sort == 'newest' else 'name_natural'
+    folders = list_packet_folders(order=order)
+    return jsonify({'folders': folders})
+
+@app.route('/api/folder/<folder_id>/files')
+def api_folder_files(folder_id):
+    if not session.get('username'):
+        return abort(401)
+    sort = request.args.get('sort', 'newest')
+    order = 'modifiedTime desc' if sort == 'newest' else 'name_natural'
+    files = list_files_in_folder(folder_id, order=order)
+    return jsonify({'files': files})
+
+@app.route('/download/file/<file_id>')
+def download_file_route(file_id):
+    if not session.get('username'):
+        return abort(401)
+    name, mime, fh = download_file_to_bytes(file_id)
+    return send_file(fh, mimetype=mime, as_attachment=True, download_name=name)
+
+@app.route('/preview/file/<file_id>')
+def preview_file(file_id):
+    t = request.args.get('t')
+    s = request.args.get('s')
+    if t and s:
+        if not verify_secure_link(file_id, t, s):
+            return abort(403)
+    elif not session.get('username'):
+        return abort(401)
+    name, mime, fh = download_file_to_bytes(file_id)
+    return send_file(fh, mimetype=mime, as_attachment=False, download_name=name)
+
+# ---------------- Admin routes (existing + new) ----------------
 @app.route('/admin-dashboard')
 def admin_dashboard():
     if not session.get('admin'):
@@ -296,6 +388,27 @@ def admin_reset_password():
     ok = reset_password_for_username(target, new_password, creds)
     flash('✅ Password reset & emailed to user.' if ok else '❌ User not found.', 'info')
     return redirect(url_for('admin_users'))
+
+# ---------------- Old local file serving (kept) ----------------
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+# ---------------- Optional: stub for venus_upload_dashboard to avoid 404 ----------------
+@app.route('/venus-upload')
+def venus_upload_dashboard():
+    if not session.get('venus_user'):
+        return redirect(url_for('login'))
+    return render_template('Venus_Upload.html', user=session.get('username', ''))
+
+# ---------------- Logout (kept) ----------------
+@app.route('/logout')
+def logout():
+    session.clear()
+    resp = make_response(redirect(url_for('login') + '?showSplash=1'))
+    resp.set_cookie('username', '', expires=0)
+    resp.set_cookie('password', '', expires=0)
+    return resp
 
 # ---------------- Entrypoint ----------------
 if __name__ == '__main__':
