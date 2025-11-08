@@ -1,39 +1,36 @@
-import json, os
+import gspread
+from datetime import datetime
 from backends.email_service import send_email
 
-DATA_FILE = "data/pending_users.json"
+SHEET_ID = "181GnSNYNBciNNUlWLXsIYNZ5qsxpDkIftfBzHrycHro"
 ADMIN_EMAIL = "admin@venusjewel.com"
 
-def handle_registration(form):
-    user_data = {
-        "full_name": form.get("full_name"),
-        "username": form.get("username"),
-        "password": form.get("password"),
-        "contact_number": form.get("contact_number"),
-        "organization": form.get("organization")
-    }
+def handle_registration(form, creds):
+    client = gspread.authorize(creds)
+    sheet = client.open_by_key(SHEET_ID).sheet1  # assuming single sheet
 
-    # Save to pending list
-    os.makedirs("data", exist_ok=True)
-    if not os.path.exists(DATA_FILE):
-        json.dump([], open(DATA_FILE, "w"))
+    full_name = form.get("full_name")
+    username = form.get("username")
+    password = form.get("password")
+    contact = form.get("contact_number")
+    org = form.get("organization")
 
-    with open(DATA_FILE, "r+") as f:
-        users = json.load(f)
-        users.append(user_data)
-        f.seek(0)
-        json.dump(users, f, indent=4)
+    # Save to Sheet
+    sheet.append_row([
+        full_name, username, password, contact, org, "⏳ Pending", datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    ])
 
-    # Email to Admin
-    subject = "🆕 New Registration Request - Venus Jewel File Portal"
+    # Send mail to Admin
+    subject = f"🆕 New Registration Request - {full_name}"
     body = f"""
     <h3>New Registration Request</h3>
-    <p><b>Name:</b> {user_data['full_name']}<br>
-    <b>Username:</b> {user_data['username']}<br>
-    <b>Contact:</b> {user_data['contact_number']}<br>
-    <b>Organization:</b> {user_data['organization']}</p>
-    <p><a href='https://yourdomain.com/admin/approve?username={user_data['username']}'>
+    <p><b>Name:</b> {full_name}<br>
+    <b>Username:</b> {username}<br>
+    <b>Contact:</b> {contact}<br>
+    <b>Organization:</b> {org}</p>
+    <p><a href='https://yourdomain.com/admin/approve?username={username}'>
     ✅ Approve User</a></p>
     """
+
     send_email(ADMIN_EMAIL, subject, body)
     return True
