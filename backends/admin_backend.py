@@ -1,58 +1,74 @@
-# backends/admin_backend.py
 import gspread
 from datetime import datetime
-from backends.email_service import send_email
+from google.oauth2 import service_account
+from backends.email_service import send_email_notification
 
-SHEET_KEY = "181GnSNYNBciNNUlWLXsIYNZ5qsxpDkIftfBzHrycHro"
-REG_WS_NAME = "Registration"
-CREDS_WS_NAME = "Credentials"
+# Google Sheet ID (same as app.py)
+SHEET_ID = "181GnSNYNBciNNUlWLXsIYNZ5qsxpDkIftfBzHrycHro"
 
-def create_credentials_from_request(reg_email, new_username, new_password, creds):
+def create_credentials_from_request(email, username, password, creds):
     """
-    Approve a registration by:
-     - appending a credentials row to Credentials worksheet
-     - updating the Registration sheet status to Approved
-     - sending email to user with credentials
+    Creates credentials for a user whose email exists in Registration sheet.
+    Writes to 'Credentials' sheet and marks the request as approved.
+    Sends login details via email.
     """
-    client = gspread.authorize(creds)
-    reg_ws = client.open_by_key(SHEET_KEY).worksheet(REG_WS_NAME)
-    creds_ws = client.open_by_key(SHEET_KEY).worksheet(CREDS_WS_NAME)
+    try:
+        client = gspread.authorize(creds)
+        reg_ws = client.open_by_key(SHEET_ID).worksheet("Registration")
+        cred_ws = client.open_by_key(SHEET_ID).worksheet("Credentials")
 
-    # Find the registration row
-    records = reg_ws.get_all_records()
-    reg_email_norm = (reg_email or "").strip().lower()
-    for idx, row in enumerate(records, start=2):
-        if str(row.get("Email", "")).strip().lower() == reg_email_norm:
-            # gather details
-            full_name = row.get("Full Name", "")
-            contact = row.get("Contact", "")
-            org = row.get("Organization", "")
-            ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            # Append to Credentials sheet
-            # Columns in Credentials sheet: CreatedTimestamp, Full Name, Username, Password, Email, Contact, Organization
-            creds_ws.append_row([ts, full_name, new_username, new_password, reg_email, contact, org])
-            # Update registration status to Approved (column 6)
-            reg_ws.update_cell(idx, 6, "Approved")
-            # Send credentials email
-            subject = "✅ Your Venus Jewel account is ready"
-            body = f"""
-            <p>Hi {full_name or ''},</p>
-            <p>Your Venus Jewel File Portal account has been created by admin.</p>
-            <p><b>Username:</b> {new_username}<br><b>Password:</b> {new_password}</p>
-            <p>Please login at <a href="{ 'https://yourdomain.com/login' }">Login</a>.</p>
-            <p>— Venus Jewel</p>
-            """
-            send_email(reg_email, subject, body)
-            return True
-    return False
+        records = reg_ws.get_all_records()
+        target_row = None
+        reg_data = None
 
-def delete_registration_by_email(reg_email, creds):
-    client = gspread.authorize(creds)
-    reg_ws = client.open_by_key(SHEET_KEY).worksheet(REG_WS_NAME)
-    records = reg_ws.get_all_records()
-    reg_email_norm = (reg_email or "").strip().lower()
-    for idx, row in enumerate(records, start=2):
-        if str(row.get("Email", "")).strip().lower() == reg_email_norm:
-            reg_ws.delete_rows(idx)
-            return True
-    return False
+        for i, row in enumerate(records, start=2):  # skip header
+            if str(row.get("Email", "")).strip().lower() == email.strip().lower():
+                target_row = i
+                reg_data = row
+                break
+
+        if not reg_data:
+            print(f"[WARN] No registration found for email: {email}")
+            return False
+
+        # Prepare row for Credentials sheet
+        row_to_insert = [
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            reg_data.get("Full Name", ""),
+            username,
+            password,
+            reg_data.get("Contact Number", ""),
+            reg_data.get("Organization", ""),
+            email
+        ]
+
+        cred_ws.append_row(row_to_insert)
+
+        # Mark registration as Approved
+        reg_ws.update_cell(target_row, 6, "Approved")
+
+        # Email user
+        subject = "✅ Venus Jewel File Portal Credentials Approved"
+        message = f"""
+Dear {reg_data.get('Full Name', '')},
+
+Your registration for the Venus Jewel File Portal has been approved.
+
+Here are your login credentials:
+
+🔹 Username: {username}
+🔹 Password: {password}
+
+Please log in at:
+https://venus-file-portal.onrender.com/login
+
+Thank you,
+Venus Jewel Admin Team
+"""
+        send_email_notification(email, subject, message)
+        print(f"[INFO] Credentials created and emailed to {email}")
+        return True
+
+    except Exception as e:
+        print(f"[ERROR] create_credentials_from_request: {e}")
+        return False
