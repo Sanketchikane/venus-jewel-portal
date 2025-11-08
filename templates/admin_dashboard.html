@@ -17,236 +17,75 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Poppins', sans-serif;
       background: url('/static/images/dimension.jpg') no-repeat center center fixed;
       background-size: cover;
       overflow-x: hidden;
     }
-
-    /* ✅ White Splash screen with fade + blur */
     #global-splash {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(255, 255, 255, 0.6);
       backdrop-filter: blur(6px);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      opacity: 1;
-      transition: opacity 0.7s ease;
+      display: flex; justify-content: center; align-items: center;
+      z-index: 9999; opacity: 1; transition: opacity 0.7s ease;
     }
-
-    #global-splash.fade-out {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    #global-splash img {
-      width: 50vw;
-      max-width: 500px;
-      min-width: 200px;
-    }
-
-    @media (max-width: 768px) {
-      #global-splash img {
-        width: 75vw;
-        max-width: 400px;
-      }
-    }
+    #global-splash.fade-out { opacity: 0; pointer-events: none; }
+    #global-splash img { width: 50vw; max-width: 500px; min-width: 200px; }
 
     .mobile-toggle {
-      display: none;
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      z-index: 10001;
-      background-color: #004080;
-      color: #fff;
-      padding: 10px 14px;
-      border-radius: 6px;
-      cursor: pointer;
+      display: none; position: fixed; top: 20px; left: 20px;
+      z-index: 10001; background-color: #004080; color: #fff;
+      padding: 10px 14px; border-radius: 6px; cursor: pointer;
     }
 
     .sidebar {
-      height: 100vh;
-      width: 260px;
-      position: fixed;
-      top: 0;
-      left: 0;
-      background: linear-gradient(to bottom, rgba(0,48,112, 0.92), rgba(0,64,128, 0.95)), url('/static/images/pencil.png') no-repeat center center;
-      background-size: cover;
-      padding: 20px 0;
+      height: 100vh; width: 260px; position: fixed; top: 0; left: 0;
+      background: linear-gradient(to bottom, rgba(0,48,112,0.92), rgba(0,64,128,0.95)),
+                  url('/static/images/pencil.png') no-repeat center center;
+      background-size: cover; padding: 20px 0;
       box-shadow: 2px 0 6px rgba(0,0,0,0.25);
-      backdrop-filter: blur(8px);
-      z-index: 9999;
-      transition: left 0.3s ease;
+      backdrop-filter: blur(8px); z-index: 9999; transition: left 0.3s ease;
     }
 
-    .sidebar.active {
-      left: 0;
-    }
+    .sidebar .logo { text-align: center; margin-top: 30px; margin-bottom: 20px; }
+    .sidebar .logo img { height: 60px; }
+    .sidebar h2 { color: white; font-size: 22px; margin-top: 10px; }
 
-    .sidebar .logo {
-      text-align: center;
-      margin-top: 30px;
-      margin-bottom: 20px;
-    }
-
-    .sidebar .logo img {
-      height: 60px;
-    }
-
-    .sidebar h2 {
-      color: white;
-      font-size: 22px;
-      margin-top: 10px;
-    }
-
-    .nav-links {
-      list-style: none;
-      padding: 0;
-      margin-top: 20px;
-    }
-
-    .nav-links li {
-      padding: 12px 20px;
-    }
-
+    .nav-links { list-style: none; padding: 0; margin-top: 20px; }
+    .nav-links li { padding: 12px 20px; }
     .nav-links li a {
-      color: white;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      font-weight: 500;
-      font-size: 16px;
-      transition: background 0.3s, transform 0.2s;
+      color: white; text-decoration: none; display: flex; align-items: center;
+      font-weight: 500; font-size: 16px; transition: background 0.3s, transform 0.2s;
     }
-
-    .nav-links li a i {
-      margin-right: 10px;
-    }
-
-    .nav-links li a:hover {
-      background: rgba(255,255,255,0.15);
-      border-radius: 6px;
-      transform: translateX(4px);
-    }
+    .nav-links li a i { margin-right: 10px; }
+    .nav-links li a:hover { background: rgba(255,255,255,0.15); border-radius: 6px; transform: translateX(4px); }
 
     .main-content {
-      margin-left: 270px;
-      padding: 60px 30px 40px;
-      background: rgba(255, 255, 255, 0.8);
-      min-height: 100vh;
-      backdrop-filter: blur(10px);
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-      text-align: center;
+      margin-left: 270px; padding: 60px 30px 40px;
+      background: rgba(255, 255, 255, 0.8); min-height: 100vh;
+      backdrop-filter: blur(10px); border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12); text-align: center;
     }
 
-    .header-logo img {
-      height: 80px;
-      margin-bottom: 10px;
-    }
-
-    .main-content h2 {
-      font-size: 28px;
-      color: #004080;
-      font-weight: 700;
-      margin-bottom: 30px;
-    }
+    .header-logo img { height: 80px; margin-bottom: 10px; }
+    .main-content h2 { font-size: 28px; color: #004080; font-weight: 700; margin-bottom: 30px; }
 
     .core-values-row {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 30px;
-      margin-top: 20px;
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 30px; margin-top: 20px;
     }
-
-    .core-value {
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      width: 230px;
-    }
-
-    .core-value span {
-      display: block;
-      font-size: 16px;
-      font-weight: 600;
-      color: #002c5a;
-      margin-bottom: 10px;
-    }
-
-    .core-value img {
-      width: 100%;
-      height: 200px;
-      object-fit: contain;
-      transition: transform 0.3s ease, filter 0.3s ease;
-    }
-
-    .core-value.active img {
-      transform: scale(1.08);
-      filter: drop-shadow(0 0 15px rgba(0,0,0,0.35));
-    }
+    .core-value { text-align: center; cursor: pointer; transition: all 0.3s ease; width: 230px; }
+    .core-value span { display: block; font-size: 16px; font-weight: 600; color: #002c5a; margin-bottom: 10px; }
+    .core-value img { width: 100%; height: 200px; object-fit: contain; transition: transform 0.3s ease, filter 0.3s ease; }
+    .core-value.active img { transform: scale(1.08); filter: drop-shadow(0 0 15px rgba(0,0,0,0.35)); }
 
     @media (max-width: 768px) {
-      .mobile-toggle {
-        display: block;
-      }
-
-      .sidebar {
-        left: -100%;
-      }
-
-      .main-content {
-        margin-left: 0;
-        margin-top: 80px;
-        padding: 30px 20px;
-      }
-
-      .core-values-row {
-        gap: 20px;
-      }
-
-      .core-value {
-        width: calc(50% - 20px);
-      }
-
-      .core-value img {
-        width: 160px;
-        height: 160px;
-      }
-
-      .core-value span {
-        font-size: 15px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .core-value {
-        width: 100%;
-      }
-
-      .core-value img {
-        width: 120px;
-        height: 120px;
-      }
-
-      .core-value span {
-        font-size: 14px;
-      }
+      .mobile-toggle { display: block; }
+      .sidebar { left: -100%; }
+      .main-content { margin-left: 0; margin-top: 80px; padding: 30px 20px; }
+      .core-value { width: calc(50% - 20px); }
+      .core-value img { width: 160px; height: 160px; }
     }
   </style>
 </head>
@@ -256,7 +95,6 @@
 <div id="global-splash">
   <img src="{{ url_for('static', filename='images/wings_new.gif') }}" alt="Splash">
 </div>
-
 <script>
   window.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
@@ -280,7 +118,7 @@
   </div>
   <ul class="nav-links">
     <li><a href="{{ url_for('admin_users') }}"><i class="fas fa-users"></i> Registered Users</a></li>
-    <li><a href="{{ url_for('admin_files') }}"><i class="fas fa-folder-open"></i> Venus Diamond Files</a></li>
+    <li><a href="{{ url_for('files_page') }}"><i class="fas fa-folder-open"></i> Files</a></li>
     <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
   </ul>
 </div>
@@ -326,12 +164,10 @@
   function toggleSidebar() {
     document.getElementById("sidebar").classList.toggle("active");
   }
-
   function highlightValue(el) {
-    document.querySelectorAll('.core-value').forEach(val => val.classList.remove('active'));
+    document.querySelectorAll('.core-value').forEach(v => v.classList.remove('active'));
     el.classList.add('active');
   }
 </script>
-
 </body>
 </html>
