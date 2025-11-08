@@ -11,9 +11,9 @@ services:
       - key: SECRET_KEY
         sync: false
       - key: SHEET_ID
-        value: 19c2tlUmzSQsQhqNvWRuKMgdw86M0PLsKrWk51m7apA4
-      - key: GOOGLE_DRIVE_FOLDER
         value: 181GnSNYNBciNNUlWLXsIYNZ5qsxpDkIftfBzHrycHro
+      - key: GOOGLE_DRIVE_FOLDER
+        value: 0AEZXjYA5wFlSUk9PVA
       - key: GOOGLE_CREDENTIALS_FILE
         value: /etc/secrets/credentials.json
       - key: ADMIN_USERNAME
