@@ -98,7 +98,7 @@
       margin-bottom: 6px;
     }
 
-    input[type="text"], input[type="password"] {
+    input[type="text"], input[type="email"] {
       width: 100%;
       padding: 12px;
       margin-bottom: 24px;
@@ -111,44 +111,8 @@
       transition: border-color 0.3s;
     }
 
-    .password-wrapper {
-      position: relative;
-    }
-
-    .password-wrapper input {
-      padding-right: 40px;
-    }
-
-    .toggle-password {
-      position: absolute;
-      top: 50%;
-      right: 10px;
-      transform: translateY(-50%);
-      cursor: pointer;
-    }
-
-    .toggle-password svg {
-      fill: white;
-      transition: fill 0.3s;
-    }
-
-    .toggle-password.match svg {
-      fill: #00ff99;
-    }
-
-    .error-message {
-      color: #ff8888;
-      font-size: 14px;
-      margin-top: -18px;
-      margin-bottom: 16px;
-    }
-
-    .error-border {
-      border-bottom: 2px solid #ff4444 !important;
-    }
-
-    .success-border {
-      border-bottom: 2px solid #00ff99 !important;
+    input:focus {
+      border-color: #7b9dff;
     }
 
     button {
@@ -162,6 +126,11 @@
       border-radius: 6px;
       cursor: pointer;
       margin-bottom: 20px;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #4f7fff;
     }
 
     .bottom-links {
@@ -203,7 +172,7 @@
   </div>
 
   <div class="right-panel">
-    <form method="POST" onsubmit="return validatePasswords();">
+    <form method="POST">
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
           {% for category, message in messages %}
@@ -215,29 +184,8 @@
       <div class="form-title">🪪 Full Name</div>
       <input type="text" name="full_name" placeholder="Full Name" required />
 
-      <div class="form-title">👤 Username</div>
-      <input type="text" name="username" placeholder="Username" required />
-
-      <div class="form-title">🔒 Password</div>
-      <div class="password-wrapper">
-        <input type="password" name="password" id="password" placeholder="Password" required />
-        <span class="toggle-password" onclick="togglePassword('password', this)" id="eyePass">
-          <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" width="20">
-            <path d="M12 4.5C7 4.5 2.73 8.11 1 12c1.73 3.89 6 7.5 11 7.5s9.27-3.61 11-7.5c-1.73-3.89-6-7.5-11-7.5zm0 13a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11zm0-9a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z"/>
-          </svg>
-        </span>
-      </div>
-
-      <div class="form-title">✅ Confirm Password</div>
-      <div class="password-wrapper">
-        <input type="password" name="confirm_password" id="confirm_password" placeholder="Confirm Password" required />
-        <span class="toggle-password" onclick="togglePassword('confirm_password', this)" id="eyeConfirm">
-          <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" width="20">
-            <path d="M12 4.5C7 4.5 2.73 8.11 1 12c1.73 3.89 6 7.5 11 7.5s9.27-3.61 11-7.5c-1.73-3.89-6-7.5-11-7.5zm0 13a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11zm0-9a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z"/>
-          </svg>
-        </span>
-      </div>
-      <div class="error-message" id="mismatchError" style="display: none;">Passwords do not match</div>
+      <div class="form-title">📧 Email Address</div>
+      <input type="email" name="email_address" placeholder="Email Address" required />
 
       <div class="form-title">📞 Contact Number</div>
       <input type="text" name="contact_number" placeholder="Contact Number" required />
@@ -256,40 +204,6 @@
 </div>
 
 <script>
-  function togglePassword(fieldId, iconSpan) {
-    const input = document.getElementById(fieldId);
-    input.type = input.type === "password" ? "text" : "password";
-  }
-
-  function validatePasswords() {
-    const pwd = document.getElementById('password');
-    const confirm = document.getElementById('confirm_password');
-    const error = document.getElementById('mismatchError');
-    const eyePass = document.getElementById('eyePass');
-    const eyeConfirm = document.getElementById('eyeConfirm');
-
-    if (pwd.value !== confirm.value) {
-      pwd.classList.add("error-border");
-      confirm.classList.add("error-border");
-      eyePass.classList.remove("match");
-      eyeConfirm.classList.remove("match");
-      error.style.display = "block";
-      return false;
-    } else {
-      pwd.classList.remove("error-border");
-      confirm.classList.remove("error-border");
-      pwd.classList.add("success-border");
-      confirm.classList.add("success-border");
-      eyePass.classList.add("match");
-      eyeConfirm.classList.add("match");
-      error.style.display = "none";
-      return true;
-    }
-  }
-
-  document.getElementById('confirm_password').addEventListener('input', validatePasswords);
-  document.getElementById('password').addEventListener('input', validatePasswords);
-
   // ✅ Always show splash then fade
   window.addEventListener('DOMContentLoaded', () => {
     const splash = document.getElementById('global-splash');
