@@ -477,6 +477,37 @@ def logout():
     resp.set_cookie('username', '', expires=0)
     resp.set_cookie('password', '', expires=0)
     return resp
+# ---------------- Test Email Endpoint (for admin diagnostics) ----------------
+from backends.email_service import send_email
+
+@app.route('/admin/test-email')
+def admin_test_email():
+    if not session.get('admin'):
+        flash('Admin access only.', 'danger')
+        return redirect(url_for('login'))
+
+    test_subject = "Venus Portal SMTP Test ✅"
+    test_body = (
+        "This is a test email sent from your Venus Jewel File Portal backend.\n\n"
+        "✅ If you received this email, your Gmail SMTP connection is working perfectly.\n"
+        "If you did NOT receive this email, please check:\n"
+        "1. Sender_Email and Sender_Password in Render Environment Variables\n"
+        "2. App Password (16-character) is correct\n"
+        "3. Gmail account security alerts are approved (https://myaccount.google.com/security)"
+    )
+
+    try:
+        sender_email = os.environ.get("Sender_Email")
+        ok = send_email(sender_email, test_subject, test_body)
+        if ok:
+            flash("✅ Test email sent successfully! Check your inbox.", "success")
+        else:
+            flash("❌ Failed to send test email. Check logs and Gmail App Password.", "danger")
+    except Exception as e:
+        print(f"[ERROR] Test email failed: {e}")
+        flash(f"❌ Error: {e}", "danger")
+
+    return redirect(url_for('admin_dashboard'))
 
 # ---------------- Entrypoint ----------------
 if __name__ == '__main__':
