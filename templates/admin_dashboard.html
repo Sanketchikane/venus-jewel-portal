@@ -183,10 +183,11 @@
     <h2>Venus Admin</h2>
   </div>
   <ul class="nav-links">
-    <li><a href="{{ url_for('admin.admin_users') }}"><i class="fas fa-users"></i> Registered Users</a></li>
-    <li><a href="{{ url_for('files_page') }}"><i class="fas fa-folder-open"></i> Files</a></li>
-    <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-  </ul>
+  <li><a href="{{ url_for('admin.admin_users') }}"><i class="fas fa-users"></i> Registered Users</a></li>
+  <li><a href="{{ url_for('file.files_page') }}"><i class="fas fa-folder-open"></i> Files</a></li>
+  <li><a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+</ul>
+
 </div>
 
 <!-- Main Content -->
