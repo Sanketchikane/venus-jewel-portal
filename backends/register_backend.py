@@ -7,7 +7,7 @@ REG_WS_NAME = "Registration"
 CREDS_WS_NAME = "Credentials"
 
 def submit_registration(form_data, creds):
-    """Append registration row to Registration sheet"""
+    """Add new pending registration row."""
     client = gspread.authorize(creds)
     ws = client.open_by_key(SHEET_KEY).worksheet(REG_WS_NAME)
 
@@ -18,24 +18,24 @@ def submit_registration(form_data, creds):
     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     ws.append_row([ts, full_name, email, contact, org, "Pending"])
+    print(f"[REGISTER] Added registration for {email}")
     return True
 
 def get_pending_requests(creds):
     client = gspread.authorize(creds)
     ws = client.open_by_key(SHEET_KEY).worksheet(REG_WS_NAME)
     records = ws.get_all_records()
-    pending = [r for r in records if str(r.get("Status", "")).lower().startswith("pending")]
-    return pending
+    return [r for r in records if str(r.get("Status", "")).lower().startswith("pending")]
 
 def find_registration_by_email(email, creds):
-    """Find the registration row for a given email (matches Email or Email Address columns)."""
+    """Find registration entry by email (case-insensitive)."""
     client = gspread.authorize(creds)
     ws = client.open_by_key(SHEET_KEY).worksheet(REG_WS_NAME)
     records = ws.get_all_records()
     email = (email or "").strip().lower()
     for i, row in enumerate(records, start=2):
-        possible_email = str(row.get("Email Address") or row.get("Email") or "").strip().lower()
-        if possible_email == email:
+        possible = str(row.get("Email Address") or row.get("Email") or "").strip().lower()
+        if possible == email:
             return {"row_number": i, "row": row}
     return None
 
