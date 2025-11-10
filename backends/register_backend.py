@@ -7,7 +7,7 @@ REG_WS_NAME = "Registration"
 CREDS_WS_NAME = "Credentials"
 
 def submit_registration(form_data, creds):
-    """Add new pending registration row."""
+    """Append registration row to Registration sheet"""
     client = gspread.authorize(creds)
     ws = client.open_by_key(SHEET_KEY).worksheet(REG_WS_NAME)
 
@@ -18,26 +18,46 @@ def submit_registration(form_data, creds):
     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     ws.append_row([ts, full_name, email, contact, org, "Pending"])
-    print(f"[REGISTER] Added registration for {email}")
     return True
 
+
 def get_pending_requests(creds):
+    """Return only pending registration rows."""
     client = gspread.authorize(creds)
     ws = client.open_by_key(SHEET_KEY).worksheet(REG_WS_NAME)
     records = ws.get_all_records()
-    return [r for r in records if str(r.get("Status", "")).lower().startswith("pending")]
+    pending = [
+        r for r in records
+        if str(r.get("Status", "")).strip().lower().startswith("pending")
+    ]
+    return pending
+
 
 def find_registration_by_email(email, creds):
-    """Find registration entry by email (case-insensitive)."""
+    """
+    Find a specific pending registration row for a given email.
+    Prioritize 'Pending' rows to avoid overwriting old ones.
+    """
     client = gspread.authorize(creds)
     ws = client.open_by_key(SHEET_KEY).worksheet(REG_WS_NAME)
     records = ws.get_all_records()
     email = (email or "").strip().lower()
+    match = None
     for i, row in enumerate(records, start=2):
-        possible = str(row.get("Email Address") or row.get("Email") or "").strip().lower()
-        if possible == email:
-            return {"row_number": i, "row": row}
-    return None
+        possible_email = str(row.get("Email") or row.get("Email Address") or "").strip().lower()
+        status = str(row.get("Status", "")).strip().lower()
+        if possible_email == email and status.startswith("pending"):
+            match = {"row_number": i, "row": row}
+            break
+    # if no pending match, return the latest occurrence (for safety)
+    if not match:
+        for i, row in enumerate(reversed(records), start=2):
+            possible_email = str(row.get("Email") or row.get("Email Address") or "").strip().lower()
+            if possible_email == email:
+                match = {"row_number": len(records) - i + 2, "row": row}
+                break
+    return match
+
 
 def update_registration_status_by_row(row_number, status, creds):
     client = gspread.authorize(creds)
