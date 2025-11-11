@@ -1,10 +1,9 @@
 # backends/forgot_password_backend.py
 from backends.utils_backend import get_registration_sheet
-import gspread
 from datetime import datetime
 
 def submit_forgot_password_request(form_data):
-    """Store user forgot password request in a Google Sheet."""
+    """Store forgot password request in a dedicated sheet tab."""
     ws = get_registration_sheet("Forgot_Password_Requests")
     data = [
         form_data.get("full_name", ""),
