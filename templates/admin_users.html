@@ -1,123 +1,257 @@
 {% extends "admin_dashboard.html" %}
 {% block content %}
 
-<!-- Splash Screen -->
-<div id="splash" class="fixed inset-0 flex items-center justify-center bg-white/70 backdrop-blur-lg z-[9999] transition-opacity duration-700">
-  <img src="{{ url_for('static', filename='images/wings_new.gif') }}" alt="Loading..." class="w-1/2 md:w-1/3 animate-pulse">
-</div>
-<script>
-  window.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-      const splash = document.getElementById('splash');
-      splash.classList.add('opacity-0');
-      setTimeout(() => splash.remove(), 700);
-    }, 2000);
-  });
-</script>
-
 <style>
+  :root {
+    --vj-blue: #003366;
+    --vj-accent: #0B5FFF;
+    --vj-bg: #f8fafc;
+    --vj-border: #e2e8f0;
+    --vj-muted: #64748b;
+  }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--vj-bg);
+    color: var(--vj-blue);
+  }
+
   .user-card {
-    background: rgba(255, 255, 255, 0.95);
+    background: white;
     border-radius: 16px;
     padding: 30px 20px;
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
-    max-width: 1150px;
-    margin: 40px auto;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    max-width: 1200px;
+    margin: 30px auto;
     font-family: 'Poppins', sans-serif;
-    backdrop-filter: blur(10px);
   }
-  .pending-title {
-    font-size: 22px;
-    color: #0066cc;
-    margin: 20px 0 10px;
+
+  .title-main {
+    font-size: 24px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 20px;
+    color: var(--vj-blue);
   }
-  .user-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+
+  .table-wrapper {
+    overflow-x: auto;
+    border-radius: 10px;
+    margin-bottom: 30px;
+  }
+
+  .user-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+    min-width: 800px;
+  }
+
   .user-table thead {
-    background: linear-gradient(to right, #004080, #0073e6);
+    background: linear-gradient(90deg, #004080, #0B5FFF);
     color: white;
   }
+
   .user-table th, .user-table td {
     padding: 12px 14px;
-    border-bottom: 1px solid #ddd;
     text-align: left;
+    border-bottom: 1px solid var(--vj-border);
   }
-  .user-table tbody tr:hover { background-color: #f0f7ff; cursor: pointer; }
+
+  .user-table tbody tr:hover {
+    background-color: #f0f7ff;
+    transition: 0.2s;
+  }
+
+  .btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    transition: 0.2s;
+  }
+
+  .btn-view {
+    background: var(--vj-accent);
+    color: white;
+  }
+
+  .btn-view:hover {
+    background: #0849c7;
+  }
+
+  .btn-approve {
+    background: #22c55e;
+    color: white;
+  }
+
+  .btn-approve:hover {
+    background: #16a34a;
+  }
+
+  .input-inline {
+    padding: 6px 8px;
+    border: 1px solid var(--vj-border);
+    border-radius: 5px;
+    width: 110px;
+    margin-right: 4px;
+  }
+
+  .pending-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 10px 0 15px;
+    color: var(--vj-blue);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .pending-title i {
+    color: #0073e6;
+  }
+
+  .text-center {
+    text-align: center;
+    color: var(--vj-muted);
+    padding: 10px 0;
+  }
+
   @media (max-width: 768px) {
-    .user-card { padding: 15px; margin: 20px auto; }
-    .user-table th, .user-table td { font-size: 13px; padding: 8px; }
+    .user-card {
+      padding: 15px;
+      margin: 20px auto;
+    }
+    .user-table {
+      font-size: 13px;
+    }
+    .input-inline {
+      width: 90px;
+    }
+    .btn {
+      padding: 5px 10px;
+      font-size: 12px;
+    }
   }
 </style>
 
 <div class="user-card">
-  <h2 class="text-center text-2xl font-bold text-venusBlue mb-4">👥 Registered Users – Venus File Portal</h2>
+  <h2 class="title-main">👥 Registered Users – Venus File Portal</h2>
 
   {% if users and users|length > 0 %}
-  <div class="overflow-x-auto">
+  <div class="table-wrapper">
     <table class="user-table">
-      <thead><tr><th>Full Name</th><th>Username</th><th>Email</th><th>Organization</th><th>Contact</th><th>Action</th></tr></thead>
+      <thead>
+        <tr>
+          <th>Full Name</th>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Organization</th>
+          <th>Contact</th>
+          <th>Action</th>
+        </tr>
+      </thead>
       <tbody>
         {% for user in users %}
-        <tr onclick="openUser('{{ user['Username'] }}')">
+        <tr>
           <td>{{ user['Full Name'] }}</td>
           <td>{{ user['Username'] }}</td>
           <td>{{ user['Email'] }}</td>
           <td>{{ user['Organization'] }}</td>
           <td>{{ user['Contact'] }}</td>
-          <td><button class="bg-blue-600 text-white px-3 py-1 rounded">View</button></td>
+          <td>
+            <button class="btn btn-view" onclick="openUser('{{ user['Username'] }}')">
+              <i class="fas fa-eye"></i> View
+            </button>
+          </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
   {% else %}
-  <p class="text-center text-gray-500">No approved users found.</p>
+  <p class="text-center">No approved users found.</p>
   {% endif %}
 
-  <h3 class="pending-title">🕒 Pending Registration Requests</h3>
-  <div class="overflow-x-auto">
+  <!-- Pending Section -->
+  <h3 class="pending-title"><i class="fas fa-hourglass-half"></i> Pending Registration Requests</h3>
+
+  <div class="table-wrapper">
     <table class="user-table" id="pending-table">
-      <thead><tr><th>Full Name</th><th>Email</th><th>Contact</th><th>Organization</th><th>Status</th><th>Approve</th></tr></thead>
-      <tbody id="pending-body"><tr><td colspan="6" class="text-center">Loading...</td></tr></tbody>
+      <thead>
+        <tr>
+          <th>Full Name</th>
+          <th>Email</th>
+          <th>Contact</th>
+          <th>Organization</th>
+          <th>Status</th>
+          <th>Approve</th>
+        </tr>
+      </thead>
+      <tbody id="pending-body">
+        <tr><td colspan="6" class="text-center">Loading pending requests...</td></tr>
+      </tbody>
     </table>
   </div>
 </div>
 
 <script>
 async function loadPending() {
-  const res = await fetch("/api/pending-registrations");
-  const data = await res.json();
   const tbody = document.getElementById("pending-body");
-  tbody.innerHTML = "";
-  if (!data.pending || data.pending.length === 0) {
-    tbody.innerHTML = "<tr><td colspan='6' class='text-center'>No pending requests.</td></tr>";
-    return;
+  tbody.innerHTML = "<tr><td colspan='6' class='text-center'>Loading...</td></tr>";
+
+  try {
+    const res = await fetch("/api/pending-registrations");
+    const data = await res.json();
+
+    tbody.innerHTML = "";
+
+    if (!data.pending || data.pending.length === 0) {
+      tbody.innerHTML = "<tr><td colspan='6' class='text-center'>No pending requests.</td></tr>";
+      return;
+    }
+
+    data.pending.forEach(r => {
+      const email = r["Email"] || "";
+      const fullName = r["Full Name"] || "";
+      const contact = r["Contact"] || "";
+      const org = r["Organization"] || "";
+      const status = r["Status"] || "Pending";
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${fullName}</td>
+        <td>${email}</td>
+        <td>${contact}</td>
+        <td>${org}</td>
+        <td><span style="color:#eab308;font-weight:500;">${status}</span></td>
+        <td>
+          <form method="POST" action="/admin/create-credential" class="approve-form" onsubmit="return confirmApprove('${fullName}')">
+            <input type="hidden" name="email" value="${email}">
+            <input type="text" class="input-inline" name="username" placeholder="Username" required>
+            <input type="text" class="input-inline" name="password" placeholder="Password" required>
+            <button type="submit" class="btn btn-approve"><i class="fas fa-check"></i> Approve</button>
+          </form>
+        </td>`;
+      tbody.appendChild(tr);
+    });
+  } catch (err) {
+    console.error("Error loading pending:", err);
+    tbody.innerHTML = "<tr><td colspan='6' class='text-center text-red-500'>Failed to load pending requests.</td></tr>";
   }
-  data.pending.forEach(r => {
-    const email = r["Email"] || "";
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${r["Full Name"] || ""}</td>
-      <td>${email}</td>
-      <td>${r["Contact"] || ""}</td>
-      <td>${r["Organization"] || ""}</td>
-      <td>${r["Status"] || "Pending"}</td>
-      <td>
-        <form class="inline-form" method="POST" action="/admin/create-credential">
-          <input type="hidden" name="email" value="${email}">
-          <input type="text" name="username" placeholder="Username" required>
-          <input type="text" name="password" placeholder="Password" required>
-          <button type="submit">Approve</button>
-        </form>
-      </td>`;
-    tbody.appendChild(tr);
-  });
+}
+
+function confirmApprove(name) {
+  return confirm(`Are you sure you want to approve registration for "${name}"?`);
 }
 
 function openUser(username) {
-  window.open(`/admin/view-user/${username}`, "_blank");
+  window.location.href = `/admin/view-user/${username}`;
 }
 
-loadPending();
+window.addEventListener("DOMContentLoaded", loadPending);
 </script>
 
 {% endblock %}
