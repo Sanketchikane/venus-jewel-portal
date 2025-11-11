@@ -20,7 +20,6 @@ def admin_dashboard():
         traceback.print_exc()
         return "Internal Server Error", 500
 
-
 # -------------------------
 # Admin → View all approved users
 # -------------------------
@@ -38,7 +37,6 @@ def admin_users():
         traceback.print_exc()
         return "Internal Server Error", 500
 
-
 # -------------------------
 # API → Pending Registrations for AJAX
 # -------------------------
@@ -51,7 +49,6 @@ def pending_registrations():
         print("Error fetching pending registrations:", e)
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
-
 
 # -------------------------
 # Approve User / Create Credential
@@ -71,7 +68,6 @@ def create_credential():
             flash("⚠️ Missing information in approval form", "warning")
             return redirect(url_for("admin.admin_users"))
 
-        # Create credential entry (approve user and add to credentials)
         admin_backend.create_credential_entry(email, username, password)
         flash(f"✅ User '{username}' added and approved successfully.", "success")
         return redirect(url_for("admin.admin_users"))
@@ -81,7 +77,6 @@ def create_credential():
         traceback.print_exc()
         flash("❌ Internal Server Error during approval", "danger")
         return redirect(url_for("admin.admin_users"))
-
 
 # -------------------------
 # View Single User Profile
@@ -107,7 +102,6 @@ def view_user(username):
         traceback.print_exc()
         flash("⚠️ Internal error loading profile.", "danger")
         return redirect(url_for("admin.admin_users"))
-
 
 # -------------------------
 # Update User Profile
