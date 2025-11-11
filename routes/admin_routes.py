@@ -11,7 +11,7 @@ admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 @admin_bp.route("/admin-dashboard")
 def admin_dashboard():
     try:
-        if not session.get("admin"):  # Check for the admin session key
+        if not session.get("is_admin"):  # Check for the admin session key
             flash("Unauthorized access", "danger")
             return redirect(url_for("auth.login"))
         return render_template("admin_dashboard.html", user=session.get("username"))
@@ -27,7 +27,7 @@ def admin_dashboard():
 @admin_bp.route("/admin-users")
 def admin_users():
     try:
-        if not session.get("admin"):  # Check for the admin session key
+        if not session.get("is_admin"):  # Check for the admin session key
             flash("Unauthorized access", "danger")
             return redirect(url_for("auth.login"))
 
@@ -59,7 +59,7 @@ def pending_registrations():
 @admin_bp.route("/create-credential", methods=["POST"])
 def create_credential():
     try:
-        if not session.get("admin"):  # Check for the admin session key
+        if not session.get("is_admin"):  # Check for the admin session key
             flash("Unauthorized access", "danger")
             return redirect(url_for("auth.login"))
 
@@ -89,7 +89,7 @@ def create_credential():
 @admin_bp.route("/view-user/<username>")
 def view_user(username):
     try:
-        if not session.get("admin"):  # Check for the admin session key
+        if not session.get("is_admin"):  # Check for the admin session key
             flash("Unauthorized access", "danger")
             return redirect(url_for("auth.login"))
 
@@ -115,7 +115,7 @@ def view_user(username):
 @admin_bp.route("/update-user/<username>", methods=["POST"])
 def update_user(username):
     try:
-        if not session.get("admin"):  # Check for the admin session key
+        if not session.get("is_admin"):  # Check for the admin session key
             flash("Unauthorized access", "danger")
             return redirect(url_for("auth.login"))
 
