@@ -39,6 +39,14 @@ def login():
             flash("Welcome, Admin!", "success")
             return redirect(url_for("admin.admin_dashboard"))
 
+        # VenusFiles Default Account
+        if username == config.VENUSFILES_USERNAME and password == config.VENUSFILES_PASSWORD:
+            session.clear()
+            session["username"] = username
+            session["venus_user"] = True
+            flash("Welcome Venus File Account!", "success")
+            return redirect(url_for("file.venus_upload_dashboard"))
+
         # Regular User Login
         user = get_user_record(username)
         if user and user.get("Password") == password:
