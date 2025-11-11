@@ -1,4 +1,3 @@
-# backends/utils_backend.py
 import os, io, tempfile, subprocess, time, hmac, hashlib
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
@@ -84,8 +83,12 @@ def list_packet_folders(order="modifiedTime desc"):
 
 def list_files_in_folder(folder_id, order="modifiedTime desc"):
     q = f"'{folder_id}' in parents and trashed=false"
-    res = _drive_service.files().list(q=q, fields="files(id,name,mimeType,size,modifiedTime)", orderBy=order, includeItemsFromAllDrives=True, supportsAllDrives=True).execute()
-    return res.get("files", [])
+    try:
+        res = _drive_service.files().list(q=q, fields="files(id,name,mimeType,size,modifiedTime)", orderBy=order, includeItemsFromAllDrives=True, supportsAllDrives=True).execute()
+        return res.get("files", [])
+    except Exception as e:
+        print("Error fetching files:", e)
+        return []  # Gracefully handle errors and return empty list
 
 def download_file_to_bytes(file_id):
     meta = _drive_service.files().get(fileId=file_id, fields="id,name,mimeType", supportsAllDrives=True).execute()
@@ -135,4 +138,3 @@ def get_user_record(username):
                 "Organization": col(5),
             }
     return None
-
