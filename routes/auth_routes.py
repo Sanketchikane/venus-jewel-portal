@@ -63,7 +63,7 @@ def register():
     if request.method == "POST":
         try:
             submit_registration(request.form)
-            flash("✅ Registration request sent successfully. Admin will approve your account.", "success")
+            flash("✅ Registration successful! The admin will review your request shortly.", "success")
             return redirect(url_for("auth.login"))
         except Exception as e:
             flash(f"❌ Registration failed: {e}", "danger")
