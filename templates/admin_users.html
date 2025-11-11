@@ -21,102 +21,74 @@
     border-radius: 16px;
     padding: 30px 20px;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-    max-width: 1200px;
-    margin: 30px auto;
-    font-family: 'Poppins', sans-serif;
+    max-width: 1150px;
+    margin: 40px auto;
+    backdrop-filter: blur(10px);
   }
 
-  .title-main {
-    font-size: 24px;
-    font-weight: 700;
-    text-align: center;
-    margin-bottom: 20px;
-    color: var(--vj-blue);
-  }
-
-  .table-wrapper {
-    overflow-x: auto;
-    border-radius: 10px;
-    margin-bottom: 30px;
+  .pending-title {
+    font-size: 22px;
+    color: #0066cc;
+    margin: 20px 0 10px;
   }
 
   .user-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 15px;
-    min-width: 800px;
   }
 
   .user-table thead {
-    background: linear-gradient(90deg, #004080, #0B5FFF);
+    background: linear-gradient(to right, #004080, #0073e6);
     color: white;
   }
 
-  .user-table th, .user-table td {
+  .user-table th,
+  .user-table td {
     padding: 12px 14px;
+    border-bottom: 1px solid #ddd;
     text-align: left;
-    border-bottom: 1px solid var(--vj-border);
   }
 
   .user-table tbody tr:hover {
     background-color: #f0f7ff;
-    transition: 0.2s;
-  }
-
-  .btn {
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 14px;
-    border: none;
     cursor: pointer;
-    font-weight: 500;
-    transition: 0.2s;
   }
 
   .btn-view {
     background: var(--vj-accent);
     color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: 0.2s;
   }
 
   .btn-view:hover {
-    background: #0849c7;
+    background: #0949c5;
   }
 
-  .btn-approve {
-    background: #22c55e;
-    color: white;
-  }
-
-  .btn-approve:hover {
-    background: #16a34a;
-  }
-
-  .input-inline {
+  .inline-form input {
     padding: 6px 8px;
-    border: 1px solid var(--vj-border);
     border-radius: 5px;
-    width: 110px;
+    border: 1px solid var(--vj-border);
     margin-right: 4px;
+    font-size: 14px;
   }
 
-  .pending-title {
-    font-size: 20px;
-    font-weight: 600;
-    margin: 10px 0 15px;
-    color: var(--vj-blue);
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  .inline-form button {
+    background: var(--vj-accent);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: 0.2s;
   }
 
-  .pending-title i {
-    color: #0073e6;
-  }
-
-  .text-center {
-    text-align: center;
-    color: var(--vj-muted);
-    padding: 10px 0;
+  .inline-form button:hover {
+    background: #0a4adb;
   }
 
   @media (max-width: 768px) {
@@ -124,24 +96,33 @@
       padding: 15px;
       margin: 20px auto;
     }
-    .user-table {
+
+    .user-table th,
+    .user-table td {
       font-size: 13px;
+      padding: 8px;
     }
-    .input-inline {
-      width: 90px;
+
+    .inline-form {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
-    .btn {
-      padding: 5px 10px;
-      font-size: 12px;
+
+    .inline-form input {
+      width: 100%;
+      margin-bottom: 5px;
     }
   }
 </style>
 
 <div class="user-card">
-  <h2 class="title-main">👥 Registered Users – Venus File Portal</h2>
+  <h2 class="text-center text-2xl font-bold text-venusBlue mb-4">
+    👥 Registered Users – Venus File Portal
+  </h2>
 
   {% if users and users|length > 0 %}
-  <div class="table-wrapper">
+  <div class="overflow-x-auto">
     <table class="user-table">
       <thead>
         <tr>
@@ -162,9 +143,12 @@
           <td>{{ user['Organization'] }}</td>
           <td>{{ user['Contact'] }}</td>
           <td>
-            <button class="btn btn-view" onclick="openUser('{{ user['Username'] }}')">
-              <i class="fas fa-eye"></i> View
-            </button>
+            <a
+              class="btn-view"
+              href="{{ url_for('admin.view_user', username=user['Username']) }}"
+              target="_blank"
+              >View</a
+            >
           </td>
         </tr>
         {% endfor %}
@@ -172,13 +156,11 @@
     </table>
   </div>
   {% else %}
-  <p class="text-center">No approved users found.</p>
+  <p class="text-center text-gray-500">No approved users found.</p>
   {% endif %}
 
-  <!-- Pending Section -->
-  <h3 class="pending-title"><i class="fas fa-hourglass-half"></i> Pending Registration Requests</h3>
-
-  <div class="table-wrapper">
+  <h3 class="pending-title">🕒 Pending Registration Requests</h3>
+  <div class="overflow-x-auto">
     <table class="user-table" id="pending-table">
       <thead>
         <tr>
@@ -191,7 +173,9 @@
         </tr>
       </thead>
       <tbody id="pending-body">
-        <tr><td colspan="6" class="text-center">Loading pending requests...</td></tr>
+        <tr>
+          <td colspan="6" class="text-center">Loading...</td>
+        </tr>
       </tbody>
     </table>
   </div>
@@ -199,59 +183,50 @@
 
 <script>
 async function loadPending() {
-  const tbody = document.getElementById("pending-body");
-  tbody.innerHTML = "<tr><td colspan='6' class='text-center'>Loading...</td></tr>";
-
   try {
-    const res = await fetch("/api/pending-registrations");
+    const res = await fetch("/admin/api/pending-registrations");
     const data = await res.json();
-
+    const tbody = document.getElementById("pending-body");
     tbody.innerHTML = "";
 
     if (!data.pending || data.pending.length === 0) {
-      tbody.innerHTML = "<tr><td colspan='6' class='text-center'>No pending requests.</td></tr>";
+      tbody.innerHTML =
+        "<tr><td colspan='6' style='text-align:center;'>No pending requests.</td></tr>";
       return;
     }
 
-    data.pending.forEach(r => {
-      const email = r["Email"] || "";
-      const fullName = r["Full Name"] || "";
-      const contact = r["Contact"] || "";
-      const org = r["Organization"] || "";
+    data.pending.forEach((r) => {
+      const email = r["Email Address"] || r["Email"] || "";
+      const contact = r["Contact"] || r["Contact Number"] || "";
+      const org = r["Organization"] || r["Organisation"] || "";
       const status = r["Status"] || "Pending";
 
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td>${fullName}</td>
+        <td>${r["Full Name"] || ""}</td>
         <td>${email}</td>
         <td>${contact}</td>
         <td>${org}</td>
-        <td><span style="color:#eab308;font-weight:500;">${status}</span></td>
+        <td>${status}</td>
         <td>
-          <form method="POST" action="/admin/create-credential" class="approve-form" onsubmit="return confirmApprove('${fullName}')">
+          <form class="inline-form" method="POST" action="/admin/create-credential">
             <input type="hidden" name="email" value="${email}">
-            <input type="text" class="input-inline" name="username" placeholder="Username" required>
-            <input type="text" class="input-inline" name="password" placeholder="Password" required>
-            <button type="submit" class="btn btn-approve"><i class="fas fa-check"></i> Approve</button>
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="text" name="password" placeholder="Password" required>
+            <button type="submit">Approve</button>
           </form>
         </td>`;
       tbody.appendChild(tr);
     });
   } catch (err) {
-    console.error("Error loading pending:", err);
-    tbody.innerHTML = "<tr><td colspan='6' class='text-center text-red-500'>Failed to load pending requests.</td></tr>";
+    console.error("Error loading pending users:", err);
+    const tbody = document.getElementById("pending-body");
+    tbody.innerHTML =
+      "<tr><td colspan='6' style='text-align:center;color:red;'>Failed to load pending requests.</td></tr>";
   }
 }
 
-function confirmApprove(name) {
-  return confirm(`Are you sure you want to approve registration for "${name}"?`);
-}
-
-function openUser(username) {
-  window.location.href = `/admin/view-user/${username}`;
-}
-
-window.addEventListener("DOMContentLoaded", loadPending);
+document.addEventListener("DOMContentLoaded", loadPending);
 </script>
 
 {% endblock %}
