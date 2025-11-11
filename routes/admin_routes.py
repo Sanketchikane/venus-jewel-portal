@@ -6,14 +6,13 @@ import traceback
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
-
 # -------------------------
 # Admin Dashboard
 # -------------------------
 @admin_bp.route("/admin-dashboard")
 def admin_dashboard():
     try:
-        if not session.get("admin"):  # ✅ fixed session key
+        if not session.get("is_admin"):  # ✅ unified key
             flash("Unauthorized access", "danger")
             return redirect(url_for("auth.login"))
         return render_template("admin_dashboard.html", user=session.get("username"))
@@ -29,7 +28,7 @@ def admin_dashboard():
 @admin_bp.route("/admin-users")
 def admin_users():
     try:
-        if not session.get("admin"):  # ✅ fixed
+        if not session.get("is_admin"):
             flash("Unauthorized access", "danger")
             return redirect(url_for("auth.login"))
 
@@ -56,12 +55,12 @@ def pending_registrations():
 
 
 # -------------------------
-# Approve User / Create Credential (no email)
+# Approve User / Create Credential
 # -------------------------
 @admin_bp.route("/create-credential", methods=["POST"])
 def create_credential():
     try:
-        if not session.get("admin"):  # ✅ fixed
+        if not session.get("is_admin"):
             flash("Unauthorized access", "danger")
             return redirect(url_for("auth.login"))
 
@@ -74,7 +73,7 @@ def create_credential():
             return redirect(url_for("admin.admin_users"))
 
         admin_backend.create_credential_entry(email, username, password)
-        flash(f"✅ Registration request for '{username}' processed successfully.", "success")
+        flash(f"✅ User '{username}' added and approved successfully.", "success")
         return redirect(url_for("admin.admin_users"))
 
     except Exception as e:
@@ -90,7 +89,7 @@ def create_credential():
 @admin_bp.route("/view-user/<username>")
 def view_user(username):
     try:
-        if not session.get("admin"):  # ✅ fixed
+        if not session.get("is_admin"):
             flash("Unauthorized access", "danger")
             return redirect(url_for("auth.login"))
 
@@ -116,7 +115,7 @@ def view_user(username):
 @admin_bp.route("/update-user/<username>", methods=["POST"])
 def update_user(username):
     try:
-        if not session.get("admin"):  # ✅ fixed
+        if not session.get("is_admin"):
             flash("Unauthorized access", "danger")
             return redirect(url_for("auth.login"))
 
