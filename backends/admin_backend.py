@@ -7,9 +7,7 @@ from config import (
     CREDENTIALS_PATH
 )
 
-# -------------------------
 # Utility: Connect to Google Sheet
-# -------------------------
 def get_gsheet(sheet_id, tab_name):
     scopes = ["https://www.googleapis.com/auth/spreadsheets"]
     creds = Credentials.from_service_account_file(CREDENTIALS_PATH, scopes=scopes)
@@ -17,29 +15,22 @@ def get_gsheet(sheet_id, tab_name):
     sheet = client.open_by_key(sheet_id)
     return sheet.worksheet(tab_name)
 
-# -------------------------
 # Fetch Approved Users
-# -------------------------
 def get_approved_users():
     sheet = get_gsheet(GOOGLE_SHEET_ID_REGISTRATION, "Registration")
     data = sheet.get_all_records()
     approved = [r for r in data if str(r.get("Status", "")).strip().lower() in ["approved", "✅ approved"]]
     return approved
 
-# -------------------------
 # Fetch Pending Users
-# -------------------------
 def get_pending_users():
     sheet = get_gsheet(GOOGLE_SHEET_ID_REGISTRATION, "Registration")
     data = sheet.get_all_records()
     pending = [r for r in data if str(r.get("Status", "")).strip().lower() == "pending"]
     return pending
 
-# -------------------------
 # Approve user + create credentials entry
-# -------------------------
 def create_credential_entry(email, username, password):
-    """Moves pending user to approved + adds credential entry"""
     reg_sheet = get_gsheet(GOOGLE_SHEET_ID_REGISTRATION, "Registration")
     cred_sheet = get_gsheet(GOOGLE_SHEET_ID_CREDENTIALS, "Credentials")
 
@@ -60,7 +51,7 @@ def create_credential_entry(email, username, password):
     if not user_row_index:
         raise Exception(f"User with email '{email}' not found in Registration sheet")
 
-    # ✅ Add new entry to Credentials sheet
+    # Add to Credentials sheet
     cred_sheet.append_row([
         datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         user_row_data.get("Full Name", ""),
@@ -71,7 +62,7 @@ def create_credential_entry(email, username, password):
         email
     ])
 
-    # ✅ Update Registration sheet status
+    # Update Registration sheet status
     if status_index:
         reg_sheet.update_cell(user_row_index, status_index, "✅ Approved")
 
