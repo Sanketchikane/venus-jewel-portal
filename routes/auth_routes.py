@@ -1,4 +1,3 @@
-# routes/auth_routes.py
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, make_response
 from google.oauth2 import service_account
 import gspread
