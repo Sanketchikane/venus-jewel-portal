@@ -1,10 +1,10 @@
 # routes/admin_routes.py
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from backends import admin_backend
+from backends.utils_backend import get_credentials_sheet
 import traceback
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
-
 
 # -------------------------
 # Admin Dashboard
@@ -55,7 +55,7 @@ def pending_registrations():
 
 
 # -------------------------
-# Approve User / Create Credential (No Email)
+# Approve User / Create Credential
 # -------------------------
 @admin_bp.route("/create-credential", methods=["POST"])
 def create_credential():
@@ -69,16 +69,73 @@ def create_credential():
         password = request.form.get("password")
 
         if not all([email, username, password]):
-            flash("Missing information in approval form", "warning")
+            flash("⚠️ Missing information in approval form", "warning")
             return redirect(url_for("admin.admin_users"))
 
-        # Call backend to approve user
+        # Create credential & move record
         admin_backend.create_credential_entry(email, username, password)
 
-        flash(f"✅ User '{username}' approved successfully!", "success")
+        flash(f"✅ Registration approved and user '{username}' added successfully.", "success")
         return redirect(url_for("admin.admin_users"))
     except Exception as e:
         print("Approval error:", e)
         traceback.print_exc()
-        flash("Internal Server Error during approval", "danger")
+        flash("❌ Internal Server Error during approval", "danger")
+        return redirect(url_for("admin.admin_users"))
+
+
+# -------------------------
+# View Single User Profile
+# -------------------------
+@admin_bp.route("/view-user/<username>")
+def view_user(username):
+    try:
+        if not session.get("is_admin"):
+            flash("Unauthorized access", "danger")
+            return redirect(url_for("auth.login"))
+
+        ws = get_credentials_sheet()
+        records = ws.get_all_records()
+        user = next((u for u in records if str(u.get("Username", "")).lower() == username.lower()), None)
+
+        if not user:
+            flash("⚠️ User not found.", "warning")
+            return redirect(url_for("admin.admin_users"))
+
+        return render_template("view_user.html", user=user)
+    except Exception as e:
+        print("Error loading user profile:", e)
+        traceback.print_exc()
+        flash("⚠️ Internal error loading profile.", "danger")
+        return redirect(url_for("admin.admin_users"))
+
+
+# -------------------------
+# Update User Profile
+# -------------------------
+@admin_bp.route("/update-user/<username>", methods=["POST"])
+def update_user(username):
+    try:
+        if not session.get("is_admin"):
+            flash("Unauthorized access", "danger")
+            return redirect(url_for("auth.login"))
+
+        ws = get_credentials_sheet()
+        records = ws.get_all_records()
+
+        for i, row in enumerate(records, start=2):
+            if str(row.get("Username", "")).lower() == username.lower():
+                for key in row.keys():
+                    if key in request.form:
+                        ws.update_cell(i, list(row.keys()).index(key) + 1, request.form[key])
+                flash("✅ User profile updated successfully.", "success")
+                return redirect(url_for("admin.view_user", username=username))
+
+        flash("⚠️ Failed to update user.", "danger")
+        return redirect(url_for("admin.admin_users"))
+
+    except Exception as e:
+        print("Error updating user:", e)
+        traceback.print_exc()
+        flash("❌ Internal Server Error while updating user.", "danger")
         return redirect(url_for("admin.admin_users"))
