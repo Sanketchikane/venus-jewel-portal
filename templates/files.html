@@ -159,82 +159,68 @@
 </div>
 
 <script>
-// JavaScript to load files and preview
+const packetList=document.getElementById('packetList');
+const filesBody=document.getElementById('filesBody');
+const filesTitle=document.getElementById('filesTitle');
+const downloadFolderBtn=document.getElementById('downloadFolderBtn');
+const searchBox=document.getElementById('searchBox');
+const sortSelect=document.getElementById('sortSelect');
+const refreshBtn=document.getElementById('refreshBtn');
 
-const packetList = document.getElementById('packetList');
-const filesBody = document.getElementById('filesBody');
-const filesTitle = document.getElementById('filesTitle');
-const downloadFolderBtn = document.getElementById('downloadFolderBtn');
-const searchBox = document.getElementById('searchBox');
-const sortSelect = document.getElementById('sortSelect');
-const refreshBtn = document.getElementById('refreshBtn');
+let currentFolder=null, allFolders=[], currentFiles=[];
 
-let currentFolder = null, allFolders = [], currentFiles = [];
-
-function loadFolders() {
-  packetList.innerHTML = '<div class="list-item">Loading…</div>';
+function loadFolders(){
+  packetList.innerHTML='<div class="list-item">Loading…</div>';
   fetch(`/api/packet-folders?sort=${sortSelect.value}`)
-    .then(r => r.json())
-    .then(({folders}) => {
-      allFolders = folders || [];
-      renderFolders();
-    })
-    .catch(() => packetList.innerHTML = '<div class="list-item">Failed to load folders</div>');
+  .then(r=>r.json())
+  .then(({folders})=>{allFolders=folders||[];renderFolders();})
+  .catch(()=>packetList.innerHTML='<div class="list-item">Failed to load folders</div>');
 }
 
-function renderFolders() {
-  const q = searchBox.value.toLowerCase();
-  const filtered = allFolders.filter(f => !q || (f.name || '').toLowerCase().includes(q));
-  packetList.innerHTML = '';
-  if (!filtered.length) {
-    packetList.innerHTML = '<div class="list-item">No folders found</div>';
-    return;
-  }
-  filtered.forEach(f => {
-    const row = document.createElement('div');
-    row.className = 'list-item';
-    row.innerHTML = `<span><i class="fas fa-folder"></i> ${f.name}</span>
-                    <span class="muted">${new Date(f.modifiedTime).toLocaleString()}</span>`;
-    row.onclick = () => selectFolder(f.id, f.name);
+function renderFolders(){
+  const q=searchBox.value.toLowerCase();
+  const filtered=allFolders.filter(f=>!q||(f.name||'').toLowerCase().includes(q));
+  packetList.innerHTML='';
+  if(!filtered.length){packetList.innerHTML='<div class="list-item">No folders found</div>';return;}
+  filtered.forEach(f=>{
+    const row=document.createElement('div');
+    row.className='list-item';
+    row.innerHTML=`<span><i class="fas fa-folder"></i> ${f.name}</span>
+      <span class="muted">${new Date(f.modifiedTime).toLocaleString()}</span>`;
+    row.onclick=()=>selectFolder(f.id,f.name);
     packetList.appendChild(row);
   });
 }
 
-function selectFolder(id, name) {
-  currentFolder = {id, name};
-  filesTitle.textContent = `Files — ${name}`;
+function selectFolder(id,name){
+  currentFolder={id,name};
+  filesTitle.textContent=`Files — ${name}`;
   downloadFolderBtn.removeAttribute('disabled');
-  downloadFolderBtn.href = `/download/folder/${id}`;
+  downloadFolderBtn.href=`/download/folder/${id}`;
   loadFiles(id);
 }
 
-function loadFiles(folderId) {
-  filesBody.innerHTML = '<tr><td colspan="4">Loading…</td></tr>';
+function loadFiles(folderId){
+  filesBody.innerHTML='<tr><td colspan="4">Loading…</td></tr>';
   fetch(`/api/folder/${folderId}/files?sort=${sortSelect.value}`)
-    .then(r => r.json())
-    .then(({files}) => {
-      currentFiles = files || [];
-      renderFiles();
-    })
-    .catch(() => filesBody.innerHTML = '<tr><td colspan="4">Failed to load files</td></tr>');
+  .then(r=>r.json())
+  .then(({files})=>{currentFiles=files||[];renderFiles();})
+  .catch(()=>filesBody.innerHTML='<tr><td colspan="4">Failed to load files</td></tr>');
 }
 
-function renderFiles() {
-  const q = searchBox.value.toLowerCase();
-  const filtered = currentFiles.filter(f => !q || (f.name || '').toLowerCase().includes(q));
-  filesBody.innerHTML = '';
-  if (!filtered.length) {
-    filesBody.innerHTML = '<tr><td colspan="4">No files found</td></tr>';
-    return;
-  }
-  filtered.forEach(f => {
-    const tr = document.createElement('tr');
-    const mime = f.mimeType || '';
-    const ext = (f.name.split('.').pop() || '').toLowerCase();
-    const date = f.modifiedTime ? new Date(f.modifiedTime).toLocaleString() : '';
-    tr.innerHTML = `
+function renderFiles(){
+  const q=searchBox.value.toLowerCase();
+  const filtered=currentFiles.filter(f=>!q||(f.name||'').toLowerCase().includes(q));
+  filesBody.innerHTML='';
+  if(!filtered.length){filesBody.innerHTML='<tr><td colspan="4">No files found</td></tr>';return;}
+  filtered.forEach(f=>{
+    const tr=document.createElement('tr');
+    const mime=f.mimeType||'';
+    const ext=(f.name.split('.').pop()||'').toLowerCase();
+    const date=f.modifiedTime?new Date(f.modifiedTime).toLocaleString():'';
+    tr.innerHTML=`
       <td>${f.name}</td>
-      <td>${mime.replace('application/', '')}</td>
+      <td>${mime.replace('application/','')}</td>
       <td>${date}</td>
       <td class="actions">
         <button class="btn" onclick="openPreview('${f.id}','${mime}','${ext}')"><i class="fas fa-eye"></i> Preview</button>
@@ -245,14 +231,12 @@ function renderFiles() {
   });
 }
 
-function shareFile(id) { window.open(`/share?id=${id}`, '_blank'); }
+function shareFile(id){window.open(`/share?id=${id}`,'_blank');}
 
-searchBox.oninput = () => { renderFolders(); renderFiles(); };
-sortSelect.onchange = () => { loadFolders(); if (currentFolder) loadFiles(currentFolder.id); };
-refreshBtn.onclick = () => loadFolders();
-
+searchBox.oninput=()=>{renderFolders();renderFiles();};
+sortSelect.onchange=()=>{loadFolders();if(currentFolder)loadFiles(currentFolder.id);};
+refreshBtn.onclick=()=>loadFolders();
 loadFolders();
 </script>
-
 </body>
 </html>
