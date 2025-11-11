@@ -1,19 +1,19 @@
-# app.py
-from flask import Flask
-import os
+from flask import Flask, redirect, url_for
+from routes.auth_routes import auth_bp
+from routes.admin_routes import admin_bp
+from routes.file_routes import file_bp
 
-# create app
-app = Flask(__name__, static_folder='static', template_folder='templates')
-app.secret_key = os.environ.get('FLASK_SECRET', 'your_secret_key_here')
+app = Flask(__name__)
+app.secret_key = "venus_secret_key_2025"
 
-# load config early
-import config  # noqa: E402
+# ✅ Register all blueprints
+app.register_blueprint(auth_bp)
+app.register_blueprint(admin_bp)
+app.register_blueprint(file_bp)
 
-# register routes (blueprints)
-from routes import register_routes  # noqa: E402
-register_routes(app)
+@app.route("/")
+def home():
+    return redirect(url_for("auth.login"))
 
 if __name__ == "__main__":
-    from waitress import serve
-    port = int(os.environ.get("PORT", 10000))
-    serve(app, host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=10000)
