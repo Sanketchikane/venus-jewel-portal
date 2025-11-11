@@ -4,9 +4,11 @@ from google.oauth2 import service_account
 import gspread
 from datetime import datetime
 import config
+
+# Backends
 from backends.register_backend import submit_registration
 from backends.utils_backend import get_credentials_sheet, get_registration_sheet, get_user_record
-from backends.forgot_password_backend import reset_password_for_username  # ✅ added import
+from backends.forgot_password_backend import submit_forgot_password_request  # ✅ Updated import
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -93,36 +95,41 @@ def logout():
 
 
 # -------------------------
-# Forgot Password (GET + POST)
+# Forgot Password (NEW APPROVAL FLOW)
 # -------------------------
 @auth_bp.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
+    """
+    New secure flow:
+    - User submits request (Full Name, Username, Email, Org, Contact)
+    - Request stored in Google Sheet tab 'Forgot_Password_Requests'
+    - Admin reviews and resets manually
+    """
     if request.method == "POST":
         full_name = request.form.get("full_name", "").strip()
         username = request.form.get("username", "").strip()
-        new_password = request.form.get("new_password", "").strip()
-        confirm_password = request.form.get("confirm_password", "").strip()
+        email = request.form.get("email", "").strip()
+        organization = request.form.get("organization", "").strip()
+        contact_number = request.form.get("contact_number", "").strip()
 
         # Validation
-        if not all([full_name, username, new_password, confirm_password]):
-            flash("⚠️ Please fill in all fields.", "warning")
-            return redirect(url_for("auth.forgot_password"))
-
-        if new_password != confirm_password:
-            flash("❌ Passwords do not match.", "danger")
+        if not all([full_name, username, email, organization, contact_number]):
+            flash("⚠️ Please fill all fields before submitting.", "warning")
             return redirect(url_for("auth.forgot_password"))
 
         try:
-            result = reset_password_for_username(username, new_password)
-            if result:
-                flash("✅ Password reset successful! Please log in with your new password.", "success")
-                return redirect(url_for("auth.login"))
-            else:
-                flash("❌ Username not found in credentials.", "danger")
-                return redirect(url_for("auth.forgot_password"))
+            submit_forgot_password_request({
+                "full_name": full_name,
+                "username": username,
+                "email": email,
+                "organization": organization,
+                "contact_number": contact_number,
+            })
+            flash("✅ Password reset request submitted successfully. Admin will review and reset your account.", "success")
+            return redirect(url_for("auth.login"))
         except Exception as e:
-            print("Error resetting password:", e)
-            flash("⚠️ Internal error while resetting password. Try again later.", "danger")
+            print("Error submitting forgot password request:", e)
+            flash("⚠️ Could not submit your request. Try again later.", "danger")
             return redirect(url_for("auth.forgot_password"))
 
     return render_template("forgot_password.html")
