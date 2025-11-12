@@ -1,70 +1,41 @@
 import gspread
-from google.oauth2.service_account import Credentials
 from datetime import datetime
-from config import (
-    GOOGLE_SHEET_ID_REGISTRATION,
-    GOOGLE_SHEET_ID_CREDENTIALS,
-    CREDENTIALS_PATH
-)
+from backends.register_backend import find_registration_by_email, update_registration_status_by_row
 
-# Utility: Connect to Google Sheet
-def get_gsheet(sheet_id, tab_name):
-    scopes = ["https://www.googleapis.com/auth/spreadsheets"]
-    creds = Credentials.from_service_account_file(CREDENTIALS_PATH, scopes=scopes)
-    client = gspread.authorize(creds)
-    sheet = client.open_by_key(sheet_id)
-    return sheet.worksheet(tab_name)
+SHEET_KEY = "181GnSNYNBciNNUlWLXsIYNZ5qsxpDkIftfBzHrycHro"
+REG_WS_NAME = "Registration"
+CREDS_WS_NAME = "Credentials"
 
-# Fetch Approved Users
-def get_approved_users():
-    sheet = get_gsheet(GOOGLE_SHEET_ID_REGISTRATION, "Registration")
-    data = sheet.get_all_records()
-    approved = [r for r in data if str(r.get("Status", "")).strip().lower() in ["approved", "✅ approved"]]
-    return approved
 
-# Fetch Pending Users
-def get_pending_users():
-    sheet = get_gsheet(GOOGLE_SHEET_ID_REGISTRATION, "Registration")
-    data = sheet.get_all_records()
-    pending = [r for r in data if str(r.get("Status", "")).strip().lower() == "pending"]
-    return pending
+def create_credentials_from_request(email, username, password, creds):
+    """Approve a pending user and update both sheets. (No email sent)"""
+    try:
+        client = gspread.authorize(creds)
+        reg_entry = find_registration_by_email(email, creds)
 
-# Approve user + create credentials entry
-def create_credential_entry(email, username, password):
-    reg_sheet = get_gsheet(GOOGLE_SHEET_ID_REGISTRATION, "Registration")
-    cred_sheet = get_gsheet(GOOGLE_SHEET_ID_CREDENTIALS, "Credentials")
+        if not reg_entry:
+            print(f"[ERROR] No registration found for {email}")
+            return False
 
-    reg_data = reg_sheet.get_all_records()
-    header = list(reg_data[0].keys()) if reg_data else []
-    status_index = header.index("Status") + 1 if "Status" in header else None
+        row_data = reg_entry["row"]
+        row_num = reg_entry["row_number"]
 
-    user_row_index = None
-    user_row_data = None
+        full_name = row_data.get("Full Name", "")
+        email_field = row_data.get("Email Address") or row_data.get("Email") or email
+        contact = row_data.get("Contact Number", "")
+        org = row_data.get("Organization", "")
 
-    for i, row in enumerate(reg_data, start=2):
-        email_field = str(row.get("Email") or row.get("Email Address") or "").strip().lower()
-        if email_field == email.strip().lower():
-            user_row_index = i
-            user_row_data = row
-            break
+        creds_ws = client.open_by_key(SHEET_KEY).worksheet(CREDS_WS_NAME)
+        ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    if not user_row_index:
-        raise Exception(f"User with email '{email}' not found in Registration sheet")
+        # ✅ Add user to Credentials sheet
+        creds_ws.append_row([ts, full_name, username, password, contact, org, email_field])
 
-    # Add to Credentials sheet
-    cred_sheet.append_row([
-        datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        user_row_data.get("Full Name", ""),
-        username,
-        password,
-        user_row_data.get("Contact") or user_row_data.get("Contact Number", ""),
-        user_row_data.get("Organization", "") or user_row_data.get("Organisation", ""),
-        email
-    ])
+        # ✅ Update Registration sheet to Approved
+        update_registration_status_by_row(row_num, "✅ Approved", creds)
 
-    # Update Registration sheet status
-    if status_index:
-        reg_sheet.update_cell(user_row_index, status_index, "✅ Approved")
-
-    print(f"✅ User '{username}' approved successfully.")
-    return True
+        print(f"[INFO] User {full_name} ({email_field}) approved successfully.")
+        return True
+    except Exception as e:
+        print(f"[ERROR] create_credentials_from_request: {e}")
+        return False
