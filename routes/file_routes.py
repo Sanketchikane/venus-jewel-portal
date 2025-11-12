@@ -1,5 +1,6 @@
 # routes/file_routes.py
-from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify, abort, send_file
+
+from flask import Blueprint, render_template, request, jsonify, send_file, abort, session
 import io
 from googleapiclient.http import MediaIoBaseUpload
 from backends.utils_backend import (
@@ -15,7 +16,6 @@ def packet_folders():
     if not session.get("username"):
         return jsonify({"error": "Unauthorized"}), 401
     try:
-        # Fetch folders from Google Drive
         folders = list_packet_folders()  # This function will call Google Drive API
         return jsonify({"folders": folders})  # Return folders in JSON format
     except Exception as e:
@@ -58,8 +58,6 @@ def upload():
                         mimetype = file.mimetype or "application/octet-stream"
                     file_stream.seek(0)
                     media = MediaIoBaseUpload(file_stream, mimetype=mimetype)
-                    # Upload media to Google Drive
-                    from backends.utils_backend import upload_media_to_drive
                     upload_media_to_drive(final_filename, folder_id, media)
         return jsonify({"success": True, "message": "✅ All files uploaded and muted successfully."})
     except Exception as e:
