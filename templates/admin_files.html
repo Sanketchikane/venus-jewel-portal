@@ -1,21 +1,67 @@
 {% extends "admin_dashboard.html" %}
 {% block content %}
-<div class="container mt-4">
-  <h2 class="mb-4"><i class="fas fa-folder-open"></i> Venus Diamond Uploaded Files</h2>
-  <div class="list-group">
-    {% for file in files %}
-      <div class="list-group-item d-flex justify-content-between align-items-center">
-        <div>
-          <i class="fas fa-file-alt text-primary me-2"></i>
-          {{ file }}
-        </div>
-        <a href="{{ url_for('uploaded_file', filename=file) }}" target="_blank" class="btn btn-sm btn-outline-primary">
-          <i class="fas fa-download"></i> Open / Download
-        </a>
-      </div>
-    {% else %}
-      <div class="alert alert-info">No files found in uploads directory.</div>
-    {% endfor %}
+
+<div class="max-w-5xl mx-auto bg-white/90 rounded-2xl shadow-lg p-6 md:p-10 mt-10 backdrop-blur-md">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row justify-between items-center mb-6">
+    <h2 class="text-3xl font-bold text-venusBlue flex items-center gap-3 mb-4 sm:mb-0">
+      <i class="fas fa-folder-open text-sapphire"></i>
+      Venus Diamond Uploaded Files
+    </h2>
+    <div class="flex items-center gap-2">
+      <i class="fas fa-cloud-upload-alt text-blue-500"></i>
+      <span class="text-gray-600 text-sm sm:text-base">Admin View - All Files</span>
+    </div>
   </div>
+
+  <!-- File List -->
+  {% if files and files|length > 0 %}
+  <div class="overflow-x-auto">
+    <table class="min-w-full border border-gray-200 text-sm md:text-base">
+      <thead class="bg-gradient-to-r from-venusBlue to-sapphire text-white">
+        <tr>
+          <th class="px-4 py-3 text-left">File Name</th>
+          <th class="px-4 py-3 text-center">Action</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200 bg-white">
+        {% for file in files %}
+        <tr class="hover:bg-blue-50 transition">
+          <td class="px-4 py-3 text-gray-700 flex items-center gap-2 break-all">
+            <i class="fas fa-file-alt text-sapphire"></i>
+            {{ file }}
+          </td>
+          <td class="px-4 py-3 text-center">
+            <a href="{{ url_for('file.uploaded_file', filename=file) }}" target="_blank"
+               class="inline-flex items-center gap-2 bg-venusBlue text-white px-3 py-2 rounded-lg hover:bg-sapphire transition text-sm">
+              <i class="fas fa-download"></i> Open / Download
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="text-center py-10">
+    <div class="text-blue-600 text-5xl mb-4"><i class="fas fa-info-circle"></i></div>
+    <p class="text-gray-700 text-lg">No files found in the uploads directory.</p>
+  </div>
+  {% endif %}
 </div>
+
+<!-- Responsive Enhancements -->
+<style>
+  @media (max-width: 640px) {
+    table th, table td {
+      padding: 8px 10px !important;
+      font-size: 14px;
+    }
+    .max-w-5xl {
+      padding: 1rem !important;
+    }
+  }
+</style>
+
 {% endblock %}
