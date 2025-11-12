@@ -10,99 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
-    :root {
-      --vj-primary: #003366;
-      --vj-accent: #0B5FFF;
-      --vj-bg: rgba(255, 255, 255, .95);
-      --vj-border: #e2e8f0;
-      --vj-muted: #6b7280;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(to bottom right, #f6f8fc, #ffffff);
-      color: var(--vj-primary);
-      min-height: 100vh;
-    }
-
-    /* Splash Screen */
-    #splash {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(8px);
-      z-index: 9999;
-      transition: opacity 0.7s ease;
-    }
-    #splash.fade-out { opacity: 0; pointer-events: none; }
-
-    .topbar {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 12px 18px; background: var(--vj-bg);
-      border-bottom: 1px solid var(--vj-border);
-      position: sticky; top: 0; z-index: 100;
-    }
-    .brand img { height: 46px; }
-    .userbox { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .btn {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 8px 10px; border-radius: 8px; border: 1px solid var(--vj-border);
-      background: #fff; color: var(--vj-primary);
-      font-size: 14px; cursor: pointer; text-decoration: none;
-      transition: 0.2s;
-    }
-    .btn:hover { background: #eef4ff; }
-    .btn-primary { background: var(--vj-accent); color: #fff; border-color: var(--vj-accent); }
-
-    .container {
-      max-width: 1200px; margin: 24px auto;
-      background: var(--vj-bg); border-radius: 14px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, .06);
-      padding: 20px;
-    }
-    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
-    .controls input, .controls select {
-      padding: 10px 12px; border-radius: 8px;
-      border: 1px solid var(--vj-border);
-      flex: 1; min-width: 180px;
-    }
-    .browser { display: grid; grid-template-columns: 300px 1fr; gap: 16px; }
-    .panel {
-      background: #fff; border: 1px solid var(--vj-border);
-      border-radius: 10px; padding: 12px;
-    }
-    .panel h3 { font-size: 15px; color: var(--vj-primary); margin-bottom: 8px; }
-    .list {
-      max-height: 55vh; overflow: auto; border-radius: 8px;
-      border: 1px solid var(--vj-border); background: #fff;
-    }
-    .list-item {
-      padding: 10px 12px; border-bottom: 1px solid var(--vj-border);
-      display: flex; justify-content: space-between; align-items: center;
-      cursor: pointer; transition: background 0.2s;
-    }
-    .list-item:hover { background: #f0f6ff; }
-    .grid { width: 100%; border-collapse: collapse; }
-    .grid th, .grid td {
-      padding: 10px; border-bottom: 1px solid var(--vj-border);
-      text-align: left; font-size: 14px;
-    }
-    .grid th {
-      background: #f7f9fe; font-weight: 600;
-      color: var(--vj-primary);
-    }
-    .actions { display: flex; gap: 6px; flex-wrap: wrap; }
-    .muted { color: var(--vj-muted); font-size: 13px; }
-
-    @media (max-width: 900px) {
-      .browser { grid-template-columns: 1fr; }
-      .list { max-height: 35vh; }
-      .btn { font-size: 13px; padding: 6px 8px; }
-      .topbar { flex-wrap: wrap; gap: 8px; }
-    }
+    /* Your existing CSS styles */
   </style>
 </head>
 <body>
@@ -111,15 +19,6 @@
 <div id="splash">
   <img src="{{ url_for('static', filename='images/wings_new.gif') }}" alt="Loading..." class="w-1/2 md:w-1/3 animate-pulse">
 </div>
-<script>
-  window.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-      const splash = document.getElementById('splash');
-      splash.classList.add('fade-out');
-      setTimeout(() => splash.remove(), 700);
-    }, 2200);
-  });
-</script>
 
 <div class="topbar">
   <div class="brand">
@@ -171,7 +70,7 @@ let currentFolder = null, allFolders = [], currentFiles = [];
 
 function loadFolders() {
   packetList.innerHTML = '<div class="list-item">Loading…</div>';
-  fetch("/api/packet-folders")  // Fetch folders via the API
+  fetch("/api/packet-folders")
     .then(r => r.json())
     .then(({folders}) => {
       allFolders = folders || [];
@@ -210,7 +109,7 @@ function selectFolder(id, name) {
 
 function loadFiles(folderId) {
   filesBody.innerHTML = '<tr><td colspan="4">Loading…</td></tr>';
-  fetch(`/api/folder/${folderId}/files`)  // Fetch files for the folder via API
+  fetch(`/api/folder/${folderId}/files`)
     .then(r => r.json())
     .then(({files}) => {
       currentFiles = files || [];
