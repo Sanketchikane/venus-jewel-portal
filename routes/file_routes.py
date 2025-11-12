@@ -9,18 +9,33 @@ from backends.utils_backend import (
 
 file_bp = Blueprint("file", __name__)
 
+# API Route for Fetching Folders
+@file_bp.route("/api/packet-folders")
+def packet_folders():
+    if not session.get("username"):
+        return jsonify({"error": "Unauthorized"}), 401
+    try:
+        # Fetch folders from Google Drive
+        folders = list_packet_folders()  # This function will call Google Drive API
+        return jsonify({"folders": folders})  # Return folders in JSON format
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Files Page (Frontend)
 @file_bp.route("/files")
 def files_page():
     if not session.get("username"):
         return redirect(url_for("auth.login"))
     return render_template("files.html", user=session.get("username"))
 
+# Share Page
 @file_bp.route("/share")
 def share_page():
     if not session.get("username"):
         return redirect(url_for("auth.login"))
     return render_template("share.html", user=session.get("username"))
 
+# Upload Route
 @file_bp.route("/upload", methods=["POST"])
 def upload():
     try:
@@ -43,13 +58,14 @@ def upload():
                         mimetype = file.mimetype or "application/octet-stream"
                     file_stream.seek(0)
                     media = MediaIoBaseUpload(file_stream, mimetype=mimetype)
-                    # upload done inside utils backend using drive instance
+                    # Upload media to Google Drive
                     from backends.utils_backend import upload_media_to_drive
                     upload_media_to_drive(final_filename, folder_id, media)
         return jsonify({"success": True, "message": "✅ All files uploaded and muted successfully."})
     except Exception as e:
         return jsonify({"success": False, "message": f"Upload failed: {e}"}), 500
 
+# Download File Route
 @file_bp.route("/download/file/<file_id>")
 def download_file_route(file_id):
     if not session.get("username"):
@@ -57,6 +73,7 @@ def download_file_route(file_id):
     name, mime, fh = download_file_to_bytes(file_id)
     return send_file(fh, mimetype=mime, as_attachment=True, download_name=name)
 
+# Preview File Route
 @file_bp.route("/preview/file/<file_id>")
 def preview_file(file_id):
     t = request.args.get("t")
@@ -70,6 +87,7 @@ def preview_file(file_id):
     name, mime, fh = download_file_to_bytes(file_id)
     return send_file(fh, mimetype=mime, as_attachment=False, download_name=name)
 
+# Venus Upload Dashboard Route
 @file_bp.route("/venus-upload")
 def venus_upload_dashboard():
     if not session.get("venus_user"):
