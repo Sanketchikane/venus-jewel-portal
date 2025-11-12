@@ -11,7 +11,7 @@ admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 @admin_bp.route("/admin-dashboard")
 def admin_dashboard():
     try:
-        if not session.get("admin"):  # Check for the admin session key
+        if not session.get("is_admin"):  # Check for the admin session key
             flash("Unauthorized access", "danger")
             return redirect(url_for("auth.login"))
         return render_template("admin_dashboard.html", user=session.get("username"))
@@ -20,14 +20,13 @@ def admin_dashboard():
         traceback.print_exc()
         return "Internal Server Error", 500
 
-
 # -------------------------
 # Admin → View all approved users
 # -------------------------
 @admin_bp.route("/admin-users")
 def admin_users():
     try:
-        if not session.get("admin"):  # Check for the admin session key
+        if not session.get("is_admin"):  # Check for the admin session key
             flash("Unauthorized access", "danger")
             return redirect(url_for("auth.login"))
 
@@ -37,7 +36,6 @@ def admin_users():
         print("Error loading approved users:", e)
         traceback.print_exc()
         return "Internal Server Error", 500
-
 
 # -------------------------
 # API → Pending Registrations for AJAX
@@ -52,14 +50,13 @@ def pending_registrations():
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
-
 # -------------------------
 # Approve User / Create Credential
 # -------------------------
 @admin_bp.route("/create-credential", methods=["POST"])
 def create_credential():
     try:
-        if not session.get("admin"):  # Check for the admin session key
+        if not session.get("is_admin"):  # Check for the admin session key
             flash("Unauthorized access", "danger")
             return redirect(url_for("auth.login"))
 
@@ -71,7 +68,6 @@ def create_credential():
             flash("⚠️ Missing information in approval form", "warning")
             return redirect(url_for("admin.admin_users"))
 
-        # Create credential entry (approve user and add to credentials)
         admin_backend.create_credential_entry(email, username, password)
         flash(f"✅ User '{username}' added and approved successfully.", "success")
         return redirect(url_for("admin.admin_users"))
@@ -82,14 +78,13 @@ def create_credential():
         flash("❌ Internal Server Error during approval", "danger")
         return redirect(url_for("admin.admin_users"))
 
-
 # -------------------------
 # View Single User Profile
 # -------------------------
 @admin_bp.route("/view-user/<username>")
 def view_user(username):
     try:
-        if not session.get("admin"):  # Check for the admin session key
+        if not session.get("is_admin"):  # Check for the admin session key
             flash("Unauthorized access", "danger")
             return redirect(url_for("auth.login"))
 
@@ -108,14 +103,13 @@ def view_user(username):
         flash("⚠️ Internal error loading profile.", "danger")
         return redirect(url_for("admin.admin_users"))
 
-
 # -------------------------
 # Update User Profile
 # -------------------------
 @admin_bp.route("/update-user/<username>", methods=["POST"])
 def update_user(username):
     try:
-        if not session.get("admin"):  # Check for the admin session key
+        if not session.get("is_admin"):  # Check for the admin session key
             flash("Unauthorized access", "danger")
             return redirect(url_for("auth.login"))
 
