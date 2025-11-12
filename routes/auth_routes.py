@@ -33,20 +33,28 @@ def login():
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "").strip()
 
-        # Admin quick checks
+        # ✅ Admin Login
         if username == config.ADMIN_USERNAME and password == config.ADMIN_PASSWORD:
-            session.update({"username": username, "admin": True})
+            session.clear()
+            session["username"] = username
+            session["is_admin"] = True  # ✅ unified key
+            flash("Welcome, Admin!", "success")
             return redirect(url_for("admin.admin_dashboard"))
 
-        # VenusFiles default account
+        # ✅ VenusFiles Default Account
         if username == config.VENUSFILES_USERNAME and password == config.VENUSFILES_PASSWORD:
-            session.update({"username": username, "venus_user": True})
+            session.clear()
+            session["username"] = username
+            session["venus_user"] = True
+            flash("Welcome Venus File Account!", "success")
             return redirect(url_for("file.venus_upload_dashboard"))
 
-        # Regular user: check Credentials sheet
+        # ✅ Regular User
         user = get_user_record(username)
         if user and user.get("Password") == password:
-            session.update({"username": username, "admin": False})
+            session.clear()
+            session["username"] = username
+            session["is_admin"] = False
             resp = make_response(redirect(url_for("auth.dashboard")))
             return resp
 
@@ -63,7 +71,7 @@ def register():
     if request.method == "POST":
         try:
             submit_registration(request.form)
-            flash("✅ Registration request sent successfully. Admin will approve your account.", "success")
+            flash("✅ Registration request sent! The admin will review your details shortly.", "success")
             return redirect(url_for("auth.login"))
         except Exception as e:
             flash(f"❌ Registration failed: {e}", "danger")
@@ -76,7 +84,7 @@ def register():
 # -------------------------
 @auth_bp.route("/dashboard")
 def dashboard():
-    if not session.get("username") or session.get("admin"):
+    if not session.get("username") or session.get("is_admin"):
         flash("Access denied.", "danger")
         return redirect(url_for("auth.login"))
     return render_template("dashboard.html", user=session.get("username"))
@@ -95,15 +103,15 @@ def logout():
 
 
 # -------------------------
-# Forgot Password (NEW APPROVAL FLOW)
+# Forgot Password (Admin Review Flow)
 # -------------------------
 @auth_bp.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
     """
-    New secure flow:
-    - User submits request (Full Name, Username, Email, Org, Contact)
-    - Request stored in Google Sheet tab 'Forgot_Password_Requests'
-    - Admin reviews and resets manually
+    Secure flow:
+    - User submits reset request.
+    - Stored in 'Forgot_Password_Requests' sheet.
+    - Admin reviews manually and resets account.
     """
     if request.method == "POST":
         full_name = request.form.get("full_name", "").strip()
@@ -112,7 +120,6 @@ def forgot_password():
         organization = request.form.get("organization", "").strip()
         contact_number = request.form.get("contact_number", "").strip()
 
-        # Validation
         if not all([full_name, username, email, organization, contact_number]):
             flash("⚠️ Please fill all fields before submitting.", "warning")
             return redirect(url_for("auth.forgot_password"))
@@ -125,11 +132,11 @@ def forgot_password():
                 "organization": organization,
                 "contact_number": contact_number,
             })
-            flash("✅ Password reset request submitted successfully. Admin will review and reset your account.", "success")
+            flash("✅ Password reset request submitted. The admin will verify and reset your account soon.", "success")
             return redirect(url_for("auth.login"))
         except Exception as e:
             print("Error submitting forgot password request:", e)
-            flash("⚠️ Could not submit your request. Try again later.", "danger")
+            flash("⚠️ Could not submit your request. Please try again later.", "danger")
             return redirect(url_for("auth.forgot_password"))
 
     return render_template("forgot_password.html")
