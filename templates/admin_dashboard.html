@@ -2,21 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Admin Dashboard - Venus Jewel</title>
+  <title>Admin Dashboard – Venus Jewel</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- ✅ Tailwind CDN -->
+  <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Custom Venus Jewel Theme -->
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
             venusBlue: '#004080',
-            diamondWhite: '#f8f9fa',
-            sapphire: '#0066cc'
+            sapphire: '#0066cc',
+            platinum: '#f9f9f9',
           }
         }
       }
@@ -33,120 +31,123 @@
       background: url('/static/images/dimension.jpg') no-repeat center center fixed;
       background-size: cover;
       overflow-x: hidden;
+      min-height: 100vh;
     }
-
-    #global-splash {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(255, 255, 255, 0.6);
-      backdrop-filter: blur(6px);
-      display: flex; justify-content: center; align-items: center;
-      z-index: 9999; opacity: 1; transition: opacity 0.7s ease;
+    .sidebar {
+      background: linear-gradient(to bottom, rgba(0,48,112,0.95), rgba(0,64,128,0.96)),
+                  url('/static/images/pencil.png') no-repeat center center;
+      background-size: cover;
+      backdrop-filter: blur(8px);
     }
-    #global-splash.fade-out { opacity: 0; pointer-events: none; }
-    #global-splash img { width: 50vw; max-width: 500px; min-width: 200px; }
+    .sidebar a.active {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 6px;
+      transform: translateX(4px);
+    }
   </style>
 </head>
-<body>
+<body class="relative">
 
-<!-- ✅ Splash Screen -->
-<div id="global-splash">
-  <img src="{{ url_for('static', filename='images/wings_new.gif') }}" alt="Splash">
-</div>
-<script>
-  window.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-      const splash = document.getElementById('global-splash');
-      splash.classList.add('fade-out');
-      setTimeout(() => splash.style.display = 'none', 700);
-    }, 2000);
-  });
-</script>
+  <!-- Splash Screen -->
+  <div id="splash" class="fixed inset-0 flex items-center justify-center bg-white/70 backdrop-blur-lg z-[9999] transition-opacity duration-700">
+    <img src="{{ url_for('static', filename='images/wings_new.gif') }}" alt="Loading..." class="w-1/2 md:w-1/3 animate-pulse">
+  </div>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        const splash = document.getElementById('splash');
+        splash.classList.add('opacity-0');
+        setTimeout(() => splash.remove(), 700);
+      }, 2200);
+    });
+  </script>
 
-<!-- ✅ Sidebar -->
-<div class="flex flex-col md:flex-row min-h-screen">
   <!-- Sidebar -->
-  <div id="sidebar"
-    class="fixed md:relative bg-venusBlue bg-opacity-90 backdrop-blur-lg text-white w-64 min-h-screen z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out shadow-lg">
-
-    <div class="text-center mt-6 mb-4">
-      <img src="{{ url_for('static', filename='images/vj_logo_new.png') }}" alt="Venus Jewel" class="mx-auto h-14">
-      <h2 class="text-xl font-semibold mt-2">Venus Admin</h2>
+  <div id="sidebar" class="sidebar fixed top-0 left-0 w-64 h-full shadow-xl z-50 transform transition-transform duration-300 md:translate-x-0 -translate-x-full md:static">
+    <div class="text-center mt-8">
+      <img src="{{ url_for('static', filename='images/vj_logo_new.png') }}" alt="Venus Jewel Logo" class="mx-auto h-14">
+      <h2 class="text-white text-xl font-semibold mt-2">Venus Admin</h2>
     </div>
-
-    <ul class="space-y-2 px-3">
+    <ul class="mt-10 space-y-2 px-4 text-white font-medium">
       <li>
-        <a href="{{ url_for('admin.admin_users') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-sapphire transition">
-          <i class="fas fa-users"></i> Registered Users
+        <a href="{{ url_for('admin.admin_users') }}" class="flex items-center gap-3 px-3 py-2 hover:bg-white/20 rounded-lg transition">
+          <i class="fas fa-users w-5"></i> Users
         </a>
       </li>
       <li>
-        <a href="{{ url_for('file.files_page') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-sapphire transition">
-          <i class="fas fa-folder-open"></i> Files
+        <a href="{{ url_for('file.admin_files') }}" class="flex items-center gap-3 px-3 py-2 hover:bg-white/20 rounded-lg transition">
+          <i class="fas fa-folder-open w-5"></i> Files
         </a>
       </li>
       <li>
-        <a href="{{ url_for('auth.logout') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-600 transition">
-          <i class="fas fa-sign-out-alt"></i> Logout
+        <a href="{{ url_for('logout') }}" class="flex items-center gap-3 px-3 py-2 hover:bg-white/20 rounded-lg transition">
+          <i class="fas fa-sign-out-alt w-5"></i> Logout
         </a>
       </li>
     </ul>
   </div>
 
-  <!-- ✅ Toggle Button (mobile only) -->
-  <button id="toggleSidebar"
-    class="fixed top-4 left-4 bg-venusBlue text-white p-3 rounded-lg shadow-lg md:hidden z-50">
+  <!-- Mobile Toggle -->
+  <button id="toggleSidebar" class="md:hidden fixed top-5 left-5 z-[999] bg-venusBlue text-white px-3 py-2 rounded-lg shadow-lg">
     <i class="fas fa-bars"></i>
   </button>
+  <script>
+    document.getElementById("toggleSidebar").onclick = () => {
+      const sidebar = document.getElementById("sidebar");
+      sidebar.classList.toggle("-translate-x-full");
+    };
+  </script>
 
-  <!-- ✅ Main Content -->
-  <div class="flex-1 bg-white/80 backdrop-blur-lg p-6 md:p-10 rounded-tl-3xl shadow-xl md:ml-64">
-    <div class="flex flex-col items-center">
-      <img src="{{ url_for('static', filename='images/venus_black_logo.jpg') }}" alt="Venus Jewel Logo" class="h-20 mb-4">
-      <h2 class="text-3xl font-bold text-venusBlue mb-6">Admin Dashboard</h2>
+  <!-- Main Content -->
+  <main class="md:ml-64 min-h-screen bg-white/85 backdrop-blur-md p-6 md:p-10">
+    <div class="flex flex-col items-center text-center mb-8">
+      <img src="{{ url_for('static', filename='images/venus_black_logo.jpg') }}" alt="Venus Jewel" class="h-16 mb-3">
+      <h1 class="text-3xl font-bold text-venusBlue">Admin Dashboard</h1>
+      <p class="text-gray-600 mt-1 text-sm md:text-base">Manage users, review files, and control the Venus File Portal</p>
     </div>
 
-    <!-- ✅ Core Values Section -->
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 mt-6">
-      <div class="text-center hover:scale-105 transition">
-        <span class="block text-sapphire font-semibold mb-2">Transparency</span>
-        <img src="{{ url_for('static', filename='images/Round.png') }}" alt="Transparency" class="mx-auto h-28 object-contain">
+    <!-- Dashboard Content -->
+    <div class="grid gap-6 md:grid-cols-3 sm:grid-cols-2">
+      <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition p-6 text-center cursor-pointer">
+        <i class="fas fa-users text-4xl text-sapphire mb-3"></i>
+        <h3 class="font-semibold text-lg text-venusBlue mb-1">Registered Users</h3>
+        <p class="text-gray-600 text-sm">View and approve registrations</p>
       </div>
-      <div class="text-center hover:scale-105 transition">
-        <span class="block text-sapphire font-semibold mb-2">Fairness & Trust</span>
-        <img src="{{ url_for('static', filename='images/Cushion.png') }}" alt="Fairness" class="mx-auto h-28 object-contain">
+      <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition p-6 text-center cursor-pointer">
+        <i class="fas fa-folder-open text-4xl text-sapphire mb-3"></i>
+        <h3 class="font-semibold text-lg text-venusBlue mb-1">File Management</h3>
+        <p class="text-gray-600 text-sm">Access uploaded diamonds</p>
       </div>
-      <div class="text-center hover:scale-105 transition">
-        <span class="block text-sapphire font-semibold mb-2">Customer Satisfaction</span>
-        <img src="{{ url_for('static', filename='images/Emerald.png') }}" alt="Customer Satisfaction" class="mx-auto h-28 object-contain">
-      </div>
-      <div class="text-center hover:scale-105 transition">
-        <span class="block text-sapphire font-semibold mb-2">Long-Term Relationships</span>
-        <img src="{{ url_for('static', filename='images/Heart.png') }}" alt="Long-Term" class="mx-auto h-28 object-contain">
-      </div>
-      <div class="text-center hover:scale-105 transition">
-        <span class="block text-sapphire font-semibold mb-2">Selling What is Needed</span>
-        <img src="{{ url_for('static', filename='images/Oval.png') }}" alt="Selling Need" class="mx-auto h-28 object-contain">
-      </div>
-      <div class="text-center hover:scale-105 transition">
-        <span class="block text-sapphire font-semibold mb-2">Reciprocal Best Business</span>
-        <img src="{{ url_for('static', filename='images/Pear.png') }}" alt="Reciprocal Practice" class="mx-auto h-28 object-contain">
+      <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition p-6 text-center cursor-pointer">
+        <i class="fas fa-chart-line text-4xl text-sapphire mb-3"></i>
+        <h3 class="font-semibold text-lg text-venusBlue mb-1">Analytics</h3>
+        <p class="text-gray-600 text-sm">Monitor file and user activity</p>
       </div>
     </div>
+
+    <!-- Core Values Section -->
+    <section class="mt-12">
+      <h2 class="text-2xl font-semibold text-center text-sapphire mb-6">Our Core Values</h2>
+      <div class="flex flex-wrap justify-center gap-6">
+        {% for value, image in {
+          'Transparency': 'Round.png',
+          'Fairness & Trust': 'Cushion.png',
+          'Customer Satisfaction': 'Emerald.png',
+          'Long-Term Relationships': 'Heart.png',
+          'Selling What is Needed': 'Oval.png',
+          'Reciprocal Best Business': 'Pear.png'
+        }.items() %}
+        <div class="text-center w-32 md:w-40 hover:scale-105 transition">
+          <img src="{{ url_for('static', filename='images/' ~ image) }}" alt="{{ value }}"
+               class="w-full h-28 object-contain mb-2 drop-shadow-md">
+          <span class="text-venusBlue font-semibold text-sm md:text-base">{{ value }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
 
     {% block content %}{% endblock %}
-  </div>
-</div>
-
-<script>
-  const sidebar = document.getElementById("sidebar");
-  const toggleBtn = document.getElementById("toggleSidebar");
-
-  toggleBtn.addEventListener("click", () => {
-    sidebar.classList.toggle("-translate-x-full");
-  });
-</script>
+  </main>
 
 </body>
 </html>
