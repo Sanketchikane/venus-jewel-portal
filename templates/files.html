@@ -1,170 +1,242 @@
-{% extends "admin_dashboard.html" %}
-{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Files • VENUS JEWEL FILE PORTAL</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='images/apple-touch-icon.png') }}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/favicon-32x32.png') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-<style>
-  :root {
-    --vj-blue: #003366;
-    --vj-accent: #0B5FFF;
-    --vj-bg: #f8fafc;
-    --vj-border: #e2e8f0;
-    --vj-muted: #64748b;
-  }
-
-  body {
-    font-family: 'Poppins', sans-serif;
-    background: var(--vj-bg);
-    color: var(--vj-blue);
-  }
-
-  .profile-card {
-    background: white;
-    border-radius: 16px;
-    padding: 30px 24px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-    max-width: 900px;
-    margin: 40px auto;
-    font-family: 'Poppins', sans-serif;
-  }
-
-  .profile-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-
-  .profile-header h2 {
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--vj-blue);
-  }
-
-  .btn {
-    padding: 8px 14px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    transition: 0.2s;
-  }
-
-  .btn-back {
-    background: #e2e8f0;
-    color: var(--vj-blue);
-  }
-
-  .btn-back:hover {
-    background: #d0d7e3;
-  }
-
-  .btn-save {
-    background: var(--vj-accent);
-    color: white;
-  }
-
-  .btn-save:hover {
-    background: #0949c5;
-  }
-
-  form {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
-
-  .form-group {
-    display: flex;
-    flex-direction: column;
-  }
-
-  label {
-    font-weight: 600;
-    margin-bottom: 4px;
-    font-size: 14px;
-    color: var(--vj-blue);
-  }
-
-  input {
-    padding: 10px 12px;
-    border-radius: 6px;
-    border: 1px solid var(--vj-border);
-    font-size: 15px;
-    outline: none;
-  }
-
-  input:focus {
-    border-color: var(--vj-accent);
-    box-shadow: 0 0 0 2px rgba(11, 95, 255, 0.15);
-  }
-
-  .actions {
-    grid-column: span 2;
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
-  }
-
-  .readonly {
-    background: #f1f5f9;
-    color: #64748b;
-  }
-
-  @media (max-width: 768px) {
-    form {
-      grid-template-columns: 1fr;
+  <style>
+    :root {
+      --vj-primary: #003366;
+      --vj-accent: #0B5FFF;
+      --vj-bg: rgba(255, 255, 255, .95);
+      --vj-border: #e2e8f0;
+      --vj-muted: #6b7280;
     }
-    .profile-card {
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(to bottom right, #f6f8fc, #ffffff);
+      color: var(--vj-primary);
+      min-height: 100vh;
+    }
+
+    /* Splash Screen */
+    #splash {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(8px);
+      z-index: 9999;
+      transition: opacity 0.7s ease;
+    }
+    #splash.fade-out { opacity: 0; pointer-events: none; }
+
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 18px; background: var(--vj-bg);
+      border-bottom: 1px solid var(--vj-border);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .brand img { height: 46px; }
+    .userbox { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 10px; border-radius: 8px; border: 1px solid var(--vj-border);
+      background: #fff; color: var(--vj-primary);
+      font-size: 14px; cursor: pointer; text-decoration: none;
+      transition: 0.2s;
+    }
+    .btn:hover { background: #eef4ff; }
+    .btn-primary { background: var(--vj-accent); color: #fff; border-color: var(--vj-accent); }
+
+    .container {
+      max-width: 1200px; margin: 24px auto;
+      background: var(--vj-bg); border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, .06);
       padding: 20px;
-      margin: 20px auto;
     }
-  }
-</style>
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .controls input, .controls select {
+      padding: 10px 12px; border-radius: 8px;
+      border: 1px solid var(--vj-border);
+      flex: 1; min-width: 180px;
+    }
+    .browser { display: grid; grid-template-columns: 300px 1fr; gap: 16px; }
+    .panel {
+      background: #fff; border: 1px solid var(--vj-border);
+      border-radius: 10px; padding: 12px;
+    }
+    .panel h3 { font-size: 15px; color: var(--vj-primary); margin-bottom: 8px; }
+    .list {
+      max-height: 55vh; overflow: auto; border-radius: 8px;
+      border: 1px solid var(--vj-border); background: #fff;
+    }
+    .list-item {
+      padding: 10px 12px; border-bottom: 1px solid var(--vj-border);
+      display: flex; justify-content: space-between; align-items: center;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .list-item:hover { background: #f0f6ff; }
+    .grid { width: 100%; border-collapse: collapse; }
+    .grid th, .grid td {
+      padding: 10px; border-bottom: 1px solid var(--vj-border);
+      text-align: left; font-size: 14px;
+    }
+    .grid th {
+      background: #f7f9fe; font-weight: 600;
+      color: var(--vj-primary);
+    }
+    .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .muted { color: var(--vj-muted); font-size: 13px; }
 
-<div class="profile-card">
-  <div class="profile-header">
-    <h2>👤 User Profile – {{ user['Username'] }}</h2>
-    <a href="{{ url_for('admin.admin_users') }}" class="btn btn-back"><i class="fas fa-arrow-left"></i> Back to Users</a>
+    @media (max-width: 900px) {
+      .browser { grid-template-columns: 1fr; }
+      .list { max-height: 35vh; }
+      .btn { font-size: 13px; padding: 6px 8px; }
+      .topbar { flex-wrap: wrap; gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Splash Screen -->
+<div id="splash">
+  <img src="{{ url_for('static', filename='images/wings_new.gif') }}" alt="Loading..." class="w-1/2 md:w-1/3 animate-pulse">
+</div>
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+      const splash = document.getElementById('splash');
+      splash.classList.add('fade-out');
+      setTimeout(() => splash.remove(), 700);
+    }, 2200);
+  });
+</script>
+
+<div class="topbar">
+  <div class="brand">
+    <img src="{{ url_for('static', filename='images/venus_black_logo.jpg') }}" alt="Venus Jewel">
   </div>
-
-  <form method="POST" action="{{ url_for('admin.update_user', username=user['Username']) }}">
-    <div class="form-group">
-      <label>Full Name</label>
-      <input type="text" name="Full Name" value="{{ user['Full Name'] }}" required>
-    </div>
-
-    <div class="form-group">
-      <label>Email</label>
-      <input type="email" name="Email" value="{{ user['Email'] }}" required>
-    </div>
-
-    <div class="form-group">
-      <label>Organization</label>
-      <input type="text" name="Organization" value="{{ user['Organization'] }}">
-    </div>
-
-    <div class="form-group">
-      <label>Contact</label>
-      <input type="text" name="Contact" value="{{ user['Contact'] }}">
-    </div>
-
-    <div class="form-group">
-      <label>Username</label>
-      <input type="text" name="Username" value="{{ user['Username'] }}" class="readonly" readonly>
-    </div>
-
-    <div class="form-group">
-      <label>Password</label>
-      <input type="text" name="Password" value="{{ user['Password'] }}">
-    </div>
-
-    <div class="actions">
-      <a href="{{ url_for('admin.admin_users') }}" class="btn btn-back"><i class="fas fa-times"></i> Cancel</a>
-      <button type="submit" class="btn btn-save"><i class="fas fa-save"></i> Save Changes</button>
-    </div>
-  </form>
+  <div class="userbox">
+    <span><i class="fas fa-user-circle"></i> {{ user }}</span>
+    <a class="btn" href="/dashboard"><i class="fas fa-arrow-left"></i> Dashboard</a>
+    <a class="btn" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+  </div>
 </div>
 
-{% endblock %}
+<div class="container">
+  <div class="controls">
+    <input id="searchBox" type="text" placeholder="Search Packet No or File..." />
+    <select id="sortSelect">
+      <option value="newest">Newest First</option>
+      <option value="name">Name A–Z</option>
+    </select>
+    <button id="refreshBtn" class="btn"><i class="fas fa-rotate"></i> Refresh</button>
+    <a id="downloadFolderBtn" class="btn btn-primary" href="#" disabled><i class="fas fa-download"></i> Download Folder</a>
+  </div>
+
+  <div class="browser">
+    <div class="panel">
+      <h3><i class="fas fa-folder"></i> Packet Folders</h3>
+      <div id="packetList" class="list"></div>
+    </div>
+    <div class="panel">
+      <h3 id="filesTitle"><i class="fas fa-file"></i> Files</h3>
+      <table class="grid">
+        <thead><tr><th>Name</th><th>Type</th><th>Modified</th><th>Actions</th></tr></thead>
+        <tbody id="filesBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+const packetList=document.getElementById('packetList');
+const filesBody=document.getElementById('filesBody');
+const filesTitle=document.getElementById('filesTitle');
+const downloadFolderBtn=document.getElementById('downloadFolderBtn');
+const searchBox=document.getElementById('searchBox');
+const sortSelect=document.getElementById('sortSelect');
+const refreshBtn=document.getElementById('refreshBtn');
+
+let currentFolder=null, allFolders=[], currentFiles=[];
+
+function loadFolders(){
+  packetList.innerHTML='<div class="list-item">Loading…</div>';
+  fetch(`/api/packet-folders?sort=${sortSelect.value}`)
+  .then(r=>r.json())
+  .then(({folders})=>{allFolders=folders||[];renderFolders();})
+  .catch(()=>packetList.innerHTML='<div class="list-item">Failed to load folders</div>');
+}
+
+function renderFolders(){
+  const q=searchBox.value.toLowerCase();
+  const filtered=allFolders.filter(f=>!q||(f.name||'').toLowerCase().includes(q));
+  packetList.innerHTML='';
+  if(!filtered.length){packetList.innerHTML='<div class="list-item">No folders found</div>';return;}
+  filtered.forEach(f=>{
+    const row=document.createElement('div');
+    row.className='list-item';
+    row.innerHTML=`<span><i class="fas fa-folder"></i> ${f.name}</span>
+      <span class="muted">${new Date(f.modifiedTime).toLocaleString()}</span>`;
+    row.onclick=()=>selectFolder(f.id,f.name);
+    packetList.appendChild(row);
+  });
+}
+
+function selectFolder(id,name){
+  currentFolder={id,name};
+  filesTitle.textContent=`Files — ${name}`;
+  downloadFolderBtn.removeAttribute('disabled');
+  downloadFolderBtn.href=`/download/folder/${id}`;
+  loadFiles(id);
+}
+
+function loadFiles(folderId){
+  filesBody.innerHTML='<tr><td colspan="4">Loading…</td></tr>';
+  fetch(`/api/folder/${folderId}/files?sort=${sortSelect.value}`)
+  .then(r=>r.json())
+  .then(({files})=>{currentFiles=files||[];renderFiles();})
+  .catch(()=>filesBody.innerHTML='<tr><td colspan="4">Failed to load files</td></tr>');
+}
+
+function renderFiles(){
+  const q=searchBox.value.toLowerCase();
+  const filtered=currentFiles.filter(f=>!q||(f.name||'').toLowerCase().includes(q));
+  filesBody.innerHTML='';
+  if(!filtered.length){filesBody.innerHTML='<tr><td colspan="4">No files found</td></tr>';return;}
+  filtered.forEach(f=>{
+    const tr=document.createElement('tr');
+    const mime=f.mimeType||'';
+    const ext=(f.name.split('.').pop()||'').toLowerCase();
+    const date=f.modifiedTime?new Date(f.modifiedTime).toLocaleString():'';
+    tr.innerHTML=`
+      <td>${f.name}</td>
+      <td>${mime.replace('application/','')}</td>
+      <td>${date}</td>
+      <td class="actions">
+        <button class="btn" onclick="openPreview('${f.id}','${mime}','${ext}')"><i class="fas fa-eye"></i> Preview</button>
+        <a class="btn" href="/download/file/${f.id}"><i class="fas fa-download"></i> Download</a>
+        <button class="btn" onclick="shareFile('${f.id}')"><i class="fas fa-share-alt"></i> Share</button>
+      </td>`;
+    filesBody.appendChild(tr);
+  });
+}
+
+function shareFile(id){window.open(`/share?id=${id}`,'_blank');}
+
+searchBox.oninput=()=>{renderFolders();renderFiles();};
+sortSelect.onchange=()=>{loadFolders();if(currentFolder)loadFiles(currentFolder.id);};
+refreshBtn.onclick=()=>loadFolders();
+loadFolders();
+</script>
+</body>
+</html>
