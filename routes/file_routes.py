@@ -4,13 +4,30 @@ import io
 from googleapiclient.http import MediaIoBaseUpload
 from backends.utils_backend import (
     get_or_create_folder, get_unique_filename, mute_video,
-    list_packet_folders, list_files_in_folder, download_file_to_bytes, upload_media_to_drive
+    list_packet_folders, list_files_in_folder, download_file_to_bytes,
+    upload_media_to_drive
 )
 
 file_bp = Blueprint("file", __name__)
 
+# Compatibility endpoint expected by admin template
+@file_bp.route("/admin-files")
+def admin_files():
+    # keep an admin-facing view if template links to it
+    if not session.get("is_admin"):
+        return redirect(url_for("auth.login"))
+    return render_template("files.html", user=session.get("username"))
+
+# Files page for normal users
+@file_bp.route("/files")
+def files_page():
+    if not session.get("username"):
+        return redirect(url_for("auth.login"))
+    return render_template("files.html", user=session.get("username"))
+
+# API endpoint to return packet folders (used by frontend JS)
 @file_bp.route("/api/packet-folders")
-def packet_folders():
+def packet_folders_api():
     if not session.get("username"):
         return jsonify({"error": "Unauthorized"}), 401
     try:
@@ -19,18 +36,18 @@ def packet_folders():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@file_bp.route("/files")
-def files_page():
+# API endpoint to return files inside a folder
+@file_bp.route("/api/folder/<folder_id>/files")
+def folder_files_api(folder_id):
     if not session.get("username"):
-        return redirect(url_for("auth.login"))
-    return render_template("files.html", user=session.get("username"))
+        return jsonify({"error": "Unauthorized"}), 401
+    try:
+        files = list_files_in_folder(folder_id)
+        return jsonify({"files": files})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-@file_bp.route("/share")
-def share_page():
-    if not session.get("username"):
-        return redirect(url_for("auth.login"))
-    return render_template("share.html", user=session.get("username"))
-
+# Upload route
 @file_bp.route("/upload", methods=["POST"])
 def upload():
     try:
@@ -48,16 +65,18 @@ def upload():
                     if final_filename.lower().endswith((".mp4", ".mov", ".avi", ".mkv", ".webm")):
                         file_stream = mute_video(file, final_filename)
                         mimetype = "video/mp4"
+                        media = MediaIoBaseUpload(file_stream, mimetype=mimetype)
                     else:
                         file_stream = io.BytesIO(file.read())
                         mimetype = file.mimetype or "application/octet-stream"
-                    file_stream.seek(0)
-                    media = MediaIoBaseUpload(file_stream, mimetype=mimetype)
+                        file_stream.seek(0)
+                        media = MediaIoBaseUpload(file_stream, mimetype=mimetype)
                     upload_media_to_drive(final_filename, folder_id, media)
-        return jsonify({"success": True, "message": "✅ All files uploaded and muted successfully."})
+        return jsonify({"success": True, "message": "✅ All files uploaded and stored successfully."})
     except Exception as e:
         return jsonify({"success": False, "message": f"Upload failed: {e}"}), 500
 
+# Download file
 @file_bp.route("/download/file/<file_id>")
 def download_file_route(file_id):
     if not session.get("username"):
@@ -65,6 +84,7 @@ def download_file_route(file_id):
     name, mime, fh = download_file_to_bytes(file_id)
     return send_file(fh, mimetype=mime, as_attachment=True, download_name=name)
 
+# Preview file (supports secure share link)
 @file_bp.route("/preview/file/<file_id>")
 def preview_file(file_id):
     t = request.args.get("t")
@@ -78,6 +98,7 @@ def preview_file(file_id):
     name, mime, fh = download_file_to_bytes(file_id)
     return send_file(fh, mimetype=mime, as_attachment=False, download_name=name)
 
+# Venus upload dashboard
 @file_bp.route("/venus-upload")
 def venus_upload_dashboard():
     if not session.get("venus_user"):
