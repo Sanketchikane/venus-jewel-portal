@@ -1,5 +1,5 @@
 # backends/register_backend.py
-from backends.utils_backend import get_registration_sheet, get_credentials_sheet
+from backends.utils_backend import get_registration_sheet
 from datetime import datetime
 
 def submit_registration(form_data):
