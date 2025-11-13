@@ -21,7 +21,6 @@ def login():
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "").strip()
 
-        # Admin Login
         if username == config.ADMIN_USERNAME and password == config.ADMIN_PASSWORD:
             session.clear()
             session["username"] = username
@@ -29,7 +28,6 @@ def login():
             flash("Welcome, Admin!", "success")
             return redirect(url_for("admin.admin_dashboard"))
 
-        # VenusFiles Default Account
         if username == config.VENUSFILES_USERNAME and password == config.VENUSFILES_PASSWORD:
             session.clear()
             session["username"] = username
@@ -37,7 +35,6 @@ def login():
             flash("Welcome Venus File Account!", "success")
             return redirect(url_for("file.venus_upload_dashboard"))
 
-        # Regular User
         user = get_user_record(username)
         if user and user.get("Password") == password:
             session.clear()
@@ -98,7 +95,7 @@ def forgot_password():
             })
             flash("✅ Password reset request submitted. The admin will verify and reset your account soon.", "success")
             return redirect(url_for("auth.login"))
-        except Exception as e:
+        except Exception:
             flash("⚠️ Could not submit your request. Please try again later.", "danger")
             return redirect(url_for("auth.forgot_password"))
     return render_template("forgot_password.html")
