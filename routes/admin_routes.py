@@ -14,7 +14,6 @@ def admin_dashboard():
             return redirect(url_for("auth.login"))
         return render_template("admin_dashboard.html", user=session.get("username"))
     except Exception as e:
-        print("Error loading admin dashboard:", e)
         traceback.print_exc()
         return "Internal Server Error", 500
 
@@ -27,7 +26,6 @@ def admin_users():
         users = admin_backend.get_approved_users()
         return render_template("admin_users.html", users=users)
     except Exception as e:
-        print("Error loading approved users:", e)
         traceback.print_exc()
         return "Internal Server Error", 500
 
@@ -37,7 +35,6 @@ def pending_registrations():
         pending = admin_backend.get_pending_users()
         return jsonify({"pending": pending})
     except Exception as e:
-        print("Error fetching pending registrations:", e)
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
@@ -61,7 +58,6 @@ def create_credential():
         return redirect(url_for("admin.admin_users"))
 
     except Exception as e:
-        print("Approval error:", e)
         traceback.print_exc()
         flash("❌ Internal Server Error during approval", "danger")
         return redirect(url_for("admin.admin_users"))
@@ -83,7 +79,6 @@ def view_user(username):
 
         return render_template("view_user.html", user=user)
     except Exception as e:
-        print("Error loading user profile:", e)
         traceback.print_exc()
         flash("⚠️ Internal error loading profile.", "danger")
         return redirect(url_for("admin.admin_users"))
@@ -110,7 +105,6 @@ def update_user(username):
         return redirect(url_for("admin.admin_users"))
 
     except Exception as e:
-        print("Error updating user:", e)
         traceback.print_exc()
         flash("❌ Internal Server Error while updating user.", "danger")
         return redirect(url_for("admin.admin_users"))
