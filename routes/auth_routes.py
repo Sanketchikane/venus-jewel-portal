@@ -1,86 +1,104 @@
-# routes/file_routes.py
-from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify, abort, send_file
-import io
-from googleapiclient.http import MediaIoBaseUpload
-from backends.utils_backend import (
-    get_or_create_folder, get_unique_filename, mute_video,
-    list_packet_folders, list_files_in_folder, download_file_to_bytes, upload_media_to_drive
-)
+# routes/auth_routes.py
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash, make_response
+import config
+from backends.register_backend import submit_registration
+from backends.utils_backend import get_credentials_sheet, get_registration_sheet, get_user_record
+from backends.forgot_password_backend import submit_forgot_password_request, reset_password_for_username
 
-file_bp = Blueprint("file", __name__)
+auth_bp = Blueprint("auth", __name__)
 
-# API used by frontend files.html (packets)
-@file_bp.route("/api/packet-folders")
-def packet_folders():
-    if not session.get("username"):
-        return jsonify({"error": "Unauthorized"}), 401
-    try:
-        folders = list_packet_folders()
-        return jsonify({"folders": folders})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+@auth_bp.route("/")
+def root():
+    return redirect(url_for("auth.splash"))
 
-@file_bp.route("/files")
-def files_page():
-    if not session.get("username"):
+@auth_bp.route("/splash")
+def splash():
+    return render_template("splash.html")
+
+@auth_bp.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "").strip()
+
+        # Admin Login
+        if username == config.ADMIN_USERNAME and password == config.ADMIN_PASSWORD:
+            session.clear()
+            session["username"] = username
+            session["is_admin"] = True
+            flash("Welcome, Admin!", "success")
+            return redirect(url_for("admin.admin_dashboard"))
+
+        # VenusFiles Default Account
+        if username == config.VENUSFILES_USERNAME and password == config.VENUSFILES_PASSWORD:
+            session.clear()
+            session["username"] = username
+            session["venus_user"] = True
+            flash("Welcome Venus File Account!", "success")
+            return redirect(url_for("file.venus_upload_dashboard"))
+
+        # Regular User
+        user = get_user_record(username)
+        if user and user.get("Password") == password:
+            session.clear()
+            session["username"] = username
+            session["is_admin"] = False
+            return redirect(url_for("auth.dashboard"))
+
+        flash("Invalid credentials.", "danger")
+    return render_template("login.html")
+
+@auth_bp.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        try:
+            submit_registration(request.form)
+            flash("✅ Registration request sent! The admin will review your details shortly.", "success")
+            return redirect(url_for("auth.login"))
+        except Exception as e:
+            flash(f"❌ Registration failed: {e}", "danger")
+            return render_template("register.html")
+    return render_template("register.html")
+
+@auth_bp.route("/dashboard")
+def dashboard():
+    if not session.get("username") or session.get("is_admin"):
+        flash("Access denied.", "danger")
         return redirect(url_for("auth.login"))
-    return render_template("files.html", user=session.get("username"))
+    return render_template("dashboard.html", user=session.get("username"))
 
-@file_bp.route("/share")
-def share_page():
-    if not session.get("username"):
-        return redirect(url_for("auth.login"))
-    return render_template("share.html", user=session.get("username"))
+@auth_bp.route("/logout")
+def logout():
+    session.clear()
+    resp = make_response(redirect(url_for("auth.login") + "?showSplash=1"))
+    resp.set_cookie("username", "", expires=0)
+    resp.set_cookie("password", "", expires=0)
+    return resp
 
-@file_bp.route("/upload", methods=["POST"])
-def upload():
-    try:
-        packet_no = request.form.get("packetNo", "").strip()
-        if not packet_no:
-            return jsonify({"success": False, "message": "Packet number is required."}), 400
-        folder_id = get_or_create_folder(packet_no)
-        for key in request.files:
-            subpoint = key.replace("file_", "")
-            for file in request.files.getlist(key):
-                if file and file.filename:
-                    ext = file.filename.rsplit(".", 1)[-1] if "." in file.filename else ""
-                    base_filename = f"{subpoint}.{ext}" if ext else subpoint
-                    final_filename = get_unique_filename(base_filename, folder_id)
-                    if final_filename.lower().endswith((".mp4", ".mov", ".avi", ".mkv", ".webm")):
-                        file_stream = mute_video(file, final_filename)
-                        mimetype = "video/mp4"
-                    else:
-                        file_stream = io.BytesIO(file.read())
-                        mimetype = file.mimetype or "application/octet-stream"
-                    file_stream.seek(0)
-                    media = MediaIoBaseUpload(file_stream, mimetype=mimetype)
-                    upload_media_to_drive(final_filename, folder_id, media)
-        return jsonify({"success": True, "message": "✅ All files uploaded and muted successfully."})
-    except Exception as e:
-        return jsonify({"success": False, "message": f"Upload failed: {e}"}), 500
+@auth_bp.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    if request.method == "POST":
+        full_name = request.form.get("full_name", "").strip()
+        username = request.form.get("username", "").strip()
+        email = request.form.get("email", "").strip()
+        organization = request.form.get("organization", "").strip()
+        contact_number = request.form.get("contact_number", "").strip()
 
-@file_bp.route("/download/file/<file_id>")
-def download_file_route(file_id):
-    if not session.get("username"):
-        return abort(401)
-    name, mime, fh = download_file_to_bytes(file_id)
-    return send_file(fh, mimetype=mime, as_attachment=True, download_name=name)
+        if not all([full_name, username, email, organization, contact_number]):
+            flash("⚠️ Please fill all fields before submitting.", "warning")
+            return redirect(url_for("auth.forgot_password"))
 
-@file_bp.route("/preview/file/<file_id>")
-def preview_file(file_id):
-    t = request.args.get("t")
-    s = request.args.get("s")
-    if t and s:
-        from backends.utils_backend import verify_secure_link
-        if not verify_secure_link(file_id, t, s):
-            return abort(403)
-    elif not session.get("username"):
-        return abort(401)
-    name, mime, fh = download_file_to_bytes(file_id)
-    return send_file(fh, mimetype=mime, as_attachment=False, download_name=name)
-
-@file_bp.route("/venus-upload")
-def venus_upload_dashboard():
-    if not session.get("venus_user"):
-        return redirect(url_for("auth.login"))
-    return render_template("Venus_Upload.html", user=session.get("username", ""))
+        try:
+            submit_forgot_password_request({
+                "full_name": full_name,
+                "username": username,
+                "email": email,
+                "organization": organization,
+                "contact_number": contact_number,
+            })
+            flash("✅ Password reset request submitted. The admin will verify and reset your account soon.", "success")
+            return redirect(url_for("auth.login"))
+        except Exception as e:
+            flash("⚠️ Could not submit your request. Please try again later.", "danger")
+            return redirect(url_for("auth.forgot_password"))
+    return render_template("forgot_password.html")
