@@ -1,3 +1,4 @@
+# backends/admin_backend.py
 import gspread
 from google.oauth2.service_account import Credentials
 from datetime import datetime
@@ -7,7 +8,6 @@ from config import (
     CREDENTIALS_PATH
 )
 
-# Utility: Connect to Google Sheet
 def get_gsheet(sheet_id, tab_name):
     scopes = ["https://www.googleapis.com/auth/spreadsheets"]
     creds = Credentials.from_service_account_file(CREDENTIALS_PATH, scopes=scopes)
@@ -15,21 +15,18 @@ def get_gsheet(sheet_id, tab_name):
     sheet = client.open_by_key(sheet_id)
     return sheet.worksheet(tab_name)
 
-# Fetch Approved Users
 def get_approved_users():
     sheet = get_gsheet(GOOGLE_SHEET_ID_REGISTRATION, "Registration")
     data = sheet.get_all_records()
     approved = [r for r in data if str(r.get("Status", "")).strip().lower() in ["approved", "✅ approved"]]
     return approved
 
-# Fetch Pending Users
 def get_pending_users():
     sheet = get_gsheet(GOOGLE_SHEET_ID_REGISTRATION, "Registration")
     data = sheet.get_all_records()
-    pending = [r for r in data if str(r.get("Status", "")).strip().lower() == "pending"]
+    pending = [r for r in data if str(r.get("Status", "")).strip().lower().startswith("pending")]
     return pending
 
-# Approve user + create credentials entry
 def create_credential_entry(email, username, password):
     reg_sheet = get_gsheet(GOOGLE_SHEET_ID_REGISTRATION, "Registration")
     cred_sheet = get_gsheet(GOOGLE_SHEET_ID_CREDENTIALS, "Credentials")
@@ -43,7 +40,7 @@ def create_credential_entry(email, username, password):
 
     for i, row in enumerate(reg_data, start=2):
         email_field = str(row.get("Email") or row.get("Email Address") or "").strip().lower()
-        if email_field == email.strip().lower():
+        if email_field == (email or "").strip().lower():
             user_row_index = i
             user_row_data = row
             break
@@ -51,7 +48,7 @@ def create_credential_entry(email, username, password):
     if not user_row_index:
         raise Exception(f"User with email '{email}' not found in Registration sheet")
 
-    # Add to Credentials sheet
+    # Append to Credentials sheet
     cred_sheet.append_row([
         datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         user_row_data.get("Full Name", ""),
@@ -64,7 +61,10 @@ def create_credential_entry(email, username, password):
 
     # Update Registration sheet status
     if status_index:
-        reg_sheet.update_cell(user_row_index, status_index, "✅ Approved")
+        try:
+            reg_sheet.update_cell(user_row_index, status_index, "✅ Approved")
+        except Exception as e:
+            print("Warning: could not update registration status:", e)
 
     print(f"✅ User '{username}' approved successfully.")
     return True
