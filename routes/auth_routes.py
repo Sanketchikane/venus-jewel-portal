@@ -2,8 +2,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, make_response
 import config
 from backends.register_backend import submit_registration
-from backends.utils_backend import get_credentials_sheet, get_registration_sheet, get_user_record
-from backends.forgot_password_backend import submit_forgot_password_request, reset_password_for_username
+from backends.utils_backend import get_credentials_sheet, get_registration_sheet, get_user_record, reset_password_for_username
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -21,6 +20,7 @@ def login():
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "").strip()
 
+        # Admin Login
         if username == config.ADMIN_USERNAME and password == config.ADMIN_PASSWORD:
             session.clear()
             session["username"] = username
@@ -28,6 +28,7 @@ def login():
             flash("Welcome, Admin!", "success")
             return redirect(url_for("admin.admin_dashboard"))
 
+        # VenusFiles Default Account
         if username == config.VENUSFILES_USERNAME and password == config.VENUSFILES_PASSWORD:
             session.clear()
             session["username"] = username
@@ -35,6 +36,7 @@ def login():
             flash("Welcome Venus File Account!", "success")
             return redirect(url_for("file.venus_upload_dashboard"))
 
+        # Regular User
         user = get_user_record(username)
         if user and user.get("Password") == password:
             session.clear()
@@ -74,28 +76,33 @@ def logout():
 
 @auth_bp.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
+    """
+    Admin-reviewed password reset flow.
+    """
     if request.method == "POST":
-        full_name = request.form.get("full_name", "").strip()
         username = request.form.get("username", "").strip()
-        email = request.form.get("email", "").strip()
-        organization = request.form.get("organization", "").strip()
-        contact_number = request.form.get("contact_number", "").strip()
+        new_password = request.form.get("new_password", "").strip()
+        confirm_password = request.form.get("confirm_password", "").strip()
 
-        if not all([full_name, username, email, organization, contact_number]):
-            flash("⚠️ Please fill all fields before submitting.", "warning")
+        if not all([username, new_password, confirm_password]):
+            flash("⚠️ Fill all fields.", "warning")
+            return redirect(url_for("auth.forgot_password"))
+
+        if new_password != confirm_password:
+            flash("❌ Passwords do not match.", "danger")
             return redirect(url_for("auth.forgot_password"))
 
         try:
-            submit_forgot_password_request({
-                "full_name": full_name,
-                "username": username,
-                "email": email,
-                "organization": organization,
-                "contact_number": contact_number,
-            })
-            flash("✅ Password reset request submitted. The admin will verify and reset your account soon.", "success")
-            return redirect(url_for("auth.login"))
-        except Exception:
-            flash("⚠️ Could not submit your request. Please try again later.", "danger")
+            ok = reset_password_for_username(username, new_password)
+            if ok:
+                flash("✅ Password reset successful. Please login with new password.", "success")
+                return redirect(url_for("auth.login"))
+            else:
+                flash("❌ Username not found.", "danger")
+                return redirect(url_for("auth.forgot_password"))
+        except Exception as e:
+            print("Error resetting password:", e)
+            flash("⚠️ Could not reset password. Try later.", "danger")
             return redirect(url_for("auth.forgot_password"))
+
     return render_template("forgot_password.html")
