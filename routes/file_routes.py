@@ -9,7 +9,6 @@ from backends.utils_backend import (
 
 file_bp = Blueprint("file", __name__)
 
-# API used by frontend files.html (packets)
 @file_bp.route("/api/packet-folders")
 def packet_folders():
     if not session.get("username"):
