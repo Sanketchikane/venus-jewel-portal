@@ -2,6 +2,7 @@
 from flask import Blueprint, jsonify, request
 from backends.register_backend import get_pending_requests
 from backends.utils_backend import list_packet_folders, list_files_in_folder, generate_secure_link
+
 api_bp = Blueprint("api", __name__)
 
 @api_bp.route("/api/pending-registrations")
