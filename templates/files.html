@@ -8,16 +8,15 @@
   <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/favicon-32x32.png') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-
   <style>
     :root {
       --vj-primary: #003366;
       --vj-accent: #0B5FFF;
       --vj-bg: rgba(255, 255, 255, .95);
+      --vj-card: #ffffff;
       --vj-border: #e2e8f0;
       --vj-muted: #6b7280;
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Poppins', sans-serif;
@@ -25,7 +24,6 @@
       color: var(--vj-primary);
       min-height: 100vh;
     }
-
     .topbar {
       display: flex; align-items: center; justify-content: space-between;
       padding: 12px 18px; background: var(--vj-bg);
@@ -43,31 +41,31 @@
     }
     .btn:hover { background: #eef4ff; }
     .btn-primary { background: var(--vj-accent); color: #fff; border-color: var(--vj-accent); }
-
     .container {
       max-width: 1200px; margin: 24px auto;
       background: var(--vj-bg); border-radius: 14px;
       box-shadow: 0 10px 30px rgba(0, 0, 0, .06);
       padding: 20px;
     }
-
-    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .controls {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;
+    }
     .controls input, .controls select {
       padding: 10px 12px; border-radius: 8px;
       border: 1px solid var(--vj-border);
       flex: 1; min-width: 180px;
     }
-
     .browser { display: grid; grid-template-columns: 300px 1fr; gap: 16px; }
     .panel {
-      background: #fff; border: 1px solid var(--vj-border);
+      background: var(--vj-card);
+      border: 1px solid var(--vj-border);
       border-radius: 10px; padding: 12px;
     }
     .panel h3 { font-size: 15px; color: var(--vj-primary); margin-bottom: 8px; }
-
     .list {
-      max-height: 55vh; overflow: auto; border-radius: 8px;
-      border: 1px solid var(--vj-border); background: #fff;
+      max-height: 55vh; overflow: auto;
+      border-radius: 8px; border: 1px solid var(--vj-border);
+      background: #fff;
     }
     .list-item {
       padding: 10px 12px; border-bottom: 1px solid var(--vj-border);
@@ -75,33 +73,36 @@
       cursor: pointer; transition: background 0.2s;
     }
     .list-item:hover { background: #f0f6ff; }
-
     .grid { width: 100%; border-collapse: collapse; }
     .grid th, .grid td {
       padding: 10px; border-bottom: 1px solid var(--vj-border);
       text-align: left; font-size: 14px;
     }
-    .grid th { background: #f7f9fe; font-weight: 600; color: var(--vj-primary); }
-
+    .grid th {
+      background: #f7f9fe; font-weight: 600;
+      color: var(--vj-primary);
+    }
     .actions { display: flex; gap: 6px; flex-wrap: wrap; }
     .muted { color: var(--vj-muted); font-size: 13px; }
 
     /* Preview Modal */
     #previewModal {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.7); display: none; justify-content: center;
-      align-items: center; z-index: 1000;
+      display: none; position: fixed; inset: 0;
+      background: rgba(0, 0, 0, 0.75); z-index: 1000;
+      align-items: center; justify-content: center; padding: 10px;
     }
-    #previewContent {
-      background: white; border-radius: 10px;
-      width: 90%; height: 90%; padding: 10px;
-      display: flex; flex-direction: column;
+    #previewBox {
+      background: #000; border-radius: 10px;
+      width: min(95vw, 900px); height: auto;
+      overflow: hidden; position: relative;
     }
-    #previewFrame { flex: 1; border: none; width: 100%; }
-    #closePreview {
-      background: var(--vj-accent); color: white;
-      border: none; padding: 8px 16px; border-radius: 6px;
-      cursor: pointer; margin-bottom: 8px; align-self: flex-end;
+    #previewBox video, #previewBox img, #previewBox iframe {
+      width: 100%; height: auto; max-height: 85vh; display: none;
+    }
+    #previewClose {
+      position: absolute; top: 8px; right: 8px;
+      background: rgba(255,255,255,0.9); border: none;
+      border-radius: 50%; width: 32px; height: 32px; cursor: pointer;
     }
 
     @media (max-width: 900px) {
@@ -114,52 +115,52 @@
 </head>
 <body>
 
-<!-- Top Bar -->
-<div class="topbar">
-  <div class="brand">
-    <img src="{{ url_for('static', filename='images/venus_black_logo.jpg') }}" alt="Venus Jewel">
-  </div>
-  <div class="userbox">
-    <span><i class="fas fa-user-circle"></i> {{ user }}</span>
-    <a class="btn" href="/dashboard"><i class="fas fa-arrow-left"></i> Dashboard</a>
-    <a class="btn" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
-  </div>
-</div>
-
-<!-- Main Container -->
-<div class="container">
-  <div class="controls">
-    <input id="searchBox" type="text" placeholder="Search Packet No or File..." />
-    <select id="sortSelect">
-      <option value="newest">Newest First</option>
-      <option value="name">Name A–Z</option>
-    </select>
-    <button id="refreshBtn" class="btn"><i class="fas fa-rotate"></i> Refresh</button>
-    <a id="downloadFolderBtn" class="btn btn-primary" href="#" disabled><i class="fas fa-download"></i> Download Folder</a>
-  </div>
-
-  <div class="browser">
-    <div class="panel">
-      <h3><i class="fas fa-folder"></i> Packet Folders</h3>
-      <div id="packetList" class="list"></div>
+  <div class="topbar">
+    <div class="brand">
+      <img src="{{ url_for('static', filename='images/venus_black_logo.jpg') }}" alt="Venus Jewel">
     </div>
-    <div class="panel">
-      <h3 id="filesTitle"><i class="fas fa-file"></i> Files</h3>
-      <table class="grid">
-        <thead><tr><th>Name</th><th>Type</th><th>Modified</th><th>Actions</th></tr></thead>
-        <tbody id="filesBody"></tbody>
-      </table>
+    <div class="userbox">
+      <span><i class="fas fa-user-circle"></i> {{ user }}</span>
+      <a class="btn" href="/dashboard"><i class="fas fa-arrow-left"></i> Dashboard</a>
+      <a class="btn" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
     </div>
   </div>
-</div>
 
-<!-- Preview Modal -->
-<div id="previewModal">
-  <div id="previewContent">
-    <button id="closePreview"><i class="fas fa-times"></i> Close</button>
-    <iframe id="previewFrame"></iframe>
+  <div class="container">
+    <div class="controls">
+      <input id="searchBox" type="text" placeholder="Search Packet No or File..." />
+      <select id="sortSelect">
+        <option value="newest">Newest First</option>
+        <option value="name">Name A–Z</option>
+      </select>
+      <button id="refreshBtn" class="btn"><i class="fas fa-rotate"></i> Refresh</button>
+      <a id="downloadFolderBtn" class="btn btn-primary" href="#" disabled><i class="fas fa-download"></i> Download Folder</a>
+    </div>
+
+    <div class="browser">
+      <div class="panel">
+        <h3><i class="fas fa-folder"></i> Packet Folders</h3>
+        <div id="packetList" class="list"></div>
+      </div>
+      <div class="panel">
+        <h3 id="filesTitle"><i class="fas fa-file"></i> Files</h3>
+        <table class="grid">
+          <thead><tr><th>Name</th><th>Type</th><th>Modified</th><th>Actions</th></tr></thead>
+          <tbody id="filesBody"></tbody>
+        </table>
+      </div>
+    </div>
   </div>
-</div>
+
+  <!-- Preview Modal -->
+  <div id="previewModal">
+    <div id="previewBox">
+      <button id="previewClose" onclick="closePreview()">✕</button>
+      <video id="previewVideo" controls></video>
+      <img id="previewImage" alt="Preview Image">
+      <iframe id="previewFrame"></iframe>
+    </div>
+  </div>
 
 <script>
 const packetList=document.getElementById('packetList');
@@ -169,12 +170,10 @@ const downloadFolderBtn=document.getElementById('downloadFolderBtn');
 const searchBox=document.getElementById('searchBox');
 const sortSelect=document.getElementById('sortSelect');
 const refreshBtn=document.getElementById('refreshBtn');
-const previewModal=document.getElementById('previewModal');
-const previewFrame=document.getElementById('previewFrame');
-const closePreview=document.getElementById('closePreview');
 
 let currentFolder=null, allFolders=[], currentFiles=[];
 
+// Load Folders
 function loadFolders(){
   packetList.innerHTML='<div class="list-item">Loading…</div>';
   fetch(`/api/packet-folders?sort=${sortSelect.value}`)
@@ -237,15 +236,29 @@ function renderFiles(){
   });
 }
 
-// ✅ File Preview Logic
-function openPreview(fileId,mime,ext){
-  const previewUrl=`/preview/${fileId}`;
-  previewFrame.src=previewUrl;
-  previewModal.style.display='flex';
-}
-closePreview.onclick=()=>{previewModal.style.display='none';previewFrame.src='';};
-previewModal.onclick=(e)=>{if(e.target===previewModal){previewModal.style.display='none';previewFrame.src='';}};
+// Preview
+const modal=document.getElementById('previewModal');
+const video=document.getElementById('previewVideo');
+const img=document.getElementById('previewImage');
+const frame=document.getElementById('previewFrame');
 
+function openPreview(id,mime,ext){
+  video.style.display=img.style.display=frame.style.display='none';
+  const url=`/preview/file/${id}`;
+  if(mime.startsWith('video/')||['mp4','mov','mkv','webm','hevc'].includes(ext)){
+    video.src=url;video.style.display='block';modal.style.display='flex';video.play();return;
+  }
+  if(mime.startsWith('image/')||['jpg','jpeg','png','gif','webp'].includes(ext)){
+    img.src=url;img.style.display='block';modal.style.display='flex';return;
+  }
+  if(mime==='application/pdf'||ext==='pdf'){
+    frame.src=url;frame.style.display='block';modal.style.display='flex';return;
+  }
+  alert('Preview not supported for this file.');
+}
+function closePreview(){modal.style.display='none';video.pause();video.src='';}
+
+// Share
 function shareFile(id){window.open(`/share?id=${id}`,'_blank');}
 
 searchBox.oninput=()=>{renderFolders();renderFiles();};
