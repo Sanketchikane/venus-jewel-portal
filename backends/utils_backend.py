@@ -59,3 +59,39 @@ def download_file_to_bytes(file_id):
         status, done = downloader.next_chunk()
     fh.seek(0)
     return meta["name"], meta.get("mimeType", "application/octet-stream"), fh
+    # -----------------------------------------
+# USER LOOKUP (REQUIRED FOR LOGIN)
+# -----------------------------------------
+def get_user_record(username):
+    """
+    Reads the Credentials sheet and returns the user record
+    matching the given username.
+    """
+    try:
+        ws = get_credentials_sheet()
+
+        # Column C contains the username list
+        usernames = ws.col_values(3)[1:]  # ignore header row
+
+        for i, u in enumerate(usernames, start=2):
+            if u == username:
+                row = ws.row_values(i)
+
+                def col(n):
+                    return row[n] if len(row) > n else ""
+
+                return {
+                    "row_number": i,
+                    "Timestamp": col(0),
+                    "Full Name": col(1),
+                    "Username": col(2),
+                    "Password": col(3),
+                    "Contact Number": col(4),
+                    "Organization": col(5),
+                }
+
+        return None
+    except Exception as e:
+        print("ERROR get_user_record:", e)
+        return None
+
