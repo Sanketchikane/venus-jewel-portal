@@ -14,10 +14,12 @@
       background: url('/static/images/dimension.jpg') no-repeat center center fixed;
       background-size: cover;
     }
+
     .sidebar {
       background: linear-gradient(to bottom, rgba(0,48,112,0.95), rgba(0,64,128,0.96));
       backdrop-filter: blur(8px);
     }
+
     .sidebar a.active {
       background: rgba(255, 255, 255, 0.25);
       border-radius: 6px;
@@ -39,6 +41,11 @@
       <a href="{{ url_for('admin.admin_users') }}" class="flex items-center gap-3 px-3 py-2 hover:bg-white/20 rounded-lg">
         <i class="fas fa-users"></i> Users
       </a>
+      <ul class="pl-4">
+        <li><a href="{{ url_for('admin.admin_users') }}" class="block py-2 px-4 hover:bg-white/20 rounded-lg">Registered Users</a></li>
+        <li><a href="{{ url_for('admin.admin_users') }}#pending" class="block py-2 px-4 hover:bg-white/20 rounded-lg">Pending Requests</a></li>
+        <li><a href="{{ url_for('admin.admin_users') }}#forgot-password" class="block py-2 px-4 hover:bg-white/20 rounded-lg">Forgot Password Requests</a></li>
+      </ul>
     </li>
 
     <li>
