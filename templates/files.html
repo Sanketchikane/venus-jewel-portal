@@ -1,269 +1,430 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Files • VENUS JEWEL FILE PORTAL</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='images/apple-touch-icon.png') }}">
-  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/favicon-32x32.png') }}">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --vj-primary: #003366;
-      --vj-accent: #0B5FFF;
-      --vj-bg: rgba(255, 255, 255, .95);
-      --vj-card: #ffffff;
-      --vj-border: #e2e8f0;
-      --vj-muted: #6b7280;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(to bottom right, #f6f8fc, #ffffff);
-      color: var(--vj-primary);
-      min-height: 100vh;
-    }
-    .topbar {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 12px 18px; background: var(--vj-bg);
-      border-bottom: 1px solid var(--vj-border);
-      position: sticky; top: 0; z-index: 100;
-    }
-    .brand img { height: 46px; }
-    .userbox { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .btn {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 8px 10px; border-radius: 8px; border: 1px solid var(--vj-border);
-      background: #fff; color: var(--vj-primary);
-      font-size: 14px; cursor: pointer; text-decoration: none;
-      transition: 0.2s;
-    }
-    .btn:hover { background: #eef4ff; }
-    .btn-primary { background: var(--vj-accent); color: #fff; border-color: var(--vj-accent); }
-    .container {
-      max-width: 1200px; margin: 24px auto;
-      background: var(--vj-bg); border-radius: 14px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, .06);
-      padding: 20px;
-    }
-    .controls {
-      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;
-    }
-    .controls input, .controls select {
-      padding: 10px 12px; border-radius: 8px;
-      border: 1px solid var(--vj-border);
-      flex: 1; min-width: 180px;
-    }
-    .browser { display: grid; grid-template-columns: 300px 1fr; gap: 16px; }
-    .panel {
-      background: var(--vj-card);
-      border: 1px solid var(--vj-border);
-      border-radius: 10px; padding: 12px;
-    }
-    .panel h3 { font-size: 15px; color: var(--vj-primary); margin-bottom: 8px; }
-    .list {
-      max-height: 55vh; overflow: auto;
-      border-radius: 8px; border: 1px solid var(--vj-border);
-      background: #fff;
-    }
-    .list-item {
-      padding: 10px 12px; border-bottom: 1px solid var(--vj-border);
-      display: flex; justify-content: space-between; align-items: center;
-      cursor: pointer; transition: background 0.2s;
-    }
-    .list-item:hover { background: #f0f6ff; }
-    .grid { width: 100%; border-collapse: collapse; }
-    .grid th, .grid td {
-      padding: 10px; border-bottom: 1px solid var(--vj-border);
-      text-align: left; font-size: 14px;
-    }
-    .grid th {
-      background: #f7f9fe; font-weight: 600;
-      color: var(--vj-primary);
-    }
-    .actions { display: flex; gap: 6px; flex-wrap: wrap; }
-    .muted { color: var(--vj-muted); font-size: 13px; }
+    <meta charset="UTF-8" />
+    <title>Files • VENUS JEWEL FILE PORTAL</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='images/apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/favicon-32x32.png') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --vj-primary: #003366;
+            --vj-accent: #0B5FFF;
+            --vj-bg: rgba(255, 255, 255, .95);
+            --vj-card: #ffffff;
+            --vj-border: #e2e8f0;
+            --vj-muted: #6b7280;
+        }
 
-    /* Preview Modal */
-    #previewModal {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0, 0, 0, 0.75); z-index: 1000;
-      align-items: center; justify-content: center; padding: 10px;
-    }
-    #previewBox {
-      background: #000; border-radius: 10px;
-      width: min(95vw, 900px); height: auto;
-      overflow: hidden; position: relative;
-    }
-    #previewBox video, #previewBox img, #previewBox iframe {
-      width: 100%; height: auto; max-height: 85vh; display: none;
-    }
-    #previewClose {
-      position: absolute; top: 8px; right: 8px;
-      background: rgba(255,255,255,0.9); border: none;
-      border-radius: 50%; width: 32px; height: 32px; cursor: pointer;
-    }
-  </style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to bottom right, #f6f8fc, #ffffff);
+            color: var(--vj-primary);
+            min-height: 100vh;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 18px;
+            background: var(--vj-bg);
+            border-bottom: 1px solid var(--vj-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand img {
+            height: 46px;
+        }
+
+        .userbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid var(--vj-border);
+            background: #fff;
+            color: var(--vj-primary);
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: 0.2s;
+        }
+
+        .btn:hover {
+            background: #eef4ff;
+        }
+
+        .btn-primary {
+            background: var(--vj-accent);
+            color: #fff;
+            border-color: var(--vj-accent);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 24px auto;
+            background: var(--vj-bg);
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .06);
+            padding: 20px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .controls input, .controls select {
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--vj-border);
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .browser {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 16px;
+        }
+
+        .panel {
+            background: var(--vj-card);
+            border: 1px solid var(--vj-border);
+            border-radius: 10px;
+            padding: 12px;
+        }
+
+        .panel h3 {
+            font-size: 15px;
+            color: var(--vj-primary);
+            margin-bottom: 8px;
+        }
+
+        .list {
+            max-height: 55vh;
+            overflow: auto;
+            border-radius: 8px;
+            border: 1px solid var(--vj-border);
+            background: #fff;
+        }
+
+        .list-item {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--vj-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .list-item:hover {
+            background: #f0f6ff;
+        }
+
+        .grid {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .grid th, .grid td {
+            padding: 10px;
+            border-bottom: 1px solid var(--vj-border);
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .grid th {
+            background: #f7f9fe;
+            font-weight: 600;
+            color: var(--vj-primary);
+        }
+
+        .actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .muted {
+            color: var(--vj-muted);
+            font-size: 13px;
+        }
+
+        /* Preview Modal */
+        #previewModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        #previewBox {
+            background: #000;
+            border-radius: 10px;
+            width: min(95vw, 900px);
+            height: auto;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #previewBox video,
+        #previewBox img,
+        #previewBox iframe {
+            width: 100%;
+            height: auto;
+            max-height: 85vh;
+            display: none;
+        }
+
+        #previewClose {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 900px) {
+            .browser {
+                grid-template-columns: 1fr;
+            }
+
+            .list {
+                max-height: 35vh;
+            }
+
+            .btn {
+                font-size: 13px;
+                padding: 6px 8px;
+            }
+
+            .topbar {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+        }
+    </style>
 </head>
 <body>
-
-  <div class="topbar">
-    <div class="brand">
-      <img src="{{ url_for('static', filename='images/venus_black_logo.jpg') }}" alt="Venus Jewel">
-    </div>
-    <div class="userbox">
-      <span><i class="fas fa-user-circle"></i> {{ user }}</span>
-      <a class="btn" href="/dashboard"><i class="fas fa-arrow-left"></i> Dashboard</a>
-      <a class="btn" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
-    </div>
-  </div>
-
-  <div class="container">
-    <div class="controls">
-      <input id="searchBox" type="text" placeholder="Search Packet No or File..." />
-      <select id="sortSelect">
-        <option value="newest">Newest First</option>
-        <option value="name">Name A–Z</option>
-      </select>
-      <button id="refreshBtn" class="btn"><i class="fas fa-rotate"></i> Refresh</button>
-      <button id="downloadFolderBtn" class="btn btn-primary" disabled><i class="fas fa-download"></i> Download Folder</button>
-      <button id="downloadSelectedBtn" class="btn btn-primary" disabled><i class="fas fa-download"></i> Download Selected Files</button>
+    <div class="topbar">
+        <div class="brand">
+            <img src="{{ url_for('static', filename='images/venus_black_logo.jpg') }}" alt="Venus Jewel">
+        </div>
+        <div class="userbox">
+            <span><i class="fas fa-user-circle"></i> {{ user }}</span>
+            <a class="btn" href="/dashboard"><i class="fas fa-arrow-left"></i> Dashboard</a>
+            <a class="btn" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
     </div>
 
-    <div class="browser">
-      <div class="panel">
-        <h3><i class="fas fa-folder"></i> Packet Folders</h3>
-        <div id="packetList" class="list"></div>
-      </div>
-      <div class="panel">
-        <h3 id="filesTitle"><i class="fas fa-file"></i> Files</h3>
-        <table class="grid">
-          <thead><tr><th>Select</th><th>Name</th><th>Type</th><th>Modified</th><th>Actions</th></tr></thead>
-          <tbody id="filesBody"></tbody>
-        </table>
-      </div>
+    <div class="container">
+        <div class="controls">
+            <input id="searchBox" type="text" placeholder="Search Packet No or File..." />
+            <select id="sortSelect">
+                <option value="newest">Newest First</option>
+                <option value="name">Name A–Z</option>
+            </select>
+            <button id="refreshBtn" class="btn"><i class="fas fa-rotate"></i> Refresh</button>
+            <a id="downloadFolderBtn" class="btn btn-primary" href="#" disabled><i class="fas fa-download"></i> Download Folder</a>
+        </div>
+
+        <div class="browser">
+            <div class="panel">
+                <h3><i class="fas fa-folder"></i> Packet Folders</h3>
+                <div id="packetList" class="list"></div>
+            </div>
+            <div class="panel">
+                <h3 id="filesTitle"><i class="fas fa-file"></i> Files</h3>
+                <table class="grid">
+                    <thead>
+                        <tr><th>Name</th><th>Type</th><th>Modified</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody id="filesBody"></tbody>
+                </table>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- Preview Modal -->
-  <div id="previewModal">
-    <div id="previewBox">
-      <button id="previewClose" onclick="closePreview()">✕</button>
-      <video id="previewVideo" controls></video>
-      <img id="previewImage" alt="Preview Image">
-      <iframe id="previewFrame"></iframe>
+    <!-- Preview Modal -->
+    <div id="previewModal">
+        <div id="previewBox">
+            <button id="previewClose" onclick="closePreview()">✕</button>
+            <video id="previewVideo" controls></video>
+            <img id="previewImage" alt="Preview Image">
+            <iframe id="previewFrame"></iframe>
+        </div>
     </div>
-  </div>
 
-<script>
-// JavaScript code as provided earlier (with correct adjustments)
+    <script>
+        const packetList = document.getElementById('packetList');
+        const filesBody = document.getElementById('filesBody');
+        const filesTitle = document.getElementById('filesTitle');
+        const downloadFolderBtn = document.getElementById('downloadFolderBtn');
+        const searchBox = document.getElementById('searchBox');
+        const sortSelect = document.getElementById('sortSelect');
+        const refreshBtn = document.getElementById('refreshBtn');
+        let currentFolder = null, allFolders = [], currentFiles = [];
 
-const packetList=document.getElementById('packetList');
-const filesBody=document.getElementById('filesBody');
-const filesTitle=document.getElementById('filesTitle');
-const downloadFolderBtn=document.getElementById('downloadFolderBtn');
-const searchBox=document.getElementById('searchBox');
-const sortSelect=document.getElementById('sortSelect');
-const refreshBtn=document.getElementById('refreshBtn');
+        // Load Folders
+        function loadFolders() {
+            packetList.innerHTML = '<div class="list-item">Loading…</div>';
+            fetch(`/api/packet-folders?sort=${sortSelect.value}`)
+                .then(r => r.json())
+                .then(({ folders }) => {
+                    allFolders = folders || [];
+                    renderFolders();
+                })
+                .catch(() => packetList.innerHTML = '<div class="list-item">Failed to load folders</div>');
+        }
 
-let currentFolder=null, allFolders=[], currentFiles=[];
+        function renderFolders() {
+            const q = searchBox.value.toLowerCase();
+            const filtered = allFolders.filter(f => !q || (f.name || '').toLowerCase().includes(q));
+            packetList.innerHTML = '';
+            if (!filtered.length) {
+                packetList.innerHTML = '<div class="list-item">No folders found</div>';
+                return;
+            }
+            filtered.forEach(f => {
+                const row = document.createElement('div');
+                row.className = 'list-item';
+                row.innerHTML = `<span><i class="fas fa-folder"></i> ${f.name}</span> <span class="muted">${new Date(f.modifiedTime).toLocaleString()}</span>`;
+                row.onclick = () => selectFolder(f.id, f.name);
+                packetList.appendChild(row);
+            });
+        }
 
-// Load Folders
-function loadFolders(){
-  packetList.innerHTML='<div class="list-item">Loading…</div>';
-  fetch(`/api/packet-folders?sort=${sortSelect.value}`)
-  .then(r=>r.json())
-  .then(({folders})=>{allFolders=folders||[];renderFolders();})
-  .catch(()=>packetList.innerHTML='<div class="list-item">Failed to load folders</div>');
-}
+        function selectFolder(id, name) {
+            currentFolder = { id, name };
+            filesTitle.textContent = `Files — ${name}`;
+            downloadFolderBtn.removeAttribute('disabled');
+            downloadFolderBtn.href = `/download/folder/${id}`;
+            loadFiles(id);
+        }
 
-function renderFolders(){
-  const q=searchBox.value.toLowerCase();
-  const filtered=allFolders.filter(f=>!q||(f.name||'').toLowerCase().includes(q));
-  packetList.innerHTML='';
-  if(!filtered.length){packetList.innerHTML='<div class="list-item">No folders found</div>';return;}
-  filtered.forEach(f=>{
-    const row=document.createElement('div');
-    row.className='list-item';
-    row.innerHTML=`<span><i class="fas fa-folder"></i> ${f.name}</span>
-      <span class="muted">${new Date(f.modifiedTime).toLocaleString()}</span>`;
-    row.onclick=()=>selectFolder(f.id,f.name);
-    packetList.appendChild(row);
-  });
-}
+        function loadFiles(folderId) {
+            filesBody.innerHTML = '<tr><td colspan="4">Loading…</td></tr>';
+            fetch(`/api/folder/${folderId}/files?sort=${sortSelect.value}`)
+                .then(r => r.json())
+                .then(({ files }) => {
+                    currentFiles = files || [];
+                    renderFiles();
+                })
+                .catch(() => filesBody.innerHTML = '<tr><td colspan="4">Failed to load files</td></tr>');
+        }
 
-function selectFolder(id,name){
-  currentFolder={id,name};
-  filesTitle.textContent=`Files — ${name}`;
-  downloadFolderBtn.removeAttribute('disabled');
-  loadFiles(id);
-}
+        function renderFiles() {
+            const q = searchBox.value.toLowerCase();
+            const filtered = currentFiles.filter(f => !q || (f.name || '').toLowerCase().includes(q));
+            filesBody.innerHTML = '';
+            if (!filtered.length) {
+                filesBody.innerHTML = '<tr><td colspan="4">No files found</td></tr>';
+                return;
+            }
+            filtered.forEach(f => {
+                const tr = document.createElement('tr');
+                const mime = f.mimeType || '';
+                const ext = (f.name.split('.').pop() || '').toLowerCase();
+                const date = f.modifiedTime ? new Date(f.modifiedTime).toLocaleString() : '';
+                tr.innerHTML = `
+                    <td>${f.name}</td>
+                    <td>${mime.replace('application/', '')}</td>
+                    <td>${date}</td>
+                    <td class="actions">
+                        <button class="btn" onclick="openPreview('${f.id}', '${mime}', '${ext}')"><i class="fas fa-eye"></i> Preview</button>
+                        <a class="btn" href="/download/file/${f.id}"><i class="fas fa-download"></i> Download</a>
+                        <button class="btn" onclick="shareFile('${f.id}')"><i class="fas fa-share-alt"></i> Share</button>
+                    </td>
+                `;
+                filesBody.appendChild(tr);
+            });
+        }
 
-function loadFiles(folderId){
-  fetch(`/api/folder/${folderId}/files?sort=${sortSelect.value}`)
-  .then(r=>r.json())
-  .then(({files})=>{currentFiles=files||[];renderFiles();})
-  .catch(()=>filesBody.innerHTML='<tr><td colspan="4">Failed to load files</td></tr>');
-}
+        // Preview
+        const modal = document.getElementById('previewModal');
+        const video = document.getElementById('previewVideo');
+        const img = document.getElementById('previewImage');
+        const frame = document.getElementById('previewFrame');
 
-function renderFiles(){
-  const q=searchBox.value.toLowerCase();
-  const filtered=currentFiles.filter(f=>!q||(f.name||'').toLowerCase().includes(q));
-  filesBody.innerHTML='';
-  if(!filtered.length){filesBody.innerHTML='<tr><td colspan="4">No files found</td></tr>';return;}
-  filtered.forEach(f=>{
-    const tr=document.createElement('tr');
-    const mime=f.mimeType||'';
-    const ext=(f.name.split('.').pop()||'').toLowerCase();
-    const date=f.modifiedTime?new Date(f.modifiedTime).toLocaleString():'';
-    tr.innerHTML=`
-      <td><input type="checkbox" class="file-checkbox" data-id="${f.id}"></td>
-      <td>${f.name}</td>
-      <td>${mime.replace('application/','')}</td>
-      <td>${date}</td>
-      <td class="actions">
-        <button class="btn" onclick="openPreview('${f.id}','${mime}','${ext}')"><i class="fas fa-eye"></i> Preview</button>
-        <a class="btn" href="/download/file/${f.id}"><i class="fas fa-download"></i> Download</a>
-      </td>`;
-    filesBody.appendChild(tr);
-  });
+        function openPreview(id, mime, ext) {
+            video.style.display = img.style.display = frame.style.display = 'none';
+            const url = `/preview/file/${id}`;
+            if (mime.startsWith('video/') || ['mp4', 'mov', 'mkv', 'webm', 'hevc'].includes(ext)) {
+                video.src = url;
+                video.style.display = 'block';
+                modal.style.display = 'flex';
+                video.play();
+                return;
+            }
+            if (mime.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
+                img.src = url;
+                img.style.display = 'block';
+                modal.style.display = 'flex';
+                return;
+            }
+            if (mime === 'application/pdf' || ext === 'pdf') {
+                frame.src = url;
+                frame.style.display = 'block';
+                modal.style.display = 'flex';
+                return;
+            }
+            alert('Preview not supported for this file.');
+        }
 
-  // Enable Download Selected Files Button
-  const checkboxes = document.querySelectorAll('.file-checkbox');
-  checkboxes.forEach(checkbox => checkbox.addEventListener('change', handleFileSelection));
-}
+        function closePreview() {
+            modal.style.display = 'none';
+            video.pause();
+            video.src = '';
+        }
 
-function handleFileSelection() {
-  selectedFiles.length = 0; // Clear previous selections
-  const selectedCheckboxes = document.querySelectorAll('.file-checkbox:checked');
-  selectedCheckboxes.forEach(checkbox => {
-    selectedFiles.push(checkbox.getAttribute('data-id'));
-  });
-  if (selectedFiles.length > 0) {
-    downloadSelectedBtn.removeAttribute('disabled');
-  } else {
-    downloadSelectedBtn.setAttribute('disabled', true);
-  }
-}
+        function shareFile(id) {
+            window.open(`/share.html?id=${id}`, '_blank');
+        }
 
-downloadSelectedBtn.addEventListener('click', () => {
-  fetch('/download/selected', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ files: selectedFiles })
-  })
-  .then(r => r.blob())
-  .then(blob => {
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'selected_files.zip';
-    link.click();
-  })
-  .catch(err => console.error('Download failed:', err));
-});
+        searchBox.oninput = () => {
+            renderFolders();
+            renderFiles();
+        };
 
-loadFolders();
-</script>
+        sortSelect.onchange = () => {
+            loadFolders();
+            if (currentFolder) loadFiles(currentFolder.id);
+        };
+
+        refreshBtn.onclick = () => loadFolders();
+
+        loadFolders();
+    </script>
 </body>
 </html>
