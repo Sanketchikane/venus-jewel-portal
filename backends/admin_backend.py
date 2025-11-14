@@ -17,51 +17,52 @@ def get_gsheet(sheet_id, tab_name):
 
 
 # ---------------------------
-# GET APPROVED USERS
+# APPROVED USERS
 # ---------------------------
 def get_approved_users():
     sheet = get_gsheet(GOOGLE_SHEET_ID_REGISTRATION, "Registration")
     data = sheet.get_all_records()
 
-    approved = [
-        {
+    approved = []
+    for r in data:
+        status = str(r.get("Status", "")).strip().lower()
+        if status not in ["approved", "✅ approved"]:
+            continue
+
+        approved.append({
             "Full Name": r.get("Full Name", ""),
-            "Username": "",
+            "Username": "",  # Will be filled only after approval
             "Email": r.get("Email Address", ""),
             "Organization": r.get("Organization", ""),
-            "Contact Number": r.get("Contact Number", "")
-        }
-        for r in data
-        if str(r.get("Status", "")).strip().lower() in ["approved", "✅ approved"]
-    ]
+            "Contact": r.get("Contact Number", "")
+        })
 
     return approved
 
 
 # ---------------------------
-# GET PENDING USERS
+# PENDING USERS
 # ---------------------------
 def get_pending_users():
     sheet = get_gsheet(GOOGLE_SHEET_ID_REGISTRATION, "Registration")
     data = sheet.get_all_records()
 
-    pending = [
-        {
-            "Full Name": r.get("Full Name", ""),
-            "Email": r.get("Email Address", ""),
-            "Contact": r.get("Contact Number", ""),
-            "Organization": r.get("Organization", ""),
-            "Status": r.get("Status", "")
-        }
-        for r in data
-        if str(r.get("Status", "")).strip().lower().startswith("pending")
-    ]
-
+    pending = []
+    for r in data:
+        status = str(r.get("Status", "")).strip().lower()
+        if status.startswith("pending"):
+            pending.append({
+                "Full Name": r.get("Full Name", ""),
+                "Email": r.get("Email Address", ""),
+                "Contact": r.get("Contact Number", ""),
+                "Organization": r.get("Organization", ""),
+                "Status": r.get("Status", "")
+            })
     return pending
 
 
 # ---------------------------
-# APPROVE USER + CREATE CREDENTIALS ENTRY
+# APPROVE USER
 # ---------------------------
 def create_credential_entry(email, username, password):
     reg_sheet = get_gsheet(GOOGLE_SHEET_ID_REGISTRATION, "Registration")
@@ -69,38 +70,39 @@ def create_credential_entry(email, username, password):
 
     reg_data = reg_sheet.get_all_records()
 
-    status_index = 6  # Column F = Status
+    # Column "Status" is column 6
+    status_col = 6
 
-    user_row_index = None
-    user_row_data = None
+    user_row = None
+    row_data = None
 
-    # Match by Email Address column
+    # Match correct column: Email Address
     for i, row in enumerate(reg_data, start=2):
-        email_cell = str(row.get("Email Address", "")).strip().lower()
-        if email_cell == email.strip().lower():
-            user_row_index = i
-            user_row_data = row
+        reg_email = str(row.get("Email Address", "")).strip().lower()
+        if reg_email == email.strip().lower():
+            user_row = i
+            row_data = row
             break
 
-    if not user_row_index:
+    if not user_row:
         raise Exception(f"User with email '{email}' not found in Registration sheet")
 
-    # Append to Credentials sheet → MUST follow your exact sheet order
+    # Credentials row MUST follow exact order of your sheet:
     cred_sheet.append_row([
-        datetime.now().strftime("%Y-%m-%d %H:%M:%S"),  # Timestamp
-        user_row_data.get("Full Name", ""),           # Full Name
-        username,                                     # Username
-        password,                                     # Password
-        user_row_data.get("Contact Number", ""),      # Contact Number
-        user_row_data.get("Organization", ""),        # Organization
-        email                                         # Email
+        datetime.now().strftime("%Y-%m-%d %H:%M:%S"),   # Timestamp
+        row_data.get("Full Name", ""),                  # Full Name
+        username,                                       # Username
+        password,                                       # Password
+        row_data.get("Contact Number", ""),             # Contact Number
+        row_data.get("Organization", ""),               # Organization
+        email                                           # Email
     ])
 
-    # Update status to Approved
+    # Update registration status
     try:
-        reg_sheet.update_cell(user_row_index, status_index, "Approved")
+        reg_sheet.update_cell(user_row, status_col, "Approved")
     except Exception as e:
-        print("Warning: Could not update registration status:", e)
+        print("Warning: could not update registration status:", e)
 
-    print(f"✅ User '{username}' approved successfully.")
+    print(f"User '{username}' approved successfully.")
     return True
