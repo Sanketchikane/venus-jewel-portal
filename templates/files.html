@@ -157,6 +157,8 @@
   </div>
 
 <script>
+// JavaScript code as provided earlier (with correct adjustments)
+
 const packetList=document.getElementById('packetList');
 const filesBody=document.getElementById('filesBody');
 const filesTitle=document.getElementById('filesTitle');
@@ -216,12 +218,12 @@ function renderFiles(){
     const ext=(f.name.split('.').pop()||'').toLowerCase();
     const date=f.modifiedTime?new Date(f.modifiedTime).toLocaleString():'';
     tr.innerHTML=`
-      <td><input type="checkbox" data-id="${f.id}" class="file-checkbox"></td>
+      <td><input type="checkbox" class="file-checkbox" data-id="${f.id}"></td>
       <td>${f.name}</td>
-      <td>${mime}</td>
+      <td>${mime.replace('application/','')}</td>
       <td>${date}</td>
       <td class="actions">
-        <button class="btn" onclick="openPreview('${f.id}')"><i class="fas fa-eye"></i> Preview</button>
+        <button class="btn" onclick="openPreview('${f.id}','${mime}','${ext}')"><i class="fas fa-eye"></i> Preview</button>
         <a class="btn" href="/download/file/${f.id}"><i class="fas fa-download"></i> Download</a>
       </td>`;
     filesBody.appendChild(tr);
