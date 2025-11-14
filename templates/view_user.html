@@ -2,40 +2,31 @@
 {% block content %}
 
 <style>
-  :root {
-    --vj-blue: #003366;
-    --vj-accent: #0B5FFF;
-    --vj-bg: #f8fafc;
-    --vj-border: #e2e8f0;
-  }
-  .profile-card {
-    background: white;
-    border-radius: 16px;
-    padding: 30px 24px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  .profile-container {
     max-width: 900px;
     margin: 40px auto;
+    background: white;
+    padding: 30px;
+    border-radius: 14px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
   }
-  .btn {
-    padding: 8px 14px;
-    border-radius: 8px;
-    font-size: 14px;
+  label {
+    font-weight: 600;
   }
-  form input {
-    display:block;
-    width:100%;
-    padding:8px 10px;
-    margin-bottom:10px;
-    border:1px solid #e2e8f0;
-    border-radius:6px;
+  input {
+    width: 100%;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 12px;
+    border-radius: 6px;
   }
 </style>
 
-<div class="profile-card">
-  <div class="flex justify-between items-center mb-5">
-    <h2 class="text-xl font-bold text-venusBlue">👤 User Profile – {{ user['Username'] }}</h2>
-    <a href="{{ url_for('admin.admin_users') }}" class="btn bg-gray-300">Back</a>
-  </div>
+<div class="profile-container">
+
+  <h2 class="text-2xl font-bold text-blue-900 mb-4">
+    User Profile – {{ user['Username'] }}
+  </h2>
 
   <form method="POST" action="{{ url_for('admin.update_user', username=user['Username']) }}">
 
@@ -52,14 +43,15 @@
     <input type="text" name="Contact Number" value="{{ user['Contact Number'] }}">
 
     <label>Username</label>
-    <input type="text" readonly name="Username" value="{{ user['Username'] }}" class="bg-gray-200">
+    <input type="text" readonly class="bg-gray-200" value="{{ user['Username'] }}">
 
     <label>Password</label>
     <input type="text" name="Password" value="{{ user['Password'] }}">
 
-    <button class="mt-4 bg-blue-600 text-white px-4 py-2 rounded">Save Changes</button>
+    <button class="bg-blue-700 text-white px-4 py-2 rounded mt-4">Save Changes</button>
 
   </form>
+
 </div>
 
 {% endblock %}
