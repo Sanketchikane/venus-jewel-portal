@@ -5,7 +5,7 @@ from googleapiclient.http import MediaIoBaseUpload
 from backends.utils_backend import (
     get_or_create_folder, get_unique_filename, mute_video,
     list_packet_folders, list_files_in_folder, download_file_to_bytes,
-    upload_media_to_drive
+    upload_media_to_drive, generate_secure_link, verify_secure_link
 )
 
 file_bp = Blueprint("file", __name__)
@@ -89,13 +89,30 @@ def preview_file(file_id):
     t = request.args.get("t")
     s = request.args.get("s")
     if t and s:
-        from backends.utils_backend import verify_secure_link
         if not verify_secure_link(file_id, t, s):
             return abort(403)
     elif not session.get("username"):
         return abort(401)
     name, mime, fh = download_file_to_bytes(file_id)
     return send_file(fh, mimetype=mime, as_attachment=False, download_name=name)
+
+# Share page
+@file_bp.route("/share.html")
+def share_file_page():
+    file_id = request.args.get("id")
+    if not file_id:
+        return "File ID not provided", 400
+    return render_template("share.html", file_id=file_id)
+
+# Share link API
+@file_bp.route("/api/share-link")
+def api_share_link():
+    file_id = request.args.get("id")
+    if not file_id:
+        return jsonify({"error": "missing id"}), 400
+    link = generate_secure_link(file_id)
+    full_url = request.url_root.rstrip("/") + link
+    return jsonify({"link": full_url})
 
 # Venus upload dashboard
 @file_bp.route("/venus-upload")
