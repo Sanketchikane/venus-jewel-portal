@@ -3,7 +3,7 @@ from backends.utils_backend import get_registration_sheet
 from datetime import datetime
 
 def submit_registration(form_data):
-    ws = get_registration_sheet()
+    ws = get_registration_sheet("Registration")
     full_name = form_data.get("full_name", "").strip()
     email = form_data.get("email_address", "").strip()
     contact = form_data.get("contact_number", "").strip()
@@ -13,13 +13,13 @@ def submit_registration(form_data):
     return True
 
 def get_pending_requests():
-    ws = get_registration_sheet()
+    ws = get_registration_sheet("Registration")
     records = ws.get_all_records()
     pending = [r for r in records if str(r.get("Status", "")).strip().lower().startswith("pending")]
     return pending
 
 def find_registration_by_email(email):
-    ws = get_registration_sheet()
+    ws = get_registration_sheet("Registration")
     records = ws.get_all_records()
     email = (email or "").strip().lower()
     for i, row in enumerate(records, start=2):
@@ -29,6 +29,6 @@ def find_registration_by_email(email):
     return None
 
 def update_registration_status_by_row(row_number, status):
-    ws = get_registration_sheet()
-    ws.update_cell(row_number, 6, status)  # Status is column 6
+    ws = get_registration_sheet("Registration")
+    ws.update_cell(row_number, 6, status)
     return True
