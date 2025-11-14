@@ -7,149 +7,104 @@
 
   <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            venusBlue: '#004080',
-            sapphire: '#0066cc',
-            platinum: '#f9f9f9',
-          }
-        }
-      }
-    }
-  </script>
-
-  <!-- Fonts & Icons -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
   <style>
     body {
       font-family: 'Poppins', sans-serif;
       background: url('/static/images/dimension.jpg') no-repeat center center fixed;
       background-size: cover;
-      overflow-x: hidden;
-      min-height: 100vh;
     }
     .sidebar {
-      background: linear-gradient(to bottom, rgba(0,48,112,0.95), rgba(0,64,128,0.96)),
-                  url('/static/images/pencil.png') no-repeat center center;
-      background-size: cover;
+      background: linear-gradient(to bottom, rgba(0,48,112,0.95), rgba(0,64,128,0.96));
       backdrop-filter: blur(8px);
     }
     .sidebar a.active {
-      background: rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.25);
       border-radius: 6px;
-      transform: translateX(4px);
     }
   </style>
 </head>
-<body class="relative">
 
-  <!-- Sidebar -->
-  <div id="sidebar" class="sidebar fixed top-0 left-0 w-64 h-full shadow-xl z-50 transform transition-transform duration-300 md:translate-x-0 -translate-x-full md:static">
-    <div class="text-center mt-8">
-      <img src="{{ url_for('static', filename='images/vj_logo_new.png') }}" alt="Venus Jewel Logo" class="mx-auto h-14">
-      <h2 class="text-white text-xl font-semibold mt-2">Venus Admin</h2>
-    </div>
+<body>
 
-    <ul class="mt-10 space-y-2 px-4 text-white font-medium">
-      <li>
-        <a href="{{ url_for('admin.admin_users') }}" class="flex items-center gap-3 px-3 py-2 hover:bg-white/20 rounded-lg transition">
-          <i class="fas fa-users w-5"></i> Users
-        </a>
-      </li>
-
-      <li>
-        <a href="{{ url_for('file.files_page') }}" class="flex items-center gap-3 px-3 py-2 hover:bg-white/20 rounded-lg transition">
-          <i class="fas fa-folder-open w-5"></i> Files
-        </a>
-      </li>
-
-      <li>
-        <a href="{{ url_for('auth.logout') }}" class="flex items-center gap-3 px-3 py-2 hover:bg-white/20 rounded-lg transition">
-          <i class="fas fa-sign-out-alt w-5"></i> Logout
-        </a>
-      </li>
-    </ul>
+<!-- Sidebar -->
+<div id="sidebar" class="sidebar fixed top-0 left-0 w-64 h-full shadow-xl text-white">
+  <div class="text-center mt-6">
+    <img src="{{ url_for('static', filename='images/vj_logo_new.png') }}" class="mx-auto h-14">
+    <h2 class="text-xl mt-2 font-semibold">Venus Admin</h2>
   </div>
 
-  <!-- Mobile Toggle -->
-  <button id="toggleSidebar" class="md:hidden fixed top-5 left-5 z-[999] bg-venusBlue text-white px-3 py-2 rounded-lg shadow-lg">
-    <i class="fas fa-bars"></i>
-  </button>
-  <script>
-    document.getElementById("toggleSidebar").onclick = () => {
-      const sidebar = document.getElementById("sidebar");
-      sidebar.classList.toggle("-translate-x-full");
-    };
-  </script>
+  <ul class="px-5 mt-10 space-y-3 text-white">
+    <li>
+      <a href="{{ url_for('admin.admin_users') }}" class="flex items-center gap-3 px-3 py-2 hover:bg-white/20 rounded-lg">
+        <i class="fas fa-users"></i> Users
+      </a>
+    </li>
 
-  <!-- Main Content -->
-  <main class="md:ml-64 min-h-screen bg-white/85 backdrop-blur-md p-6 md:p-10">
-    <div class="flex flex-col items-center text-center mb-8">
-      <img src="{{ url_for('static', filename='images/venus_black_logo.jpg') }}" alt="Venus Jewel" class="h-16 mb-3">
-      <h1 class="text-3xl font-bold text-venusBlue">Admin Dashboard</h1>
-      <p class="text-gray-600 mt-1 text-sm md:text-base">Manage users, review files, and control the Venus File Portal</p>
-    </div>
+    <li>
+      <a href="{{ url_for('file.admin_files') }}" class="flex items-center gap-3 px-3 py-2 hover:bg-white/20 rounded-lg">
+        <i class="fas fa-folder-open"></i> Files
+      </a>
+    </li>
 
-    <!-- FLASH MESSAGES (shows admin success/failure messages here) -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <div class="max-w-4xl mx-auto mb-6">
-          {% for category, message in messages %}
-            <div class="p-4 mb-2 rounded {{ 'bg-green-100 text-green-800' if category=='success' else ('bg-yellow-100 text-yellow-800' if category=='warning' else 'bg-red-100 text-red-800') }}">
-              {{ message }}
-            </div>
-          {% endfor %}
+    <li>
+      <a href="{{ url_for('auth.logout') }}" class="flex items-center gap-3 px-3 py-2 hover:bg-white/20 rounded-lg">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </a>
+    </li>
+  </ul>
+</div>
+
+<main class="ml-64 p-8">
+
+  <!-- Flash Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="mb-4">
+      {% for category, message in messages %}
+        <div class="p-4 rounded
+          {% if category=='success' %}bg-green-200 text-green-800
+          {% elif category=='warning' %}bg-yellow-200 text-yellow-800
+          {% else %}bg-red-200 text-red-800{% endif %}">
+          {{ message }}
         </div>
-      {% endif %}
-    {% endwith %}
-
-    <div class="grid gap-6 md:grid-cols-3 sm:grid-cols-2">
-      <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition p-6 text-center cursor-pointer">
-        <i class="fas fa-users text-4xl text-sapphire mb-3"></i>
-        <h3 class="font-semibold text-lg text-venusBlue mb-1">Registered Users</h3>
-        <p class="text-gray-600 text-sm">View and approve registrations</p>
-      </div>
-
-      <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition p-6 text-center cursor-pointer">
-        <i class="fas fa-folder-open text-4xl text-sapphire mb-3"></i>
-        <h3 class="font-semibold text-lg text-venusBlue mb-1">File Management</h3>
-        <p class="text-gray-600 text-sm">Access uploaded diamonds</p>
-      </div>
-
-      <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition p-6 text-center cursor-pointer">
-        <i class="fas fa-chart-line text-4xl text-sapphire mb-3"></i>
-        <h3 class="font-semibold text-lg text-venusBlue mb-1">Analytics</h3>
-        <p class="text-gray-600 text-sm">Monitor file and user activity</p>
-      </div>
+      {% endfor %}
     </div>
+  {% endif %}
+  {% endwith %}
 
-    <section class="mt-12">
-      <h2 class="text-2xl font-semibold text-center text-sapphire mb-6">Our Core Values</h2>
+  <h1 class="text-3xl font-bold text-blue-900 mb-6">Admin Dashboard</h1>
 
-      <div class="flex flex-wrap justify-center gap-6">
-        {% for value, image in {
-          'Transparency': 'Round.png',
-          'Fairness & Trust': 'Cushion.png',
-          'Customer Satisfaction': 'Emerald.png',
-          'Long-Term Relationships': 'Heart.png',
-          'Selling What is Needed': 'Oval.png',
-          'Reciprocal Best Business': 'Pear.png'
-        }.items() %}
-        <div class="text-center w-32 md:w-40 hover:scale-105 transition">
-          <img src="{{ url_for('static', filename='images/' ~ image) }}" alt="{{ value }}" class="w-full h-28 object-contain mb-2 drop-shadow-md">
-          <span class="text-venusBlue font-semibold text-sm md:text-base">{{ value }}</span>
-        </div>
-        {% endfor %}
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+    <a href="{{ url_for('admin.admin_users') }}">
+      <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg text-center">
+        <i class="fas fa-users text-5xl text-blue-700 mb-3"></i>
+        <h3 class="font-semibold text-lg">Registered Users</h3>
+        <p class="text-gray-600 text-sm">Manage all approved users</p>
       </div>
-    </section>
+    </a>
 
-    {% block content %}{% endblock %}
-  </main>
+    <a href="{{ url_for('admin.admin_users') }}#pending">
+      <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg text-center">
+        <i class="fas fa-user-clock text-5xl text-blue-700 mb-3"></i>
+        <h3 class="font-semibold text-lg">Pending Requests</h3>
+        <p class="text-gray-600 text-sm">Approve registrations</p>
+      </div>
+    </a>
+
+    <a href="{{ url_for('admin.admin_users') }}#forgot-password">
+      <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg text-center">
+        <i class="fas fa-key text-5xl text-blue-700 mb-3"></i>
+        <h3 class="font-semibold text-lg">Forgot Password Requests</h3>
+        <p class="text-gray-600 text-sm">Reset user passwords</p>
+      </div>
+    </a>
+
+  </div>
+
+  {% block content %}{% endblock %}
+</main>
 
 </body>
 </html>
