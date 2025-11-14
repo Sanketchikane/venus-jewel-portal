@@ -1,4 +1,3 @@
-# routes/admin_routes.py
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from backends import admin_backend
 from backends.utils_backend import get_credentials_sheet, reset_password_for_username, get_registration_sheet
@@ -83,7 +82,6 @@ def create_credential():
             return redirect(url_for("admin.admin_users"))
 
         admin_backend.create_credential_entry(email, username, password)
-        # show message on admin pages
         flash(f"✅ User '{username}' added and approved successfully.", "success")
         return redirect(url_for("admin.admin_users"))
     except Exception as e:
