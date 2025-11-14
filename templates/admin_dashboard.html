@@ -68,19 +68,23 @@
       <img src="{{ url_for('static', filename='images/vj_logo_new.png') }}" alt="Venus Jewel Logo" class="mx-auto h-14">
       <h2 class="text-white text-xl font-semibold mt-2">Venus Admin</h2>
     </div>
+
     <ul class="mt-10 space-y-2 px-4 text-white font-medium">
       <li>
         <a href="{{ url_for('admin.admin_users') }}" class="flex items-center gap-3 px-3 py-2 hover:bg-white/20 rounded-lg transition">
           <i class="fas fa-users w-5"></i> Users
         </a>
       </li>
+
+      <!-- FIXED THE BROKEN LINK HERE -->
       <li>
-        <a href="{{ url_for('file.admin_files') }}" class="flex items-center gap-3 px-3 py-2 hover:bg-white/20 rounded-lg transition">
+        <a href="{{ url_for('file.files_page') }}" class="flex items-center gap-3 px-3 py-2 hover:bg-white/20 rounded-lg transition">
           <i class="fas fa-folder-open w-5"></i> Files
         </a>
       </li>
+
       <li>
-        <a href="{{ url_for('logout') }}" class="flex items-center gap-3 px-3 py-2 hover:bg-white/20 rounded-lg transition">
+        <a href="{{ url_for('auth.logout') }}" class="flex items-center gap-3 px-3 py-2 hover:bg-white/20 rounded-lg transition">
           <i class="fas fa-sign-out-alt w-5"></i> Logout
         </a>
       </li>
@@ -106,18 +110,19 @@
       <p class="text-gray-600 mt-1 text-sm md:text-base">Manage users, review files, and control the Venus File Portal</p>
     </div>
 
-    <!-- Dashboard Content -->
     <div class="grid gap-6 md:grid-cols-3 sm:grid-cols-2">
       <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition p-6 text-center cursor-pointer">
         <i class="fas fa-users text-4xl text-sapphire mb-3"></i>
         <h3 class="font-semibold text-lg text-venusBlue mb-1">Registered Users</h3>
         <p class="text-gray-600 text-sm">View and approve registrations</p>
       </div>
+
       <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition p-6 text-center cursor-pointer">
         <i class="fas fa-folder-open text-4xl text-sapphire mb-3"></i>
         <h3 class="font-semibold text-lg text-venusBlue mb-1">File Management</h3>
         <p class="text-gray-600 text-sm">Access uploaded diamonds</p>
       </div>
+
       <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition p-6 text-center cursor-pointer">
         <i class="fas fa-chart-line text-4xl text-sapphire mb-3"></i>
         <h3 class="font-semibold text-lg text-venusBlue mb-1">Analytics</h3>
@@ -125,9 +130,9 @@
       </div>
     </div>
 
-    <!-- Core Values Section -->
     <section class="mt-12">
       <h2 class="text-2xl font-semibold text-center text-sapphire mb-6">Our Core Values</h2>
+
       <div class="flex flex-wrap justify-center gap-6">
         {% for value, image in {
           'Transparency': 'Round.png',
@@ -138,8 +143,7 @@
           'Reciprocal Best Business': 'Pear.png'
         }.items() %}
         <div class="text-center w-32 md:w-40 hover:scale-105 transition">
-          <img src="{{ url_for('static', filename='images/' ~ image) }}" alt="{{ value }}"
-               class="w-full h-28 object-contain mb-2 drop-shadow-md">
+          <img src="{{ url_for('static', filename='images/' ~ image) }}" alt="{{ value }}" class="w-full h-28 object-contain mb-2 drop-shadow-md">
           <span class="text-venusBlue font-semibold text-sm md:text-base">{{ value }}</span>
         </div>
         {% endfor %}
