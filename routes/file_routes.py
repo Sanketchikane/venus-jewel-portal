@@ -1,11 +1,11 @@
-# routes/file_routes.py
 from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify, abort, send_file
 import io
+import zipfile
 from googleapiclient.http import MediaIoBaseUpload
 from backends.utils_backend import (
     get_or_create_folder, get_unique_filename, mute_video,
     list_packet_folders, list_files_in_folder, download_file_to_bytes,
-    upload_media_to_drive, generate_secure_link, verify_secure_link
+    upload_media_to_drive, generate_secure_link, verify_secure_link, get_file_content
 )
 
 file_bp = Blueprint("file", __name__)
@@ -75,7 +75,7 @@ def upload():
     except Exception as e:
         return jsonify({"success": False, "message": f"Upload failed: {e}"}), 500
 
-# Download
+# Download a single file
 @file_bp.route("/download/file/<file_id>")
 def download_file_route(file_id):
     if not session.get("username"):
@@ -113,6 +113,62 @@ def api_share_link():
     link = generate_secure_link(file_id)
     full_url = request.url_root.rstrip("/") + link
     return jsonify({"link": full_url})
+
+# Download folder as ZIP
+@file_bp.route("/download/folder/<folder_id>")
+def download_folder(folder_id):
+    try:
+        # Retrieve the files in the folder
+        files = list_files_in_folder(folder_id)
+
+        # Create a zip in memory
+        zip_buffer = io.BytesIO()
+
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            for file in files:
+                file_id = file.get('id')
+                file_name = file.get('name')
+
+                # Retrieve the file content
+                file_content = get_file_content(file_id)
+
+                # Add the file to the zip
+                zip_file.writestr(file_name, file_content)
+
+        # Seek to the start of the buffer
+        zip_buffer.seek(0)
+
+        # Provide the zip file for download
+        return send_file(zip_buffer, as_attachment=True, download_name="folder.zip")
+
+    except Exception as e:
+        print(f"Error downloading folder: {e}")
+        return jsonify({"error": "Failed to download folder"}), 500
+
+# Selective Download of Files (after selecting files in frontend)
+@file_bp.route("/download/selected", methods=["POST"])
+def download_selected_files():
+    try:
+        selected_files = request.json.get('files')  # A list of file ids to be downloaded
+
+        if not selected_files:
+            return jsonify({"error": "No files selected"}), 400
+
+        zip_buffer = io.BytesIO()
+
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            for file_id in selected_files:
+                file_content = get_file_content(file_id)
+                file_name = file_id  # Or fetch file name based on the ID
+                zip_file.writestr(file_name, file_content)
+
+        zip_buffer.seek(0)
+
+        return send_file(zip_buffer, as_attachment=True, download_name="selected_files.zip")
+
+    except Exception as e:
+        print(f"Error downloading selected files: {e}")
+        return jsonify({"error": "Failed to download selected files"}), 500
 
 # Venus upload dashboard
 @file_bp.route("/venus-upload")
