@@ -1,20 +1,6 @@
 {% extends "admin_dashboard.html" %}
 {% block content %}
 
-<!-- Splash Screen -->
-<div id="splash" class="fixed inset-0 flex items-center justify-center bg-white/70 backdrop-blur-lg z-[9999] transition-opacity duration-700">
-  <img src="{{ url_for('static', filename='images/wings_new.gif') }}" alt="Loading..." class="w-1/2 md:w-1/3 animate-pulse">
-</div>
-<script>
-  window.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-      const splash = document.getElementById('splash');
-      splash.classList.add('opacity-0');
-      setTimeout(() => splash.remove(), 700);
-    }, 2200);
-  });
-</script>
-
 <style>
   .user-card {
     background: rgba(255, 255, 255, 0.95);
