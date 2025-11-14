@@ -54,8 +54,8 @@ def pending_registrations():
         for r in pending:
             formatted.append({
                 "Full Name": r.get("Full Name", ""),
-                "Email": r.get("Email Address", ""),       # FIXED COLUMN NAME
-                "Contact": r.get("Contact Number", ""),    # FIXED COLUMN NAME
+                "Email": r.get("Email Address", ""),
+                "Contact": r.get("Contact Number", ""),
                 "Organization": r.get("Organization", ""),
                 "Status": r.get("Status", "Pending")
             })
@@ -88,6 +88,7 @@ def create_credential():
 
         admin_backend.create_credential_entry(email, username, password)
 
+        # show message on admin pages (we render flash in admin_dashboard)
         flash(f"✅ User '{username}' added and approved successfully.", "success")
         return redirect(url_for("admin.admin_users"))
 
@@ -111,8 +112,7 @@ def view_user(username):
         ws = get_credentials_sheet()
         records = ws.get_all_records()
 
-        # IMPORTANT FIX ✔
-        # Lookup username EXACTLY from Credentials sheet
+        # Lookup username EXACTLY (case/whitespace-insensitive)
         user = next(
             (u for u in records
              if str(u.get("Username", "")).strip().lower() == username.strip().lower()),
@@ -146,7 +146,7 @@ def update_user(username):
         records = ws.get_all_records()
 
         for i, row in enumerate(records, start=2):
-            if str(row.get("Username", "")).strip().lower() == username.lower():
+            if str(row.get("Username", "")).strip().lower() == username.strip().lower():
 
                 # Update ONLY existing columns
                 for key in row.keys():
