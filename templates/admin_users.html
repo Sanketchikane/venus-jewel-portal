@@ -10,6 +10,7 @@
     max-width: 1150px;
     margin: 40px auto;
     font-family: 'Poppins', sans-serif;
+    backdrop-filter: blur(10px);
   }
   .pending-title {
     font-size: 22px;
@@ -44,13 +45,15 @@
       </thead>
       <tbody>
         {% for user in users %}
-        <tr onclick="openUser('{{ user['Username'] }}')">
+        <tr>
           <td>{{ user['Full Name'] }}</td>
           <td>{{ user['Username'] }}</td>
           <td>{{ user['Email'] }}</td>
           <td>{{ user['Organization'] }}</td>
           <td>{{ user['Contact Number'] }}</td>
-          <td><button class="bg-blue-600 text-white px-3 py-1 rounded">View</button></td>
+          <td>
+            <button onclick="openUser('{{ user['Username']|e }}')" class="bg-blue-600 text-white px-3 py-1 rounded">View</button>
+          </td>
         </tr>
         {% endfor %}
       </tbody>
@@ -71,7 +74,9 @@
 
 <script>
 function openUser(username) {
-  window.open(`/admin/view-user/${username}`, "_blank");
+  // Use encodeURIComponent to handle spaces/special chars
+  const url = '/admin/view-user/' + encodeURIComponent(username);
+  window.open(url, "_blank");
 }
 
 async function loadPending() {
@@ -88,14 +93,14 @@ async function loadPending() {
   data.pending.forEach(r => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${r["Full Name"]}</td>
-      <td>${r["Email"]}</td>
-      <td>${r["Contact"]}</td>
-      <td>${r["Organization"]}</td>
-      <td>${r["Status"]}</td>
+      <td>${r["Full Name"] || ""}</td>
+      <td>${r["Email"] || ""}</td>
+      <td>${r["Contact"] || ""}</td>
+      <td>${r["Organization"] || ""}</td>
+      <td>${r["Status"] || "Pending"}</td>
       <td>
-        <form method="POST" action="/admin/create-credential">
-          <input type="hidden" name="email" value="${r["Email"]}">
+        <form method="POST" action="/admin/create-credential" onsubmit="return validateApproveForm(this)">
+          <input type="hidden" name="email" value="${(r["Email"]||'').replace(/"/g, '&quot;')}">
           <input type="text" name="username" placeholder="Username" required>
           <input type="text" name="password" placeholder="Password" required>
           <button type="submit" class="bg-green-600 text-white px-2 py-1 rounded">Approve</button>
@@ -103,6 +108,15 @@ async function loadPending() {
       </td>`;
     tbody.appendChild(tr);
   });
+}
+
+function validateApproveForm(form) {
+  // basic client-side check
+  if (!form.username.value.trim() || !form.password.value.trim()) {
+    alert("Please enter username and password.");
+    return false;
+  }
+  return true;
 }
 
 loadPending();
