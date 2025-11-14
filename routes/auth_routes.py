@@ -3,6 +3,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, sessio
 import config
 from backends.register_backend import submit_registration
 from backends.utils_backend import get_credentials_sheet, get_registration_sheet, get_user_record, reset_password_for_username
+from backends.forgot_password_backend import submit_forgot_password_request
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -74,35 +75,20 @@ def logout():
     resp.set_cookie("password", "", expires=0)
     return resp
 
+# Forgot password submission (public-facing)
 @auth_bp.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
-    """
-    Admin-reviewed password reset flow.
-    """
     if request.method == "POST":
-        username = request.form.get("username", "").strip()
-        new_password = request.form.get("new_password", "").strip()
-        confirm_password = request.form.get("confirm_password", "").strip()
-
-        if not all([username, new_password, confirm_password]):
-            flash("⚠️ Fill all fields.", "warning")
-            return redirect(url_for("auth.forgot_password"))
-
-        if new_password != confirm_password:
-            flash("❌ Passwords do not match.", "danger")
-            return redirect(url_for("auth.forgot_password"))
-
+        # Accept the request and store in Forgot_Password_Requests sheet
         try:
-            ok = reset_password_for_username(username, new_password)
+            ok = submit_forgot_password_request(request.form)
             if ok:
-                flash("✅ Password reset successful. Please login with new password.", "success")
+                flash("✅ Your password reset request has been submitted. Admin will review.", "success")
                 return redirect(url_for("auth.login"))
             else:
-                flash("❌ Username not found.", "danger")
-                return redirect(url_for("auth.forgot_password"))
+                flash("❌ Could not submit request. Try again later.", "danger")
         except Exception as e:
-            print("Error resetting password:", e)
-            flash("⚠️ Could not reset password. Try later.", "danger")
+            print("Error submitting forgot password request:", e)
+            flash("⚠️ Error submitting request. Try later.", "danger")
             return redirect(url_for("auth.forgot_password"))
-
     return render_template("forgot_password.html")
