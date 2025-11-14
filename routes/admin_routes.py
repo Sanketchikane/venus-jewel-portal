@@ -7,6 +7,9 @@ import traceback
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
 
+# ------------------------------------------
+# ADMIN DASHBOARD
+# ------------------------------------------
 @admin_bp.route("/admin-dashboard")
 def admin_dashboard():
     try:
@@ -20,6 +23,9 @@ def admin_dashboard():
         return "Internal Server Error", 500
 
 
+# ------------------------------------------
+# ADMIN USERS PAGE
+# ------------------------------------------
 @admin_bp.route("/admin-users")
 def admin_users():
     try:
@@ -36,7 +42,9 @@ def admin_users():
         return "Internal Server Error", 500
 
 
-# FIXED PENDING REGISTRATIONS ROUTE
+# ------------------------------------------
+# FIXED: PENDING REGISTRATIONS API
+# ------------------------------------------
 @admin_bp.route("/api/pending-registrations")
 def pending_registrations():
     try:
@@ -46,8 +54,8 @@ def pending_registrations():
         for r in pending:
             formatted.append({
                 "Full Name": r.get("Full Name", ""),
-                "Email": r.get("Email Address", ""),
-                "Contact": r.get("Contact Number", ""),
+                "Email": r.get("Email Address", ""),       # FIXED COLUMN NAME
+                "Contact": r.get("Contact Number", ""),    # FIXED COLUMN NAME
                 "Organization": r.get("Organization", ""),
                 "Status": r.get("Status", "Pending")
             })
@@ -60,6 +68,9 @@ def pending_registrations():
         return jsonify({"pending": []})
 
 
+# ------------------------------------------
+# CREATE CREDENTIALS
+# ------------------------------------------
 @admin_bp.route("/create-credential", methods=["POST"])
 def create_credential():
     try:
@@ -76,6 +87,7 @@ def create_credential():
             return redirect(url_for("admin.admin_users"))
 
         admin_backend.create_credential_entry(email, username, password)
+
         flash(f"✅ User '{username}' added and approved successfully.", "success")
         return redirect(url_for("admin.admin_users"))
 
@@ -86,6 +98,9 @@ def create_credential():
         return redirect(url_for("admin.admin_users"))
 
 
+# ------------------------------------------
+# VIEW USER PROFILE
+# ------------------------------------------
 @admin_bp.route("/view-user/<username>")
 def view_user(username):
     try:
@@ -96,7 +111,13 @@ def view_user(username):
         ws = get_credentials_sheet()
         records = ws.get_all_records()
 
-        user = next((u for u in records if str(u.get("Username", "")).lower() == username.lower()), None)
+        # IMPORTANT FIX ✔
+        # Lookup username EXACTLY from Credentials sheet
+        user = next(
+            (u for u in records
+             if str(u.get("Username", "")).strip().lower() == username.strip().lower()),
+            None
+        )
 
         if not user:
             flash("⚠️ User not found.", "warning")
@@ -111,6 +132,9 @@ def view_user(username):
         return redirect(url_for("admin.admin_users"))
 
 
+# ------------------------------------------
+# UPDATE USER PROFILE
+# ------------------------------------------
 @admin_bp.route("/update-user/<username>", methods=["POST"])
 def update_user(username):
     try:
@@ -122,8 +146,9 @@ def update_user(username):
         records = ws.get_all_records()
 
         for i, row in enumerate(records, start=2):
-            if str(row.get("Username", "")).lower() == username.lower():
+            if str(row.get("Username", "")).strip().lower() == username.lower():
 
+                # Update ONLY existing columns
                 for key in row.keys():
                     if key in request.form:
                         ws.update_cell(i, list(row.keys()).index(key) + 1, request.form[key])
