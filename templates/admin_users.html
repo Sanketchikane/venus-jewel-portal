@@ -1,125 +1,181 @@
 {% extends "admin_dashboard.html" %}
+
 {% block content %}
 
 <style>
-  .user-card {
-    background: rgba(255, 255, 255, 0.95);
+  .card {
+    background: white;
     border-radius: 16px;
-    padding: 30px 20px;
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
-    max-width: 1150px;
-    margin: 40px auto;
-    font-family: 'Poppins', sans-serif;
-    backdrop-filter: blur(10px);
+    padding: 25px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.12);
   }
-  .pending-title {
-    font-size: 22px;
-    color: #0066cc;
-    margin: 20px 0 10px;
-  }
-  .user-table {
+  table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 15px;
   }
-  .user-table thead {
-    background: linear-gradient(to right, #004080, #0073e6);
+  th {
+    background: #004080;
     color: white;
+    padding: 10px;
   }
-  .user-table th, .user-table td {
-    padding: 12px 14px;
+  td {
+    padding: 10px;
     border-bottom: 1px solid #ddd;
-    text-align: left;
   }
-  .user-table tbody tr:hover { background-color: #f0f7ff; cursor: pointer; }
+  tr:hover {
+    background: #eef4ff;
+  }
 </style>
 
-<div class="user-card">
-  <h2 class="text-center text-2xl font-bold text-venusBlue mb-4">👥 Registered Users – Venus File Portal</h2>
+<div class="card">
 
-  {% if users and users|length > 0 %}
-  <div class="overflow-x-auto">
-    <table class="user-table">
-      <thead>
-        <tr><th>Full Name</th><th>Username</th><th>Email</th><th>Organization</th><th>Contact</th><th>Action</th></tr>
-      </thead>
-      <tbody>
-        {% for user in users %}
-        <tr>
-          <td>{{ user['Full Name'] }}</td>
-          <td>{{ user['Username'] }}</td>
-          <td>{{ user['Email'] }}</td>
-          <td>{{ user['Organization'] }}</td>
-          <td>{{ user['Contact Number'] }}</td>
-          <td>
-            <button onclick="openUser('{{ user['Username']|e }}')" class="bg-blue-600 text-white px-3 py-1 rounded">View</button>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  {% else %}
-  <p class="text-center text-gray-500">No approved users found.</p>
-  {% endif %}
+  <h2 class="text-2xl font-bold text-blue-800 mb-4">Registered Users</h2>
 
-  <h3 class="pending-title">🕒 Pending Registration Requests</h3>
-  <div class="overflow-x-auto">
-    <table class="user-table" id="pending-table">
-      <thead><tr><th>Full Name</th><th>Email</th><th>Contact</th><th>Organization</th><th>Status</th><th>Approve</th></tr></thead>
-      <tbody id="pending-body"><tr><td colspan="6" class="text-center">Loading...</td></tr></tbody>
-    </table>
-  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Full Name</th>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Organization</th>
+        <th>Contact</th>
+        <th>View</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for user in users %}
+      <tr>
+        <td>{{ user['Full Name'] }}</td>
+        <td>{{ user['Username'] }}</td>
+        <td>{{ user['Email'] }}</td>
+        <td>{{ user['Organization'] }}</td>
+        <td>{{ user['Contact Number'] }}</td>
+        <td>
+          <button onclick="openUser('{{ user['Username']|e }}')" class="bg-blue-600 text-white px-3 py-1 rounded">View</button>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+
+
+  <!-- Pending Registration -->
+  <h2 id="pending" class="text-2xl mt-10 font-bold text-blue-800">Pending Registrations</h2>
+
+  <table id="pending-table">
+    <thead>
+      <tr>
+        <th>Full Name</th>
+        <th>Email</th>
+        <th>Contact</th>
+        <th>Organization</th>
+        <th>Status</th>
+        <th>Approve</th>
+      </tr>
+    </thead>
+    <tbody id="pending-body">
+      <tr><td colspan="6" class="text-center">Loading...</td></tr>
+    </tbody>
+  </table>
+
+
+  <!-- Forgot Password Requests -->
+  <h2 id="forgot-password" class="text-2xl mt-10 font-bold text-blue-800">Forgot Password Requests</h2>
+
+  <table id="forgot-table">
+    <thead>
+      <tr>
+        <th>Full Name</th>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Organization</th>
+        <th>Contact</th>
+        <th>Request Date</th>
+        <th>Reset</th>
+      </tr>
+    </thead>
+    <tbody id="forgot-body">
+      <tr><td colspan="7" class="text-center">Loading...</td></tr>
+    </tbody>
+  </table>
+
 </div>
 
 <script>
+
 function openUser(username) {
-  // Use encodeURIComponent to handle spaces/special chars
-  const url = '/admin/view-user/' + encodeURIComponent(username);
-  window.open(url, "_blank");
+  window.location.href = "/admin/view-user/" + encodeURIComponent(username);
 }
 
+// Load Pending Registrations
 async function loadPending() {
   const res = await fetch("/admin/api/pending-registrations");
   const data = await res.json();
   const tbody = document.getElementById("pending-body");
+
   tbody.innerHTML = "";
 
   if (!data.pending || data.pending.length === 0) {
-    tbody.innerHTML = "<tr><td colspan='6' class='text-center'>No pending requests.</td></tr>";
+    tbody.innerHTML = "<tr><td colspan='6' class='text-center'>No pending requests</td></tr>";
     return;
   }
 
   data.pending.forEach(r => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${r["Full Name"] || ""}</td>
-      <td>${r["Email"] || ""}</td>
-      <td>${r["Contact"] || ""}</td>
-      <td>${r["Organization"] || ""}</td>
-      <td>${r["Status"] || "Pending"}</td>
-      <td>
-        <form method="POST" action="/admin/create-credential" onsubmit="return validateApproveForm(this)">
-          <input type="hidden" name="email" value="${(r["Email"]||'').replace(/"/g, '&quot;')}">
-          <input type="text" name="username" placeholder="Username" required>
-          <input type="text" name="password" placeholder="Password" required>
-          <button type="submit" class="bg-green-600 text-white px-2 py-1 rounded">Approve</button>
-        </form>
-      </td>`;
-    tbody.appendChild(tr);
+    tbody.innerHTML += `
+      <tr>
+        <td>${r["Full Name"]}</td>
+        <td>${r["Email"]}</td>
+        <td>${r["Contact"]}</td>
+        <td>${r["Organization"]}</td>
+        <td>${r["Status"]}</td>
+        <td>
+          <form method="POST" action="/admin/create-credential">
+            <input type="hidden" name="email" value="${r["Email"]}">
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="text" name="password" placeholder="Password" required>
+            <button class="bg-green-600 text-white px-3 py-1 rounded">Approve</button>
+          </form>
+        </td>
+      </tr>`;
   });
 }
 
-function validateApproveForm(form) {
-  // basic client-side check
-  if (!form.username.value.trim() || !form.password.value.trim()) {
-    alert("Please enter username and password.");
-    return false;
+// Load Forgot Password Requests
+async function loadForgot() {
+  const res = await fetch("/admin/api/pending-forgot-passwords");
+  const data = await res.json();
+
+  const tbody = document.getElementById("forgot-body");
+  tbody.innerHTML = "";
+
+  if (!data.pending || data.pending.length === 0) {
+    tbody.innerHTML = "<tr><td colspan='7' class='text-center'>No requests</td></tr>";
+    return;
   }
-  return true;
+
+  data.pending.forEach((r, index) => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${r["Full Name"]}</td>
+        <td>${r["Username"]}</td>
+        <td>${r["Email"]}</td>
+        <td>${r["Organization"]}</td>
+        <td>${r["Contact Number"]}</td>
+        <td>${r["Request Date"]}</td>
+        <td>
+          <form method="POST" action="/admin/reset-forgot-password">
+            <input type="hidden" name="username" value="${r["Username"]}">
+            <input type="password" name="new_password" placeholder="New Password" required>
+            <input type="hidden" name="request_row" value="${index + 2}">
+            <button class="bg-blue-600 text-white px-3 py-1 rounded">Reset</button>
+          </form>
+        </td>
+      </tr>`;
+  });
 }
 
 loadPending();
+loadForgot();
 </script>
 
 {% endblock %}
