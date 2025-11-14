@@ -21,34 +21,30 @@ _drive_service = build("drive", "v3", credentials=_creds)
 def get_registration_sheet(tab_name="Registration"):
     """
     Returns the worksheet for registration (or other tabs under the main SHEET_ID).
+    Creates sheet tab if missing.
     """
     wb = _gspread_client.open_by_key(config.SHEET_ID)
     try:
         return wb.worksheet(tab_name)
     except Exception:
-        # create the worksheet if it doesn't exist (with a minimal header)
         ws = wb.add_worksheet(title=tab_name, rows="100", cols="20")
         return ws
 
 def get_credentials_sheet():
     """
     Return the worksheet named 'Credentials' under the main sheet.
+    Create with header if missing.
     """
     wb = _gspread_client.open_by_key(config.SHEET_ID)
     try:
         return wb.worksheet("Credentials")
     except Exception:
-        # create Credentials sheet with a basic header if missing
         ws = wb.add_worksheet(title="Credentials", rows="100", cols="20")
-        # optional: write header row
         ws.append_row(["Timestamp", "Full Name", "Username", "Password", "Contact Number", "Organization", "Email"])
         return ws
 
 # === Drive helpers ===
 def list_packet_folders(order="modifiedTime desc"):
-    """
-    List folders inside the parent DRIVE_FOLDER_ID (shared drive).
-    """
     q = f"'{config.DRIVE_FOLDER_ID}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false"
     res = _drive_service.files().list(q=q, fields="files(id,name,modifiedTime)", orderBy=order,
                                      includeItemsFromAllDrives=True, supportsAllDrives=True).execute()
@@ -65,9 +61,6 @@ def list_files_in_folder(folder_id, order="modifiedTime desc"):
         return []
 
 def get_or_create_folder(name, parent_id=config.DRIVE_FOLDER_ID):
-    """
-    Return folder id for given folder name under parent_id. Creates if missing.
-    """
     q = f"name='{name}' and mimeType='application/vnd.google-apps.folder' and '{parent_id}' in parents and trashed=false"
     res = _drive_service.files().list(q=q, fields="files(id,name)", includeItemsFromAllDrives=True, supportsAllDrives=True).execute()
     files = res.get("files", [])
@@ -78,16 +71,10 @@ def get_or_create_folder(name, parent_id=config.DRIVE_FOLDER_ID):
     return folder.get("id")
 
 def upload_media_to_drive(name, parent_id, media):
-    """
-    Upload MediaIoBaseUpload object to Drive under parent_id.
-    """
     body = {"name": name, "parents": [parent_id]}
     _drive_service.files().create(body=body, media_body=media, fields="id", supportsAllDrives=True).execute()
 
 def download_file_to_bytes(file_id):
-    """
-    Download a Drive file into BytesIO and return (name, mime, BytesIO)
-    """
     meta = _drive_service.files().get(fileId=file_id, fields="id,name,mimeType", supportsAllDrives=True).execute()
     fh = io.BytesIO()
     req = _drive_service.files().get_media(fileId=file_id, supportsAllDrives=True)
@@ -116,23 +103,16 @@ def get_unique_filename(base_filename, folder_id):
 
 # === Video mute helper (uses ffmpeg on server) ===
 def mute_video(file_storage, filename):
-    """
-    Save incoming file_storage to temp, run ffmpeg to remove audio, return BytesIO.
-    If ffmpeg fails, returns original bytes.
-    """
     ext = os.path.splitext(filename)[1] or ".mp4"
     temp_dir = tempfile.mkdtemp()
     input_path = os.path.join(temp_dir, f"input{ext}")
     output_path = os.path.join(temp_dir, f"muted{ext}")
-    # save
     file_storage.save(input_path)
     try:
-        # copy video stream, remove audio
         subprocess.run(["ffmpeg", "-y", "-i", input_path, "-c:v", "copy", "-an", output_path],
                        check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         return io.BytesIO(open(output_path, "rb").read())
-    except Exception as e:
-        # fallback to original file bytes
+    except Exception:
         try:
             return io.BytesIO(open(input_path, "rb").read())
         except Exception:
@@ -159,12 +139,9 @@ def verify_secure_link(file_id, t, s):
 
 # === USER LOOKUP (required by login) ===
 def get_user_record(username):
-    """
-    Read the Credentials sheet and return user dict for username (exact match).
-    """
     try:
         ws = get_credentials_sheet()
-        usernames = ws.col_values(3)[1:]  # Column C (index 3) ignoring header
+        usernames = ws.col_values(3)[1:]  # Column C ignoring header
         for i, u in enumerate(usernames, start=2):
             if str(u).strip() == str(username).strip():
                 row = ws.row_values(i)
@@ -184,19 +161,14 @@ def get_user_record(username):
         print("ERROR get_user_record:", e)
         return None
 
-# === Reset password helper (used by forgot password flow) ===
+# === Reset password helper ===
 def reset_password_for_username(username, new_password):
-    """
-    Find the username in Credentials sheet and replace the password cell.
-    Returns True if updated, False if user not found.
-    """
     try:
         ws = get_credentials_sheet()
-        usernames = ws.col_values(3)[1:]  # column C
+        usernames = ws.col_values(3)[1:]
         for i, u in enumerate(usernames, start=2):
             if str(u).strip() == str(username).strip():
-                # Password is column index 4 (0-based in row_values it's index 3)
-                ws.update_cell(i, 4, new_password)  # column 4 in sheet (Password)
+                ws.update_cell(i, 4, new_password)  # Password is column 4
                 return True
         return False
     except Exception as e:
