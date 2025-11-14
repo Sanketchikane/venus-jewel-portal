@@ -10,22 +10,21 @@ from backends.utils_backend import (
 
 file_bp = Blueprint("file", __name__)
 
-# Compatibility endpoint expected by admin template
+# Admin-facing files page alias expected by templates
 @file_bp.route("/admin-files")
 def admin_files():
-    # keep an admin-facing view if template links to it
     if not session.get("is_admin"):
         return redirect(url_for("auth.login"))
     return render_template("files.html", user=session.get("username"))
 
-# Files page for normal users
+# Files page for regular users
 @file_bp.route("/files")
 def files_page():
     if not session.get("username"):
         return redirect(url_for("auth.login"))
     return render_template("files.html", user=session.get("username"))
 
-# API endpoint to return packet folders (used by frontend JS)
+# API: packet folders
 @file_bp.route("/api/packet-folders")
 def packet_folders_api():
     if not session.get("username"):
@@ -36,7 +35,7 @@ def packet_folders_api():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# API endpoint to return files inside a folder
+# API: files in folder
 @file_bp.route("/api/folder/<folder_id>/files")
 def folder_files_api(folder_id):
     if not session.get("username"):
@@ -47,7 +46,7 @@ def folder_files_api(folder_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Upload route
+# Upload handler
 @file_bp.route("/upload", methods=["POST"])
 def upload():
     try:
@@ -76,7 +75,7 @@ def upload():
     except Exception as e:
         return jsonify({"success": False, "message": f"Upload failed: {e}"}), 500
 
-# Download file
+# Download
 @file_bp.route("/download/file/<file_id>")
 def download_file_route(file_id):
     if not session.get("username"):
@@ -84,7 +83,7 @@ def download_file_route(file_id):
     name, mime, fh = download_file_to_bytes(file_id)
     return send_file(fh, mimetype=mime, as_attachment=True, download_name=name)
 
-# Preview file (supports secure share link)
+# Preview (secure link support)
 @file_bp.route("/preview/file/<file_id>")
 def preview_file(file_id):
     t = request.args.get("t")
