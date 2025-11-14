@@ -5,6 +5,7 @@ from datetime import datetime
 def submit_forgot_password_request(form_data):
     """
     Store forgot password request in the 'Forgot_Password_Requests' tab.
+    Columns: Full Name | Username | Email | Organization | Contact Number | Status | Request Date
     """
     ws = get_registration_sheet("Forgot_Password_Requests")
     data = [
