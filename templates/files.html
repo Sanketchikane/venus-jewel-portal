@@ -256,10 +256,16 @@ function openPreview(id,mime,ext){
   }
   alert('Preview not supported for this file.');
 }
-function closePreview(){modal.style.display='none';video.pause();video.src='';}
 
-// Share
-function shareFile(id){window.open(`/share?id=${id}`,'_blank');}
+function closePreview(){
+  modal.style.display='none';
+  video.pause();
+  video.src='';
+}
+
+function shareFile(id){
+  window.open(`/share.html?id=${id}`,'_blank');
+}
 
 searchBox.oninput=()=>{renderFolders();renderFiles();};
 sortSelect.onchange=()=>{loadFolders();if(currentFolder)loadFiles(currentFolder.id);};
