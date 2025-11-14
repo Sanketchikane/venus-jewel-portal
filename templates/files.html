@@ -104,13 +104,6 @@
       background: rgba(255,255,255,0.9); border: none;
       border-radius: 50%; width: 32px; height: 32px; cursor: pointer;
     }
-
-    @media (max-width: 900px) {
-      .browser { grid-template-columns: 1fr; }
-      .list { max-height: 35vh; }
-      .btn { font-size: 13px; padding: 6px 8px; }
-      .topbar { flex-wrap: wrap; gap: 8px; }
-    }
   </style>
 </head>
 <body>
@@ -134,7 +127,8 @@
         <option value="name">Name A–Z</option>
       </select>
       <button id="refreshBtn" class="btn"><i class="fas fa-rotate"></i> Refresh</button>
-      <a id="downloadFolderBtn" class="btn btn-primary" href="#" disabled><i class="fas fa-download"></i> Download Folder</a>
+      <button id="downloadFolderBtn" class="btn btn-primary" disabled><i class="fas fa-download"></i> Download Folder</button>
+      <button id="downloadSelectedBtn" class="btn btn-primary" disabled><i class="fas fa-download"></i> Download Selected Files</button>
     </div>
 
     <div class="browser">
@@ -145,7 +139,7 @@
       <div class="panel">
         <h3 id="filesTitle"><i class="fas fa-file"></i> Files</h3>
         <table class="grid">
-          <thead><tr><th>Name</th><th>Type</th><th>Modified</th><th>Actions</th></tr></thead>
+          <thead><tr><th>Select</th><th>Name</th><th>Type</th><th>Modified</th><th>Actions</th></tr></thead>
           <tbody id="filesBody"></tbody>
         </table>
       </div>
@@ -201,12 +195,10 @@ function selectFolder(id,name){
   currentFolder={id,name};
   filesTitle.textContent=`Files — ${name}`;
   downloadFolderBtn.removeAttribute('disabled');
-  downloadFolderBtn.href=`/download/folder/${id}`;
   loadFiles(id);
 }
 
 function loadFiles(folderId){
-  filesBody.innerHTML='<tr><td colspan="4">Loading…</td></tr>';
   fetch(`/api/folder/${folderId}/files?sort=${sortSelect.value}`)
   .then(r=>r.json())
   .then(({files})=>{currentFiles=files||[];renderFiles();})
@@ -224,52 +216,51 @@ function renderFiles(){
     const ext=(f.name.split('.').pop()||'').toLowerCase();
     const date=f.modifiedTime?new Date(f.modifiedTime).toLocaleString():'';
     tr.innerHTML=`
+      <td><input type="checkbox" data-id="${f.id}" class="file-checkbox"></td>
       <td>${f.name}</td>
-      <td>${mime.replace('application/','')}</td>
+      <td>${mime}</td>
       <td>${date}</td>
       <td class="actions">
-        <button class="btn" onclick="openPreview('${f.id}','${mime}','${ext}')"><i class="fas fa-eye"></i> Preview</button>
+        <button class="btn" onclick="openPreview('${f.id}')"><i class="fas fa-eye"></i> Preview</button>
         <a class="btn" href="/download/file/${f.id}"><i class="fas fa-download"></i> Download</a>
-        <button class="btn" onclick="shareFile('${f.id}')"><i class="fas fa-share-alt"></i> Share</button>
       </td>`;
     filesBody.appendChild(tr);
   });
+
+  // Enable Download Selected Files Button
+  const checkboxes = document.querySelectorAll('.file-checkbox');
+  checkboxes.forEach(checkbox => checkbox.addEventListener('change', handleFileSelection));
 }
 
-// Preview
-const modal=document.getElementById('previewModal');
-const video=document.getElementById('previewVideo');
-const img=document.getElementById('previewImage');
-const frame=document.getElementById('previewFrame');
-
-function openPreview(id,mime,ext){
-  video.style.display=img.style.display=frame.style.display='none';
-  const url=`/preview/file/${id}`;
-  if(mime.startsWith('video/')||['mp4','mov','mkv','webm','hevc'].includes(ext)){
-    video.src=url;video.style.display='block';modal.style.display='flex';video.play();return;
+function handleFileSelection() {
+  selectedFiles.length = 0; // Clear previous selections
+  const selectedCheckboxes = document.querySelectorAll('.file-checkbox:checked');
+  selectedCheckboxes.forEach(checkbox => {
+    selectedFiles.push(checkbox.getAttribute('data-id'));
+  });
+  if (selectedFiles.length > 0) {
+    downloadSelectedBtn.removeAttribute('disabled');
+  } else {
+    downloadSelectedBtn.setAttribute('disabled', true);
   }
-  if(mime.startsWith('image/')||['jpg','jpeg','png','gif','webp'].includes(ext)){
-    img.src=url;img.style.display='block';modal.style.display='flex';return;
-  }
-  if(mime==='application/pdf'||ext==='pdf'){
-    frame.src=url;frame.style.display='block';modal.style.display='flex';return;
-  }
-  alert('Preview not supported for this file.');
 }
 
-function closePreview(){
-  modal.style.display='none';
-  video.pause();
-  video.src='';
-}
+downloadSelectedBtn.addEventListener('click', () => {
+  fetch('/download/selected', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ files: selectedFiles })
+  })
+  .then(r => r.blob())
+  .then(blob => {
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'selected_files.zip';
+    link.click();
+  })
+  .catch(err => console.error('Download failed:', err));
+});
 
-function shareFile(id){
-  window.open(`/share.html?id=${id}`,'_blank');
-}
-
-searchBox.oninput=()=>{renderFolders();renderFiles();};
-sortSelect.onchange=()=>{loadFolders();if(currentFolder)loadFiles(currentFolder.id);};
-refreshBtn.onclick=()=>loadFolders();
 loadFolders();
 </script>
 </body>
