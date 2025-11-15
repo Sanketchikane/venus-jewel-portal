@@ -29,20 +29,19 @@
             color: var(--vj-primary);
         }
 
+        /* TOPBAR */
         .topbar {
             background: var(--vj-bg);
             padding: 10px 18px;
             border-bottom: 1px solid var(--vj-border);
             display: flex;
-            align-items: center; justify-content: space-between;
+            align-items: center;
+            justify-content: space-between;
             gap: 10px;
             flex-wrap: nowrap;
         }
-
         .topbar img { height: 42px; }
-
         .top-right { display:flex; align-items:center; gap:10px; }
-
         .top-btn {
             padding: 6px 12px; border:1px solid var(--vj-border); background:#fff; border-radius:8px;
             font-size:13px; cursor:pointer; display:flex; align-items:center; gap:6px;
@@ -61,7 +60,9 @@
             background: var(--vj-bg); border-radius: 14px; box-shadow: var(--vj-shadow);
         }
 
-        .controls { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:14px; align-items:center; }
+        .controls {
+            display:flex; gap:12px; flex-wrap:wrap; margin-bottom:14px; align-items:center;
+        }
         .controls input, .controls select { padding:10px; border-radius:8px; border:1px solid var(--vj-border); font-size:14px; }
 
         .btn { padding:8px 12px; border:1px solid var(--vj-border); background:#fff; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:.15s; }
@@ -83,16 +84,14 @@
         .selected-folder { background: rgba(11,95,255,0.18) !important; }
         .muted { margin-left:auto; color:var(--vj-muted); font-size:12px; }
 
-        table { width:100%; border-collapse:collapse; }
+        /* Table stays side-by-side even on mobile: horizontal scroll */
+        .table-wrap { overflow-x:auto; }
+        table { width:100%; border-collapse:collapse; min-width:720px; } /* min-width keeps columns side-by-side */
         th, td { padding:10px; border-bottom:1px solid var(--vj-border); text-align:left; vertical-align:middle; }
         th { background:#f8faff; font-weight:600; }
 
         @media(max-width:600px){
-            table, thead, tbody, th, td, tr { display:block; }
-            tr { margin-bottom:12px; padding:10px; background:#fff; border-radius:10px; box-shadow:var(--vj-shadow); }
-            td { border:none; display:flex; justify-content:space-between; gap:8px; align-items:center; }
-            td:nth-child(1){ font-weight:600; }
-            td:nth-child(4){ display:flex; gap:8px; }
+            table { min-width:720px; } /* keeps side-by-side and allows horizontal scroll */
         }
 
         /* Loader */
@@ -105,7 +104,7 @@
         #previewClose { position:absolute; right:10px; top:10px; background:#fff; border:none; border-radius:50%; width:36px; height:36px; cursor:pointer; }
         #previewBox video,#previewBox img,#previewBox iframe{display:none;width:100%;max-height:85vh;}
 
-        /* Share modal (for folder share) */
+        /* Share modal */
         #shareModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:3000; align-items:center; justify-content:center; }
         #shareBox { width:min(680px,95vw); background:#fff; border-radius:10px; padding:18px; box-shadow:var(--vj-shadow); }
         .share-link { word-break:break-all; background:#f7f9fe; padding:10px; border-radius:8px; border:1px solid var(--vj-border); margin-bottom:10px; }
@@ -133,13 +132,17 @@
 
         <button id="refreshBtn" class="btn"><i class="fa fa-rotate"></i> Refresh</button>
 
-        <button id="downloadSelectedBtn" class="btn btn-primary" disabled>
-            <i class="fa fa-download"></i> Download Selected (<span id="selectedCount">0</span>)
-        </button>
+        <!-- Top control: Download Selected + Share Folder (side-by-side) -->
+        <div style="margin-left:auto; display:flex; gap:8px; flex-wrap:wrap;">
+            <button id="downloadSelectedBtn" class="btn btn-primary" disabled>
+                <i class="fa fa-download"></i> Download Selected (<span id="selectedCount">0</span>)
+            </button>
 
-        <button id="shareSelectedBtn" class="btn" disabled>
-            <i class="fa fa-share-alt"></i> Share Selected
-        </button>
+            <!-- Share Folder: only enabled when EXACTLY ONE folder is selected -->
+            <button id="shareFolderBtn" class="btn" disabled>
+                <i class="fa fa-share-alt"></i> Share Folder
+            </button>
+        </div>
     </div>
 
     <div id="loader"></div>
@@ -160,33 +163,40 @@
             <h3 id="filesTitle"><i class="fa fa-file"></i> Files</h3>
             <div id="fileLoader"></div>
 
-            <table>
-                <thead>
-                    <tr><th>Name</th><th>Type</th><th>Modified</th><th>Action</th></tr>
-                </thead>
-                <tbody id="filesBody"></tbody>
-            </table>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Modified</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="filesBody"></tbody>
+                </table>
+            </div>
         </div>
 
     </div>
 </div>
 
 <!-- Preview modal -->
-<div id="previewModal">
+<div id="previewModal" role="dialog" aria-modal="true">
     <div id="previewBox">
         <button id="previewClose">✕</button>
         <video id="previewVideo" controls></video>
-        <img id="previewImage">
-        <iframe id="previewFrame"></iframe>
+        <img id="previewImage" alt="Preview image">
+        <iframe id="previewFrame" title="PDF Preview"></iframe>
     </div>
 </div>
 
-<!-- Share modal (for folder share link) -->
-<div id="shareModal">
+<!-- Share modal (folder link) -->
+<div id="shareModal" role="dialog" aria-modal="true">
     <div id="shareBox">
-        <h3>Share Selected Folders</h3>
+        <h3>Share Folder</h3>
         <div class="share-link" id="shareLink">Generating link…</div>
-        <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:8px;">
             <button id="copyShareLink" class="btn">Copy Link</button>
             <button id="openShareLink" class="btn btn-primary">Open Link</button>
             <button id="closeShareModal" class="btn">Close</button>
@@ -195,12 +205,14 @@
 </div>
 
 <script>
-/* ====== Variables ====== */
+/* ========== State ========== */
 let allFolders = [];
 let selectedFolders = [];
 let currentFolder = null;
 let currentFiles = [];
+let latestShareUrl = "";
 
+/* ========== Elements ========== */
 const packetList = document.getElementById('packetList');
 const filesBody = document.getElementById('filesBody');
 const filesTitle = document.getElementById('filesTitle');
@@ -209,7 +221,7 @@ const sortSelect = document.getElementById('sortSelect');
 const refreshBtn = document.getElementById('refreshBtn');
 const selectAll = document.getElementById('selectAll');
 const downloadBtn = document.getElementById('downloadSelectedBtn');
-const shareBtn = document.getElementById('shareSelectedBtn');
+const shareFolderBtn = document.getElementById('shareFolderBtn');
 const selectedCount = document.getElementById('selectedCount');
 const loader = document.getElementById('loader');
 const fileLoader = document.getElementById('fileLoader');
@@ -226,36 +238,40 @@ const copyShareLinkBtn = document.getElementById('copyShareLink');
 const openShareLinkBtn = document.getElementById('openShareLink');
 const closeShareModalBtn = document.getElementById('closeShareModal');
 
-let latestShareUrl = "";
+/* ========== Helpers ========== */
+function setLoading(el, on) { el.style.display = on ? 'block' : 'none'; }
 
-/* ====== Load folders ====== */
-function loadFolders(){
-    loader.style.display = "block";
+function loadFolders() {
+    setLoading(loader, true);
     packetList.innerHTML = "<div class='list-item'>Loading…</div>";
     fetch(`/api/packet-folders?sort=${sortSelect.value}`)
-        .then(r=>r.json())
+        .then(r => r.json())
         .then(data => { allFolders = data.folders || []; renderFolders(); })
-        .catch(()=> packetList.innerHTML = "<div class='list-item'>Failed to load</div>")
-        .finally(()=> loader.style.display = "none");
+        .catch(() => packetList.innerHTML = "<div class='list-item'>Failed to load</div>")
+        .finally(() => setLoading(loader, false));
 }
 
-/* ====== Render folders with checkboxes ====== */
-function renderFolders(){
+function renderFolders() {
     const q = (searchBox.value || "").toLowerCase();
-    const filtered = allFolders.filter(f => (f.name||"").toLowerCase().includes(q));
+    const filtered = (allFolders || []).filter(f => (f.name||'').toLowerCase().includes(q));
     packetList.innerHTML = "";
-    if(!filtered.length){ packetList.innerHTML = "<div class='list-item'>No folders</div>"; updateActionButtons(); return; }
+    if (!filtered.length) {
+        packetList.innerHTML = "<div class='list-item'>No folders</div>";
+        updateActionButtons();
+        return;
+    }
 
-    filtered.forEach(f=>{
+    filtered.forEach(f => {
         const row = document.createElement('div');
         row.className = "list-item" + (selectedFolders.includes(f.id) ? " selected-folder" : "");
         row.innerHTML = `
             <input type="checkbox" class="folderChk" data-id="${f.id}" ${selectedFolders.includes(f.id) ? "checked": ""}>
             <span style="flex:1"><i class="fa fa-folder"></i> ${f.name}</span>
-            <span class="muted">${new Date(f.modifiedTime).toLocaleString()}</span>
+            <span class="muted">${f.modifiedTime ? new Date(f.modifiedTime).toLocaleString() : ''}</span>
         `;
-        row.addEventListener('click', (e)=>{
-            if(!e.target.classList.contains('folderChk')){
+        row.addEventListener('click', (e) => {
+            if (!e.target.classList.contains('folderChk')) {
+                // click selects folder to view files
                 currentFolder = f;
                 filesTitle.textContent = 'Files — ' + f.name;
                 loadFiles(f.id);
@@ -267,55 +283,52 @@ function renderFolders(){
     updateActionButtons();
 }
 
-/* ====== Folder checkbox handler ====== */
-packetList.addEventListener('change', (e)=>{
-    if(!e.target.classList.contains('folderChk')) return;
+packetList.addEventListener('change', (e) => {
+    if (!e.target.classList.contains('folderChk')) return;
     const id = e.target.dataset.id;
-    if(e.target.checked){
-        if(!selectedFolders.includes(id)) selectedFolders.push(id);
+    if (e.target.checked) {
+        if (!selectedFolders.includes(id)) selectedFolders.push(id);
     } else {
-        selectedFolders = selectedFolders.filter(x=>x!==id);
+        selectedFolders = selectedFolders.filter(x => x !== id);
         selectAll.checked = false;
     }
     renderFolders();
 });
 
-/* ====== Select all ====== */
-selectAll.addEventListener('change', ()=>{
-    if(selectAll.checked){
-        selectedFolders = allFolders.map(f=>f.id);
-    } else {
-        selectedFolders = [];
-    }
+selectAll.addEventListener('change', () => {
+    if (selectAll.checked) selectedFolders = (allFolders||[]).map(f => f.id);
+    else selectedFolders = [];
     renderFolders();
 });
 
-/* ====== Update action buttons ====== */
-function updateActionButtons(){
+function updateActionButtons() {
     selectedCount.textContent = selectedFolders.length;
     downloadBtn.disabled = selectedFolders.length === 0;
-    shareBtn.disabled = selectedFolders.length === 0;
+    // Share Folder only enabled when exactly ONE folder selected (Option 1)
+    shareFolderBtn.disabled = selectedFolders.length !== 1;
 }
 
-/* ====== Load files inside a folder ====== */
-function loadFiles(folderId){
-    fileLoader.style.display = "block";
+/* ========== Files ========== */
+function loadFiles(folderId) {
+    setLoading(fileLoader, true);
     filesBody.innerHTML = "<tr><td colspan='4'>Loading…</td></tr>";
-    fetch(`/api/folder/${folderId}/files`)
-        .then(r=>r.json())
+    fetch(`/api/folder/${folderId}/files?sort=${sortSelect.value}`)
+        .then(r => r.json())
         .then(data => { currentFiles = data.files || []; renderFiles(); })
-        .catch(()=> filesBody.innerHTML = "<tr><td colspan='4'>Failed to load files</td></tr>")
-        .finally(()=> fileLoader.style.display = "none");
+        .catch(() => filesBody.innerHTML = "<tr><td colspan='4'>Failed to load files</td></tr>")
+        .finally(() => setLoading(fileLoader, false));
 }
 
-/* ====== Render files table ====== */
-function renderFiles(){
+function renderFiles() {
     const q = (searchBox.value || "").toLowerCase();
-    const filtered = (currentFiles || []).filter(f => (f.name||"").toLowerCase().includes(q));
+    const filtered = (currentFiles || []).filter(f => (f.name||'').toLowerCase().includes(q));
     filesBody.innerHTML = "";
-    if(!filtered.length){ filesBody.innerHTML = "<tr><td colspan='4'>No files found</td></tr>"; return; }
+    if (!filtered.length) {
+        filesBody.innerHTML = "<tr><td colspan='4'>No files found</td></tr>";
+        return;
+    }
 
-    filtered.forEach(f=>{
+    filtered.forEach(f => {
         const mime = f.mimeType || "";
         const ext = (f.name || "").split('.').pop().toLowerCase();
         const tr = document.createElement('tr');
@@ -333,93 +346,91 @@ function renderFiles(){
     });
 }
 
-/* ====== File-level share (unchanged) ====== */
-function shareFile(id){
-    // opens existing share page for single file (your old behavior)
+/* File-level share (unchanged) */
+function shareFile(id) {
     window.open(`/share.html?id=${id}`, '_blank');
 }
 
-/* ====== Download selected folders (existing) ====== */
-downloadBtn.addEventListener('click', ()=>{
-    if(!selectedFolders.length) return;
+/* Download selected folders */
+downloadBtn.addEventListener('click', () => {
+    if (!selectedFolders.length) return;
     window.location.href = `/download/folders-zip/${selectedFolders.join(',')}`;
 });
 
-/* ====== Share selected folders (NEW) ====== */
-shareBtn.addEventListener('click', async ()=>{
-    if(!selectedFolders.length) return;
+/* Share ONE folder (Option 1) */
+shareFolderBtn.addEventListener('click', async () => {
+    if (selectedFolders.length !== 1) return;
+    const folderId = selectedFolders[0];
     shareLinkDiv.textContent = "Generating link…";
     shareModal.style.display = "flex";
+    latestShareUrl = "";
     try {
-        const ids = selectedFolders.join(',');
-        const resp = await fetch(`/api/share-folders?ids=${encodeURIComponent(ids)}`);
-        if(!resp.ok) throw new Error('Share link generation failed');
+        // expire optional param — you can change default server-side
+        const resp = await fetch(`/api/share-folder?id=${encodeURIComponent(folderId)}`);
+        if (!resp.ok) throw new Error('Failed to generate share link');
         const data = await resp.json();
         latestShareUrl = data.link;
         shareLinkDiv.textContent = latestShareUrl;
     } catch (err) {
-        shareLinkDiv.textContent = "Failed to generate link.";
         console.error(err);
+        shareLinkDiv.textContent = "Failed to generate link.";
     }
 });
 
-/* ====== Share modal actions ====== */
-copyShareLinkBtn.addEventListener('click', ()=>{
-    if(!latestShareUrl) return;
-    navigator.clipboard.writeText(latestShareUrl).then(()=>{
+/* Share modal actions */
+copyShareLinkBtn.addEventListener('click', () => {
+    if (!latestShareUrl) return;
+    navigator.clipboard.writeText(latestShareUrl).then(() => {
         copyShareLinkBtn.textContent = "Copied!";
-        setTimeout(()=> copyShareLinkBtn.textContent = "Copy Link", 1500);
-    }).catch(()=> alert("Copy failed"));
+        setTimeout(() => copyShareLinkBtn.textContent = "Copy Link", 1400);
+    }).catch(() => alert("Copy failed"));
 });
-
-openShareLinkBtn.addEventListener('click', ()=>{
-    if(!latestShareUrl) return;
+openShareLinkBtn.addEventListener('click', () => {
+    if (!latestShareUrl) return;
     window.open(latestShareUrl, '_blank');
 });
-
-closeShareModalBtn.addEventListener('click', ()=>{
+closeShareModalBtn.addEventListener('click', () => {
     shareModal.style.display = "none";
     latestShareUrl = "";
     shareLinkDiv.textContent = "";
 });
 
-/* ====== Preview modal ====== */
-function openPreview(id,mime,ext){
+/* ===== Preview modal ===== */
+function openPreview(id, mime, ext) {
     previewVideo.style.display = previewImage.style.display = previewFrame.style.display = 'none';
     const url = `/preview/file/${id}`;
-    if(mime.startsWith('video/') || ['mp4','mov','mkv','webm','avi'].includes(ext)){
+    if (mime.startsWith('video/') || ['mp4','mov','mkv','webm','avi'].includes(ext)) {
         previewVideo.src = url;
         previewVideo.style.display = 'block';
         previewVideo.play().catch(()=>{});
-    } else if(mime.startsWith('image/')|| ['jpg','jpeg','png','gif','webp'].includes(ext)){
+    } else if (mime.startsWith('image/') || ['jpg','jpeg','png','gif','webp'].includes(ext)) {
         previewImage.src = url;
         previewImage.style.display = 'block';
-    } else if(ext === 'pdf' || mime === 'application/pdf'){
+    } else if (ext === 'pdf' || mime === 'application/pdf') {
         previewFrame.src = url;
         previewFrame.style.display = 'block';
     } else {
-        window.open(url,'_blank');
+        window.open(url, '_blank');
         return;
     }
     previewModal.style.display = 'flex';
 }
 
-function closePreview(){
+function closePreview() {
     previewModal.style.display = 'none';
     previewVideo.pause(); previewVideo.src = '';
     previewImage.src = ''; previewFrame.src = '';
 }
-
 previewClose.addEventListener('click', closePreview);
-previewModal.addEventListener('click', (e)=>{ if(e.target === previewModal) closePreview(); });
-document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closePreview(); });
+previewModal.addEventListener('click', (e) => { if (e.target === previewModal) closePreview(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePreview(); });
 
-/* ====== Misc events ====== */
-searchBox.addEventListener('input', ()=>{ renderFolders(); renderFiles(); });
-sortSelect.addEventListener('change', ()=> loadFolders());
-refreshBtn.addEventListener('click', ()=> loadFolders());
+/* ===== Events ===== */
+searchBox.addEventListener('input', () => { renderFolders(); renderFiles(); });
+sortSelect.addEventListener('change', () => loadFolders());
+refreshBtn.addEventListener('click', () => loadFolders());
 
-/* ====== Init ====== */
+/* ===== Init ===== */
 loadFolders();
 </script>
 </body>
