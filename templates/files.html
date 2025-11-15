@@ -19,7 +19,11 @@
             --vj-muted: #6b7280;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
         body {
             font-family: 'Poppins', sans-serif;
@@ -29,87 +33,196 @@
         }
 
         .topbar {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 12px 18px; background: var(--vj-bg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 18px;
+            background: var(--vj-bg);
             border-bottom: 1px solid var(--vj-border);
-            position: sticky; top: 0; z-index: 100;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
-        .brand img { height: 46px; }
 
-        .userbox { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .brand img {
+            height: 46px;
+        }
+
+        .userbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
 
         .btn {
-            display: inline-flex; align-items: center; gap: 6px;
-            padding: 8px 10px; border-radius: 8px;
-            border: 1px solid var(--vj-border); background: #fff;
-            font-size: 14px; text-decoration: none;
-            cursor: pointer; transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid var(--vj-border);
+            background: #fff;
+            color: var(--vj-primary);
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: 0.2s;
         }
-        .btn-primary { background: var(--vj-accent); color: #fff; border-color: var(--vj-accent); }
+
+        .btn:hover {
+            background: #eef4ff;
+        }
+
+        .btn-primary {
+            background: var(--vj-accent);
+            color: #fff;
+            border-color: var(--vj-accent);
+        }
 
         .container {
-            max-width: 1200px; margin: 24px auto;
-            background: var(--vj-bg); border-radius: 14px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, .06); padding: 20px;
+            max-width: 1200px;
+            margin: 24px auto;
+            background: var(--vj-bg);
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .06);
+            padding: 20px;
         }
 
-        .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+        .controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
         .controls input, .controls select {
-            padding: 10px 12px; border-radius: 8px;
-            border: 1px solid var(--vj-border); flex: 1; min-width: 180px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--vj-border);
+            flex: 1;
+            min-width: 180px;
         }
 
         .browser {
-            display: grid; grid-template-columns: 300px 1fr; gap: 16px;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 16px;
         }
 
         .panel {
-            background: var(--vj-card); border: 1px solid var(--vj-border);
-            border-radius: 10px; padding: 12px;
+            background: var(--vj-card);
+            border: 1px solid var(--vj-border);
+            border-radius: 10px;
+            padding: 12px;
+        }
+
+        .panel h3 {
+            font-size: 15px;
+            color: var(--vj-primary);
+            margin-bottom: 8px;
         }
 
         .list {
-            max-height: 55vh; overflow: auto; border-radius: 8px;
-            border: 1px solid var(--vj-border); background: #fff;
+            max-height: 55vh;
+            overflow: auto;
+            border-radius: 8px;
+            border: 1px solid var(--vj-border);
+            background: #fff;
         }
 
         .list-item {
-            padding: 10px 12px; border-bottom: 1px solid var(--vj-border);
-            display: flex; gap: 10px;
-            align-items: center; cursor: pointer;
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--vj-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.2s;
         }
 
-        /* Highlight for selected folders */
-        .selected-folder {
-            background: rgba(11,95,255,0.15) !important;
-            border-left: 4px solid var(--vj-accent);
+        .list-item:hover {
+            background: #f0f6ff;
+        }
+
+        .grid {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .grid th, .grid td {
+            padding: 10px;
+            border-bottom: 1px solid var(--vj-border);
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .grid th {
+            background: #f7f9fe;
+            font-weight: 600;
+            color: var(--vj-primary);
+        }
+
+        .actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .muted {
+            color: var(--vj-muted);
+            font-size: 13px;
         }
 
         /* Preview Modal */
-        #previewModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75);
-            z-index: 1000; align-items: center; justify-content: center; padding: 10px; }
+        #previewModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
 
-        #previewBox { background: #000; border-radius: 10px;
-            width: min(95vw, 900px); position: relative; }
+        #previewBox {
+            background: #000;
+            border-radius: 10px;
+            width: min(95vw, 900px);
+            height: auto;
+            overflow: hidden;
+            position: relative;
+        }
 
-        #previewBox video, #previewBox img, #previewBox iframe {
-            width: 100%; max-height: 85vh; display: none; z-index: 1;
+        #previewBox video,
+        #previewBox img,
+        #previewBox iframe {
+            width: 100%;
+            height: auto;
+            max-height: 85vh;
+            display: none;
+            z-index: 1 !important;
         }
 
         #previewClose {
-            position: absolute; top: 8px; right: 8px;
+            position: absolute;
+            top: 8px;
+            right: 8px;
             background: rgba(255,255,255,0.9);
-            border-radius: 50%; width: 32px; height: 32px;
-            cursor: pointer; z-index: 9999;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            z-index: 9999 !important;
         }
     </style>
 </head>
-
 <body>
-
     <div class="topbar">
         <div class="brand">
-            <img src="{{ url_for('static', filename='images/venus_black_logo.jpg') }}">
+            <img src="{{ url_for('static', filename='images/venus_black_logo.jpg') }}" alt="Venus Jewel">
         </div>
         <div class="userbox">
             <span><i class="fas fa-user-circle"></i> {{ user }}</span>
@@ -120,16 +233,13 @@
 
     <div class="container">
         <div class="controls">
-            <input id="searchBox" type="text" placeholder="Search Packet No..." />
+            <input id="searchBox" type="text" placeholder="Search Packet No or File..." />
             <select id="sortSelect">
-                <option value="newest">Newest</option>
+                <option value="newest">Newest First</option>
                 <option value="name">Name A–Z</option>
             </select>
             <button id="refreshBtn" class="btn"><i class="fas fa-rotate"></i> Refresh</button>
-
-            <button id="downloadFolderBtn" class="btn btn-primary" disabled>
-                <i class="fas fa-download"></i> Download Selected Folders
-            </button>
+            <a id="downloadFolderBtn" class="btn btn-primary" href="#" disabled><i class="fas fa-download"></i> Download Folder</a>
         </div>
 
         <div class="browser">
@@ -137,7 +247,6 @@
                 <h3><i class="fas fa-folder"></i> Packet Folders</h3>
                 <div id="packetList" class="list"></div>
             </div>
-
             <div class="panel">
                 <h3 id="filesTitle"><i class="fas fa-file"></i> Files</h3>
                 <table class="grid">
@@ -155,79 +264,165 @@
         <div id="previewBox">
             <button id="previewClose" onclick="closePreview()">✕</button>
             <video id="previewVideo" controls></video>
-            <img id="previewImage">
+            <img id="previewImage" alt="Preview Image">
             <iframe id="previewFrame"></iframe>
         </div>
     </div>
 
-<script>
-let selectedFolders = [];  // MULTI SELECTION
+    <script>
+        const packetList = document.getElementById('packetList');
+        const filesBody = document.getElementById('filesBody');
+        const filesTitle = document.getElementById('filesTitle');
+        const downloadFolderBtn = document.getElementById('downloadFolderBtn');
+        const searchBox = document.getElementById('searchBox');
+        const sortSelect = document.getElementById('sortSelect');
+        const refreshBtn = document.getElementById('refreshBtn');
 
-function renderFolders() {
-    const q = searchBox.value.toLowerCase();
-    const filtered = allFolders.filter(f => !q || f.name.toLowerCase().includes(q));
+        let currentFolder = null, allFolders = [], currentFiles = [];
 
-    packetList.innerHTML = "";
-
-    if (!filtered.length) {
-        packetList.innerHTML = "<div class='list-item'>No folders</div>";
-        return;
-    }
-
-    filtered.forEach(folder => {
-        const row = document.createElement("div");
-        row.className = "list-item";
-
-        // Highlight if selected
-        if (selectedFolders.includes(folder.id)) {
-            row.classList.add("selected-folder");
+        // Load folders
+        function loadFolders() {
+            packetList.innerHTML = '<div class="list-item">Loading…</div>';
+            fetch(`/api/packet-folders?sort=${sortSelect.value}`)
+                .then(r => r.json())
+                .then(({ folders }) => {
+                    allFolders = folders || [];
+                    renderFolders();
+                })
+                .catch(() => packetList.innerHTML = '<div class="list-item">Failed to load folders</div>');
         }
 
-        row.innerHTML = `
-            <input type="checkbox" class="folderCheck" data-id="${folder.id}" data-name="${folder.name}"
-                ${selectedFolders.includes(folder.id) ? "checked" : ""}>
-            <span><i class="fas fa-folder"></i> ${folder.name}</span>
-            <span class="muted">${new Date(folder.modifiedTime).toLocaleString()}</span>
-        `;
+        // RENDER FOLDERS (UPDATED WITH FIX FOR DOWNLOAD BUTTON)
+        function renderFolders() {
+            const q = searchBox.value.toLowerCase();
+            const filtered = allFolders.filter(f => !q || (f.name || '').toLowerCase().includes(q));
 
-        packetList.appendChild(row);
-    });
+            packetList.innerHTML = '';
 
-    updateDownloadButton();
-}
+            // FIX: reset download button when folder is not selected
+            downloadFolderBtn.setAttribute("disabled", "true");
+            downloadFolderBtn.href = "#";
+            currentFolder = null;
 
-function updateDownloadButton() {
-    if (selectedFolders.length === 0) {
-        downloadFolderBtn.disabled = true;
-    } else {
-        downloadFolderBtn.disabled = false;
-    }
-}
-
-// CHECKBOX HANDLER
-packetList.addEventListener("change", (e) => {
-    if (e.target.classList.contains("folderCheck")) {
-        const id = e.target.dataset.id;
-
-        if (e.target.checked) {
-            selectedFolders.push(id);
-        } else {
-            selectedFolders = selectedFolders.filter(f => f !== id);
+            if (!filtered.length) {
+                packetList.innerHTML = '<div class="list-item">No folders found</div>';
+                return;
+            }
+            filtered.forEach(f => {
+                const row = document.createElement('div');
+                row.className = 'list-item';
+                row.innerHTML = `<span><i class="fas fa-folder"></i> ${f.name}</span> <span class="muted">${new Date(f.modifiedTime).toLocaleString()}</span>`;
+                row.onclick = () => selectFolder(f.id, f.name);
+                packetList.appendChild(row);
+            });
         }
-        renderFolders(); // re-render highlight
-    }
-});
 
-// DOWNLOAD SELECTED FOLDERS
-downloadFolderBtn.onclick = () => {
-    if (selectedFolders.length === 0) return;
+        // When folder is clicked
+        function selectFolder(id, name) {
+            currentFolder = { id, name };
+            filesTitle.textContent = `Files — ${name}`;
 
-    const ids = selectedFolders.join(",");
-    window.location.href = `/download/folders-zip/${ids}`;
-};
+            downloadFolderBtn.removeAttribute('disabled');
+            downloadFolderBtn.href = `/download/folder/${id}`;
 
-// Everything else same (load files, preview, etc.)...
-</script>
+            loadFiles(id);
+        }
 
+        // Load files inside folder
+        function loadFiles(folderId) {
+            filesBody.innerHTML = '<tr><td colspan="4">Loading…</td></tr>';
+            fetch(`/api/folder/${folderId}/files?sort=${sortSelect.value}`)
+                .then(r => r.json())
+                .then(({ files }) => {
+                    currentFiles = files || [];
+                    renderFiles();
+                })
+                .catch(() => filesBody.innerHTML = '<tr><td colspan="4">Failed to load files</td></tr>');
+        }
+
+        function renderFiles() {
+            const q = searchBox.value.toLowerCase();
+            const filtered = currentFiles.filter(f => !q || (f.name || '').toLowerCase().includes(q));
+            filesBody.innerHTML = '';
+
+            if (!filtered.length) {
+                filesBody.innerHTML = '<tr><td colspan="4">No files found</td></tr>';
+                return;
+            }
+
+            filtered.forEach(f => {
+                const tr = document.createElement('tr');
+                const mime = f.mimeType || '';
+                const ext = (f.name.split('.').pop() || '').toLowerCase();
+                const date = f.modifiedTime ? new Date(f.modifiedTime).toLocaleString() : '';
+
+                tr.innerHTML = `
+                    <td>${f.name}</td>
+                    <td>${mime.replace('application/', '')}</td>
+                    <td>${date}</td>
+                    <td class="actions">
+                        <button class="btn" onclick="openPreview('${f.id}', '${mime}', '${ext}')"><i class="fas fa-eye"></i> Preview</button>
+                        <a class="btn" href="/download/file/${f.id}"><i class="fas fa-download"></i> Download</a>
+                        <button class="btn" onclick="shareFile('${f.id}')"><i class="fas fa-share-alt"></i> Share</button>
+                    </td>
+                `;
+                filesBody.appendChild(tr);
+            });
+        }
+
+        const modal = document.getElementById('previewModal');
+        const video = document.getElementById('previewVideo');
+        const img = document.getElementById('previewImage');
+        const frame = document.getElementById('previewFrame');
+
+        function openPreview(id, mime, ext) {
+            video.style.display = img.style.display = frame.style.display = 'none';
+            const url = `/preview/file/${id}`;
+
+            if (mime.startsWith('video/') || ['mp4', 'mov', 'mkv', 'webm', 'hevc'].includes(ext)) {
+                video.src = url;
+                video.style.display = 'block';
+                modal.style.display = 'flex';
+                video.play();
+                return;
+            }
+            if (mime.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
+                img.src = url;
+                img.style.display = 'block';
+                modal.style.display = 'flex';
+                return;
+            }
+            if (mime === 'application/pdf' || ext === 'pdf') {
+                frame.src = url;
+                frame.style.display = 'block';
+                modal.style.display = 'flex';
+                return;
+            }
+
+            alert('Preview not supported for this file.');
+        }
+
+        function closePreview() {
+            modal.style.display = 'none';
+            video.pause();
+            video.src = '';
+            img.src = '';
+            frame.src = '';
+        }
+
+        modal.addEventListener("click", function(e) {
+            if (e.target === modal) closePreview();
+        });
+
+        function shareFile(id) {
+            window.open(`/share.html?id=${id}`, '_blank');
+        }
+
+        searchBox.oninput = () => { renderFolders(); renderFiles(); };
+        sortSelect.onchange = () => { loadFolders(); if (currentFolder) loadFiles(currentFolder.id); };
+        refreshBtn.onclick = () => loadFolders();
+
+        loadFolders();
+    </script>
 </body>
 </html>
