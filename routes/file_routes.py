@@ -1,6 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify, abort, send_file
-import io
-import zipfile
+import io, zipfile, os
 from googleapiclient.http import MediaIoBaseUpload
 from backends.utils_backend import (
     get_or_create_folder, get_unique_filename, mute_video,
@@ -10,143 +9,63 @@ from backends.utils_backend import (
 
 file_bp = Blueprint("file", __name__)
 
-@file_bp.route("/admin-files")
-def admin_files():
-    if not session.get("is_admin"):
-        return redirect(url_for("auth.login"))
-    return render_template("files.html", user=session.get("username"))
-
-@file_bp.route("/files")
-def files_page():
-    if not session.get("username"):
-        return redirect(url_for("auth.login"))
-    return render_template("files.html", user=session.get("username"))
-
-@file_bp.route("/api/packet-folders")
-def packet_folders_api():
-    if not session.get("username"):
-        return jsonify({"error": "Unauthorized"}), 401
-    try:
-        folders = list_packet_folders()
-        return jsonify({"folders": folders})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@file_bp.route("/api/folder/<folder_id>/files")
-def folder_files_api(folder_id):
-    if not session.get("username"):
-        return jsonify({"error": "Unauthorized"}), 401
-    try:
-        files = list_files_in_folder(folder_id)
-        return jsonify({"files": files})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@file_bp.route("/upload", methods=["POST"])
-def upload():
-    try:
-        packet_no = request.form.get("packetNo", "").strip()
-        if not packet_no:
-            return jsonify({"success": False, "message": "Packet number is required."}), 400
-        folder_id = get_or_create_folder(packet_no)
-        
-        for key in request.files:
-            subpoint = key.replace("file_", "")
-            for file in request.files.getlist(key):
-                if file and file.filename:
-                    ext = file.filename.rsplit(".", 1)[-1] if "." in file.filename else ""
-                    base_filename = f"{subpoint}.{ext}" if ext else subpoint
-                    final_filename = get_unique_filename(base_filename, folder_id)
-                    
-                    if final_filename.lower().endswith((".mp4", ".mov", ".avi", ".mkv", ".webm")):
-                        file_stream = mute_video(file, final_filename)
-                        mimetype = "video/mp4"
-                        media = MediaIoBaseUpload(file_stream, mimetype=mimetype)
-                    else:
-                        file_stream = io.BytesIO(file.read())
-                        mimetype = file.mimetype or "application/octet-stream"
-                        file_stream.seek(0)
-                        media = MediaIoBaseUpload(file_stream, mimetype=mimetype)
-
-                    upload_media_to_drive(final_filename, folder_id, media)
-        return jsonify({"success": True, "message": "✅ All files uploaded and stored successfully."})
-    except Exception as e:
-        return jsonify({"success": False, "message": f"Upload failed: {e}"}), 500
-
-@file_bp.route("/download/file/<file_id>")
-def download_file_route(file_id):
-    if not session.get("username"):
-        return abort(401)
-    name, mime, fh = download_file_to_bytes(file_id)
-    return send_file(fh, mimetype=mime, as_attachment=True, download_name=name)
-
-@file_bp.route("/preview/file/<file_id>")
-def preview_file(file_id):
-    t = request.args.get("t")
-    s = request.args.get("s")
-    if t and s:
-        if not verify_secure_link(file_id, t, s):
-            return abort(403)
-    elif not session.get("username"):
-        return abort(401)
-    name, mime, fh = download_file_to_bytes(file_id)
-    return send_file(fh, mimetype=mime, as_attachment=False, download_name=name)
-
-@file_bp.route("/share.html")
-def share_file_page():
-    file_id = request.args.get("id")
-    if not file_id:
-        return "File ID not provided", 400
-    return render_template("share.html", file_id=file_id)
-
-@file_bp.route("/api/share-link")
-def api_share_link():
-    file_id = request.args.get("id")
-    if not file_id:
-        return jsonify({"error": "missing id"}), 400
-    link = generate_secure_link(file_id)
-    full_url = request.url_root.rstrip("/") + link
-    return jsonify({"link": full_url})
-
-@file_bp.route("/venus-upload")
-def venus_upload_dashboard():
-    if not session.get("venus_user"):
-        return redirect(url_for("auth.login"))
-    return render_template("Venus_Upload.html", user=session.get("username", ""))
-
-# ---------------------
-# FOLDER ZIP DOWNLOAD
-# ---------------------
-@file_bp.route("/download/folder/<folder_id>")
-def download_folder_zip(folder_id):
+# --------------------------
+# MULTIPLE FOLDER ZIP EXPORT
+# --------------------------
+@file_bp.route("/download/folders-zip/<folder_ids>")
+def download_multiple_folders(folder_ids):
     if not session.get("username"):
         return abort(401)
 
-    try:
-        files = list_files_in_folder(folder_id)
-        if not files:
-            return abort(404)
+    folder_list = folder_ids.split(",")
+    if not folder_list:
+        return abort(400)
 
-        zip_buffer = io.BytesIO()
+    zip_buffer = io.BytesIO()
 
-        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
+    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
+
+        for folder_id in folder_list:
+            # get folder name
+            try:
+                # fetch folder metadata
+                from backends.utils_backend import _drive_service
+                meta = _drive_service.files().get(
+                    fileId=folder_id,
+                    fields="name",
+                    supportsAllDrives=True
+                ).execute()
+                folder_name = meta.get("name", folder_id)
+            except:
+                folder_name = folder_id
+
+            # get files inside folder
+            files = list_files_in_folder(folder_id)
+
+            # add each file inside folder subdirectory
             for f in files:
                 try:
                     name, mime, fh = download_file_to_bytes(f["id"])
                     fh.seek(0)
-                    zipf.writestr(name, fh.read())
+
+                    zip_path = f"{folder_name}/{name}"
+                    zipf.writestr(zip_path, fh.read())
+
                 except Exception as e:
-                    print("ZIP skip file:", e)
+                    print("Error adding file:", e)
                     continue
 
-        zip_buffer.seek(0)
-        return send_file(
-            zip_buffer,
-            mimetype="application/zip",
-            as_attachment=True,
-            download_name="Packet_Folder.zip"
-        )
+    zip_buffer.seek(0)
 
-    except Exception as e:
-        print("ZIP ERROR:", e)
-        return abort(500)
+    # ZIP name: one = PacketNo.zip, many = Selected_Folders.zip
+    if len(folder_list) == 1:
+        zipname = f"{folder_name}.zip"
+    else:
+        zipname = "Selected_Folders.zip"
+
+    return send_file(
+        zip_buffer,
+        mimetype="application/zip",
+        as_attachment=True,
+        download_name=zipname
+    )
