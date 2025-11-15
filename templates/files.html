@@ -29,7 +29,6 @@
             color: var(--vj-primary);
         }
 
-        /* TOPBAR */
         .topbar {
             background: var(--vj-bg);
             padding: 10px 18px;
@@ -42,195 +41,104 @@
 
         .topbar img { height: 42px; }
 
-        .top-right {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            white-space: nowrap;
-        }
+        .top-right { display:flex; align-items:center; gap:10px; }
 
         .top-btn {
-            padding: 6px 12px;
-            border: 1px solid var(--vj-border);
-            background: #fff; border-radius: 8px;
-            font-size: 13px; cursor:pointer;
-            display:flex; align-items:center; gap:6px;
+            padding: 6px 12px; border:1px solid var(--vj-border); background:#fff; border-radius:8px;
+            font-size:13px; cursor:pointer; display:flex; align-items:center; gap:6px;
         }
         .top-btn:hover { background: var(--vj-hover); }
 
-        /* MOBILE TOPBAR FIX */
         @media(max-width:600px){
             .topbar { padding: 6px 10px; gap: 6px; flex-wrap: wrap; }
             .topbar img { height: 32px; }
             .top-right span { display:none; }
-            .top-btn { font-size: 11px; padding: 4px 8px; }
+            .top-btn { font-size:11px; padding:4px 8px; }
         }
 
-        /* MAIN */
         .container {
-            max-width: 1280px;
-            margin: 18px auto;
-            padding: 14px;
-            background: var(--vj-bg);
-            border-radius: 14px;
-            box-shadow: var(--vj-shadow);
+            max-width: 1280px; margin: 18px auto; padding: 14px;
+            background: var(--vj-bg); border-radius: 14px; box-shadow: var(--vj-shadow);
         }
 
-        /* CONTROLS */
-        .controls {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 14px;
-        }
+        .controls { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:14px; align-items:center; }
+        .controls input, .controls select { padding:10px; border-radius:8px; border:1px solid var(--vj-border); font-size:14px; }
 
-        .controls input,
-        .controls select {
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid var(--vj-border);
-            font-size: 14px;
-        }
-
-        .btn {
-            padding: 8px 12px;
-            border: 1px solid var(--vj-border);
-            background: #fff;
-            border-radius: 8px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            transition: .2s;
-            font-size: 14px;
-        }
-
-        .btn-primary {
-            background: var(--vj-accent);
-            color: #fff;
-            border-color: var(--vj-accent);
-        }
+        .btn { padding:8px 12px; border:1px solid var(--vj-border); background:#fff; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:.15s; }
+        .btn-primary { background:var(--vj-accent); color:#fff; border-color:var(--vj-accent); }
 
         @media(max-width:600px){
-            .controls { flex-direction: column; }
-            .controls input, .controls select,
-            .controls .btn-primary { width: 100%; }
+            .controls { flex-direction:column; align-items:stretch; }
+            .controls input, .controls select, .controls .btn { width:100%; }
         }
 
-        /* LAYOUT */
-        .browser {
-            display: grid;
-            grid-template-columns: 320px 1fr;
-            gap: 16px;
-        }
-        @media(max-width:900px){
-            .browser { grid-template-columns: 1fr; }
-        }
+        .browser { display:grid; grid-template-columns:320px 1fr; gap:16px; }
+        @media(max-width:900px){ .browser { grid-template-columns:1fr; } }
 
-        .panel {
-            background: #fff;
-            border: 1px solid var(--vj-border);
-            border-radius: 12px;
-            padding: 14px;
-            box-shadow: var(--vj-shadow);
-        }
+        .panel { background:#fff; border:1px solid var(--vj-border); border-radius:12px; padding:14px; box-shadow:var(--vj-shadow); }
 
-        /* FOLDER LIST */
-        .list {
-            max-height: 60vh;
-            overflow-y: auto;
-            border-radius: 10px;
-            border: 1px solid var(--vj-border);
-        }
-
-        .list-item {
-            padding: 10px;
-            display:flex; gap:12px; align-items:center;
-            border-bottom:1px solid var(--vj-border);
-            cursor:pointer;
-        }
-
-        .list-item:hover { background: var(--vj-hover); }
-        .selected-folder { background: rgba(11,95,255,0.18)!important; }
-
+        .list { max-height:60vh; overflow-y:auto; border-radius:10px; border:1px solid var(--vj-border); }
+        .list-item { padding:10px; display:flex; gap:12px; align-items:center; border-bottom:1px solid var(--vj-border); cursor:pointer; }
+        .list-item:hover { background:var(--vj-hover); }
+        .selected-folder { background: rgba(11,95,255,0.18) !important; }
         .muted { margin-left:auto; color:var(--vj-muted); font-size:12px; }
 
-        /* FILE TABLE */
         table { width:100%; border-collapse:collapse; }
-        th,td { padding:10px; border-bottom:1px solid var(--vj-border); }
+        th, td { padding:10px; border-bottom:1px solid var(--vj-border); text-align:left; vertical-align:middle; }
         th { background:#f8faff; font-weight:600; }
 
-        /* MOBILE FILE CARD */
         @media(max-width:600px){
             table, thead, tbody, th, td, tr { display:block; }
-            tr {
-                margin-bottom:12px; padding:10px;
-                background:#fff; border-radius:10px;
-                box-shadow:var(--vj-shadow);
-            }
-            td { border:none; }
-            td:nth-child(1){ font-weight:600; margin-bottom:6px; }
-            td:nth-child(4){ display:flex; gap:6px; margin-top:6px; }
+            tr { margin-bottom:12px; padding:10px; background:#fff; border-radius:10px; box-shadow:var(--vj-shadow); }
+            td { border:none; display:flex; justify-content:space-between; gap:8px; align-items:center; }
+            td:nth-child(1){ font-weight:600; }
+            td:nth-child(4){ display:flex; gap:8px; }
         }
 
-        /* PREVIEW MODAL */
-        #previewModal {
-            display:none; position:fixed; inset:0;
-            background:rgba(0,0,0,.75);
-            z-index:2000; align-items:center; justify-content:center;
-        }
-        #previewBox {
-            width:min(95vw,900px);
-            background:#000; border-radius:10px;
-            padding:10px; position:relative;
-        }
-        #previewClose {
-            position:absolute; right:10px; top:10px;
-            background:#fff; border:none;
-            border-radius:50%; width:36px;height:36px;
-            cursor:pointer;
-        }
-        #previewBox video,
-        #previewBox img,
-        #previewBox iframe {
-            display:none; width:100%; max-height:85vh;
-        }
+        /* Loader */
+        #loader, #fileLoader { display:none; margin:12px auto; width:36px; height:36px; border:4px solid #cfd5e1; border-top-color:#0B5FFF; border-radius:50%; animation:spin .75s linear infinite; }
+        @keyframes spin { to{ transform:rotate(360deg);} }
+
+        /* Preview modal */
+        #previewModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:2000; align-items:center; justify-content:center; }
+        #previewBox { width:min(95vw,900px); background:#000; border-radius:10px; padding:10px; position:relative; }
+        #previewClose { position:absolute; right:10px; top:10px; background:#fff; border:none; border-radius:50%; width:36px; height:36px; cursor:pointer; }
+        #previewBox video,#previewBox img,#previewBox iframe{display:none;width:100%;max-height:85vh;}
+
+        /* Share modal (for folder share) */
+        #shareModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:3000; align-items:center; justify-content:center; }
+        #shareBox { width:min(680px,95vw); background:#fff; border-radius:10px; padding:18px; box-shadow:var(--vj-shadow); }
+        .share-link { word-break:break-all; background:#f7f9fe; padding:10px; border-radius:8px; border:1px solid var(--vj-border); margin-bottom:10px; }
     </style>
 </head>
-
 <body>
 
-<!-- TOPBAR -->
 <div class="topbar">
     <img src="{{ url_for('static', filename='images/venus_black_logo.jpg') }}">
-
     <div class="top-right">
         <span><i class="fas fa-user-circle"></i> {{ user }}</span>
-
-        <a class="top-btn" href="/dashboard">
-            <i class="fas fa-arrow-left"></i> Dashboard
-        </a>
-
-        <a class="top-btn" href="/logout">
-            <i class="fas fa-sign-out-alt"></i> Logout
-        </a>
+        <a class="top-btn" href="/dashboard"><i class="fas fa-arrow-left"></i> Dashboard</a>
+        <a class="top-btn" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
     </div>
 </div>
 
-<!-- MAIN -->
 <div class="container">
 
-    <!-- CONTROLS -->
     <div class="controls">
         <input id="searchBox" placeholder="Search Packet No or File...">
         <select id="sortSelect">
-            <option value="newest">Newest</option>
+            <option value="newest">Newest First</option>
             <option value="name">Name A–Z</option>
         </select>
 
-        <!-- ONLY ONE BUTTON -->
+        <button id="refreshBtn" class="btn"><i class="fa fa-rotate"></i> Refresh</button>
+
         <button id="downloadSelectedBtn" class="btn btn-primary" disabled>
             <i class="fa fa-download"></i> Download Selected (<span id="selectedCount">0</span>)
+        </button>
+
+        <button id="shareSelectedBtn" class="btn" disabled>
+            <i class="fa fa-share-alt"></i> Share Selected
         </button>
     </div>
 
@@ -238,31 +146,23 @@
 
     <div class="browser">
 
-        <!-- LEFT PANEL -->
         <div class="panel">
             <h3><i class="fa fa-folder"></i> Packet Folders</h3>
 
             <label style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
-                <input type="checkbox" id="selectAll">
-                <strong>Select All</strong>
+                <input type="checkbox" id="selectAll"> <strong>Select All</strong>
             </label>
 
             <div class="list" id="packetList"></div>
         </div>
 
-        <!-- RIGHT PANEL -->
         <div class="panel">
             <h3 id="filesTitle"><i class="fa fa-file"></i> Files</h3>
             <div id="fileLoader"></div>
 
             <table>
                 <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Type</th>
-                        <th>Modified</th>
-                        <th>Action</th>
-                    </tr>
+                    <tr><th>Name</th><th>Type</th><th>Modified</th><th>Action</th></tr>
                 </thead>
                 <tbody id="filesBody"></tbody>
             </table>
@@ -271,7 +171,7 @@
     </div>
 </div>
 
-<!-- PREVIEW MODAL -->
+<!-- Preview modal -->
 <div id="previewModal">
     <div id="previewBox">
         <button id="previewClose">✕</button>
@@ -281,179 +181,246 @@
     </div>
 </div>
 
+<!-- Share modal (for folder share link) -->
+<div id="shareModal">
+    <div id="shareBox">
+        <h3>Share Selected Folders</h3>
+        <div class="share-link" id="shareLink">Generating link…</div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;">
+            <button id="copyShareLink" class="btn">Copy Link</button>
+            <button id="openShareLink" class="btn btn-primary">Open Link</button>
+            <button id="closeShareModal" class="btn">Close</button>
+        </div>
+    </div>
+</div>
+
 <script>
-/* EXACT OLD JS LOGIC — NOTHING CHANGED */
+/* ====== Variables ====== */
 let allFolders = [];
 let selectedFolders = [];
 let currentFolder = null;
 let currentFiles = [];
 
-const packetList=document.getElementById("packetList");
-const filesBody=document.getElementById("filesBody");
-const filesTitle=document.getElementById("filesTitle");
-const searchBox=document.getElementById("searchBox");
-const sortSelect=document.getElementById("sortSelect");
-const selectAll=document.getElementById("selectAll");
-const downloadBtn=document.getElementById("downloadSelectedBtn");
-const selectedCount=document.getElementById("selectedCount");
-const loader=document.getElementById("loader");
-const fileLoader=document.getElementById("fileLoader");
+const packetList = document.getElementById('packetList');
+const filesBody = document.getElementById('filesBody');
+const filesTitle = document.getElementById('filesTitle');
+const searchBox = document.getElementById('searchBox');
+const sortSelect = document.getElementById('sortSelect');
+const refreshBtn = document.getElementById('refreshBtn');
+const selectAll = document.getElementById('selectAll');
+const downloadBtn = document.getElementById('downloadSelectedBtn');
+const shareBtn = document.getElementById('shareSelectedBtn');
+const selectedCount = document.getElementById('selectedCount');
+const loader = document.getElementById('loader');
+const fileLoader = document.getElementById('fileLoader');
 
-const previewModal=document.getElementById("previewModal");
-const previewVideo=document.getElementById("previewVideo");
-const previewImage=document.getElementById("previewImage");
-const previewFrame=document.getElementById("previewFrame");
-const previewClose=document.getElementById("previewClose");
+const previewModal = document.getElementById('previewModal');
+const previewVideo = document.getElementById('previewVideo');
+const previewImage = document.getElementById('previewImage');
+const previewFrame = document.getElementById('previewFrame');
+const previewClose = document.getElementById('previewClose');
 
-/* LOAD FOLDERS */
+const shareModal = document.getElementById('shareModal');
+const shareLinkDiv = document.getElementById('shareLink');
+const copyShareLinkBtn = document.getElementById('copyShareLink');
+const openShareLinkBtn = document.getElementById('openShareLink');
+const closeShareModalBtn = document.getElementById('closeShareModal');
+
+let latestShareUrl = "";
+
+/* ====== Load folders ====== */
 function loadFolders(){
-    loader.style.display="block";
+    loader.style.display = "block";
+    packetList.innerHTML = "<div class='list-item'>Loading…</div>";
     fetch(`/api/packet-folders?sort=${sortSelect.value}`)
         .then(r=>r.json())
-        .then(d=>{allFolders=d.folders||[];renderFolders();})
-        .finally(()=>loader.style.display="none");
+        .then(data => { allFolders = data.folders || []; renderFolders(); })
+        .catch(()=> packetList.innerHTML = "<div class='list-item'>Failed to load</div>")
+        .finally(()=> loader.style.display = "none");
 }
 
-/* RENDER FOLDERS */
+/* ====== Render folders with checkboxes ====== */
 function renderFolders(){
-    const q=searchBox.value.toLowerCase();
-    const filtered=allFolders.filter(f=>f.name.toLowerCase().includes(q));
-    packetList.innerHTML="";
+    const q = (searchBox.value || "").toLowerCase();
+    const filtered = allFolders.filter(f => (f.name||"").toLowerCase().includes(q));
+    packetList.innerHTML = "";
+    if(!filtered.length){ packetList.innerHTML = "<div class='list-item'>No folders</div>"; updateActionButtons(); return; }
 
     filtered.forEach(f=>{
-        const row=document.createElement("div");
-        row.className="list-item"+(selectedFolders.includes(f.id)?" selected-folder":"");
-
-        row.innerHTML=`
-            <input type="checkbox" class="folderChk" data-id="${f.id}" ${selectedFolders.includes(f.id)?"checked":""}>
+        const row = document.createElement('div');
+        row.className = "list-item" + (selectedFolders.includes(f.id) ? " selected-folder" : "");
+        row.innerHTML = `
+            <input type="checkbox" class="folderChk" data-id="${f.id}" ${selectedFolders.includes(f.id) ? "checked": ""}>
             <span style="flex:1"><i class="fa fa-folder"></i> ${f.name}</span>
             <span class="muted">${new Date(f.modifiedTime).toLocaleString()}</span>
         `;
-
-        row.onclick=(e)=>{
-            if(!e.target.classList.contains("folderChk")){
-                currentFolder=f;
-                filesTitle.textContent=`Files — ${f.name}`;
+        row.addEventListener('click', (e)=>{
+            if(!e.target.classList.contains('folderChk')){
+                currentFolder = f;
+                filesTitle.textContent = 'Files — ' + f.name;
                 loadFiles(f.id);
             }
-        };
-
+        });
         packetList.appendChild(row);
     });
 
-    updateDownloadButton();
+    updateActionButtons();
 }
 
-/* FOLDER SELECT HANDLER */
-packetList.addEventListener("change",(e)=>{
-    if(!e.target.classList.contains("folderChk"))return;
-    const id=e.target.dataset.id;
+/* ====== Folder checkbox handler ====== */
+packetList.addEventListener('change', (e)=>{
+    if(!e.target.classList.contains('folderChk')) return;
+    const id = e.target.dataset.id;
     if(e.target.checked){
         if(!selectedFolders.includes(id)) selectedFolders.push(id);
-    }else{
-        selectedFolders=selectedFolders.filter(x=>x!==id);
-        selectAll.checked=false;
+    } else {
+        selectedFolders = selectedFolders.filter(x=>x!==id);
+        selectAll.checked = false;
     }
     renderFolders();
 });
 
-/* SELECT ALL */
-selectAll.onclick=()=>{
+/* ====== Select all ====== */
+selectAll.addEventListener('change', ()=>{
     if(selectAll.checked){
-        selectedFolders=allFolders.map(f=>f.id);
-    }else selectedFolders=[];
+        selectedFolders = allFolders.map(f=>f.id);
+    } else {
+        selectedFolders = [];
+    }
     renderFolders();
-};
+});
 
-/* LOAD FILES */
-function loadFiles(folderId){
-    fileLoader.style.display="block";
-    fetch(`/api/folder/${folderId}/files`)
-        .then(r=>r.json())
-        .then(data=>{currentFiles=data.files||[];renderFiles();})
-        .finally(()=>fileLoader.style.display="none");
+/* ====== Update action buttons ====== */
+function updateActionButtons(){
+    selectedCount.textContent = selectedFolders.length;
+    downloadBtn.disabled = selectedFolders.length === 0;
+    shareBtn.disabled = selectedFolders.length === 0;
 }
 
-/* RENDER FILES */
-function renderFiles(){
-    const q=searchBox.value.toLowerCase();
-    const filtered=currentFiles.filter(f=>f.name.toLowerCase().includes(q));
+/* ====== Load files inside a folder ====== */
+function loadFiles(folderId){
+    fileLoader.style.display = "block";
+    filesBody.innerHTML = "<tr><td colspan='4'>Loading…</td></tr>";
+    fetch(`/api/folder/${folderId}/files`)
+        .then(r=>r.json())
+        .then(data => { currentFiles = data.files || []; renderFiles(); })
+        .catch(()=> filesBody.innerHTML = "<tr><td colspan='4'>Failed to load files</td></tr>")
+        .finally(()=> fileLoader.style.display = "none");
+}
 
-    filesBody.innerHTML="";
+/* ====== Render files table ====== */
+function renderFiles(){
+    const q = (searchBox.value || "").toLowerCase();
+    const filtered = (currentFiles || []).filter(f => (f.name||"").toLowerCase().includes(q));
+    filesBody.innerHTML = "";
+    if(!filtered.length){ filesBody.innerHTML = "<tr><td colspan='4'>No files found</td></tr>"; return; }
 
     filtered.forEach(f=>{
-        const mime=f.mimeType||"";
-        const ext=f.name.split(".").pop();
-
-        filesBody.innerHTML+=`
-            <tr>
-                <td>${f.name}</td>
-                <td>${mime.replace("application/","")}</td>
-                <td>${new Date(f.modifiedTime).toLocaleString()}</td>
-                <td>
-                    <button class="btn" onclick="openPreview('${f.id}','${mime}','${ext}')">
-                        <i class="fa fa-eye"></i>
-                    </button>
-                    <a class="btn" href="/download/file/${f.id}">
-                        <i class="fa fa-download"></i>
-                    </a>
-                </td>
-            </tr>
+        const mime = f.mimeType || "";
+        const ext = (f.name || "").split('.').pop().toLowerCase();
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${f.name}</td>
+            <td>${mime.replace('application/','')}</td>
+            <td>${f.modifiedTime ? new Date(f.modifiedTime).toLocaleString() : ''}</td>
+            <td>
+                <button class="btn" onclick="openPreview('${f.id}','${mime}','${ext}')"><i class="fa fa-eye"></i></button>
+                <a class="btn" href="/download/file/${f.id}" title="Download"><i class="fa fa-download"></i></a>
+                <button class="btn" onclick="shareFile('${f.id}')" title="Share"><i class="fa fa-share-alt"></i></button>
+            </td>
         `;
+        filesBody.appendChild(tr);
     });
 }
 
-/* UPDATE BUTTON */
-function updateDownloadButton(){
-    selectedCount.textContent=selectedFolders.length;
-    downloadBtn.disabled=selectedFolders.length===0;
+/* ====== File-level share (unchanged) ====== */
+function shareFile(id){
+    // opens existing share page for single file (your old behavior)
+    window.open(`/share.html?id=${id}`, '_blank');
 }
 
-/* DOWNLOAD SELECTED */
-downloadBtn.onclick=()=>{
-    if(!selectedFolders.length)return;
-    window.location.href=`/download/folders-zip/${selectedFolders.join(",")}`;
-};
+/* ====== Download selected folders (existing) ====== */
+downloadBtn.addEventListener('click', ()=>{
+    if(!selectedFolders.length) return;
+    window.location.href = `/download/folders-zip/${selectedFolders.join(',')}`;
+});
 
-/* PREVIEW */
+/* ====== Share selected folders (NEW) ====== */
+shareBtn.addEventListener('click', async ()=>{
+    if(!selectedFolders.length) return;
+    shareLinkDiv.textContent = "Generating link…";
+    shareModal.style.display = "flex";
+    try {
+        const ids = selectedFolders.join(',');
+        const resp = await fetch(`/api/share-folders?ids=${encodeURIComponent(ids)}`);
+        if(!resp.ok) throw new Error('Share link generation failed');
+        const data = await resp.json();
+        latestShareUrl = data.link;
+        shareLinkDiv.textContent = latestShareUrl;
+    } catch (err) {
+        shareLinkDiv.textContent = "Failed to generate link.";
+        console.error(err);
+    }
+});
+
+/* ====== Share modal actions ====== */
+copyShareLinkBtn.addEventListener('click', ()=>{
+    if(!latestShareUrl) return;
+    navigator.clipboard.writeText(latestShareUrl).then(()=>{
+        copyShareLinkBtn.textContent = "Copied!";
+        setTimeout(()=> copyShareLinkBtn.textContent = "Copy Link", 1500);
+    }).catch(()=> alert("Copy failed"));
+});
+
+openShareLinkBtn.addEventListener('click', ()=>{
+    if(!latestShareUrl) return;
+    window.open(latestShareUrl, '_blank');
+});
+
+closeShareModalBtn.addEventListener('click', ()=>{
+    shareModal.style.display = "none";
+    latestShareUrl = "";
+    shareLinkDiv.textContent = "";
+});
+
+/* ====== Preview modal ====== */
 function openPreview(id,mime,ext){
-    previewVideo.style.display=previewImage.style.display=previewFrame.style.display="none";
-    const url=`/preview/file/${id}`;
-
-    if(mime.startsWith("video/")){
-        previewVideo.src=url;
-        previewVideo.style.display="block";
-        previewVideo.play();
-    }else if(mime.startsWith("image/")){
-        previewImage.src=url;
-        previewImage.style.display="block";
-    }else if(ext==="pdf"){
-        previewFrame.src=url;
-        previewFrame.style.display="block";
-    }else{
-        window.open(url,"_blank");
+    previewVideo.style.display = previewImage.style.display = previewFrame.style.display = 'none';
+    const url = `/preview/file/${id}`;
+    if(mime.startsWith('video/') || ['mp4','mov','mkv','webm','avi'].includes(ext)){
+        previewVideo.src = url;
+        previewVideo.style.display = 'block';
+        previewVideo.play().catch(()=>{});
+    } else if(mime.startsWith('image/')|| ['jpg','jpeg','png','gif','webp'].includes(ext)){
+        previewImage.src = url;
+        previewImage.style.display = 'block';
+    } else if(ext === 'pdf' || mime === 'application/pdf'){
+        previewFrame.src = url;
+        previewFrame.style.display = 'block';
+    } else {
+        window.open(url,'_blank');
         return;
     }
-    previewModal.style.display="flex";
+    previewModal.style.display = 'flex';
 }
-
-previewClose.onclick=closePreview;
-previewModal.onclick=e=>{if(e.target===previewModal)closePreview();}
-document.onkeydown=e=>{if(e.key==="Escape")closePreview();}
 
 function closePreview(){
-    previewModal.style.display="none";
-    previewVideo.pause(); previewVideo.src="";
-    previewImage.src=""; previewFrame.src="";
+    previewModal.style.display = 'none';
+    previewVideo.pause(); previewVideo.src = '';
+    previewImage.src = ''; previewFrame.src = '';
 }
 
-/* SEARCH + SORT */
-searchBox.oninput=()=>{renderFolders();renderFiles();};
-sortSelect.onchange=()=>loadFolders();
+previewClose.addEventListener('click', closePreview);
+previewModal.addEventListener('click', (e)=>{ if(e.target === previewModal) closePreview(); });
+document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closePreview(); });
 
-/* INIT */
+/* ====== Misc events ====== */
+searchBox.addEventListener('input', ()=>{ renderFolders(); renderFiles(); });
+sortSelect.addEventListener('change', ()=> loadFolders());
+refreshBtn.addEventListener('click', ()=> loadFolders());
+
+/* ====== Init ====== */
 loadFolders();
 </script>
-
 </body>
 </html>
