@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify, abort, send_file
 import io
+import zipfile
 from googleapiclient.http import MediaIoBaseUpload
 from backends.utils_backend import (
     get_or_create_folder, get_unique_filename, mute_video,
@@ -9,21 +10,18 @@ from backends.utils_backend import (
 
 file_bp = Blueprint("file", __name__)
 
-# Admin-facing files page alias expected by templates
 @file_bp.route("/admin-files")
 def admin_files():
     if not session.get("is_admin"):
         return redirect(url_for("auth.login"))
     return render_template("files.html", user=session.get("username"))
 
-# Files page for regular users
 @file_bp.route("/files")
 def files_page():
     if not session.get("username"):
         return redirect(url_for("auth.login"))
     return render_template("files.html", user=session.get("username"))
 
-# API: packet folders
 @file_bp.route("/api/packet-folders")
 def packet_folders_api():
     if not session.get("username"):
@@ -34,7 +32,6 @@ def packet_folders_api():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# API: files in folder
 @file_bp.route("/api/folder/<folder_id>/files")
 def folder_files_api(folder_id):
     if not session.get("username"):
@@ -45,7 +42,6 @@ def folder_files_api(folder_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Upload handler
 @file_bp.route("/upload", methods=["POST"])
 def upload():
     try:
@@ -77,7 +73,6 @@ def upload():
     except Exception as e:
         return jsonify({"success": False, "message": f"Upload failed: {e}"}), 500
 
-# Download
 @file_bp.route("/download/file/<file_id>")
 def download_file_route(file_id):
     if not session.get("username"):
@@ -85,7 +80,6 @@ def download_file_route(file_id):
     name, mime, fh = download_file_to_bytes(file_id)
     return send_file(fh, mimetype=mime, as_attachment=True, download_name=name)
 
-# Preview (secure link support)
 @file_bp.route("/preview/file/<file_id>")
 def preview_file(file_id):
     t = request.args.get("t")
@@ -98,7 +92,6 @@ def preview_file(file_id):
     name, mime, fh = download_file_to_bytes(file_id)
     return send_file(fh, mimetype=mime, as_attachment=False, download_name=name)
 
-# Share page
 @file_bp.route("/share.html")
 def share_file_page():
     file_id = request.args.get("id")
@@ -106,7 +99,6 @@ def share_file_page():
         return "File ID not provided", 400
     return render_template("share.html", file_id=file_id)
 
-# Share link API
 @file_bp.route("/api/share-link")
 def api_share_link():
     file_id = request.args.get("id")
@@ -116,9 +108,45 @@ def api_share_link():
     full_url = request.url_root.rstrip("/") + link
     return jsonify({"link": full_url})
 
-# Venus upload dashboard
 @file_bp.route("/venus-upload")
 def venus_upload_dashboard():
     if not session.get("venus_user"):
         return redirect(url_for("auth.login"))
     return render_template("Venus_Upload.html", user=session.get("username", ""))
+
+# ---------------------
+# FOLDER ZIP DOWNLOAD
+# ---------------------
+@file_bp.route("/download/folder/<folder_id>")
+def download_folder_zip(folder_id):
+    if not session.get("username"):
+        return abort(401)
+
+    try:
+        files = list_files_in_folder(folder_id)
+        if not files:
+            return abort(404)
+
+        zip_buffer = io.BytesIO()
+
+        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
+            for f in files:
+                try:
+                    name, mime, fh = download_file_to_bytes(f["id"])
+                    fh.seek(0)
+                    zipf.writestr(name, fh.read())
+                except Exception as e:
+                    print("ZIP skip file:", e)
+                    continue
+
+        zip_buffer.seek(0)
+        return send_file(
+            zip_buffer,
+            mimetype="application/zip",
+            as_attachment=True,
+            download_name="Packet_Folder.zip"
+        )
+
+    except Exception as e:
+        print("ZIP ERROR:", e)
+        return abort(500)
