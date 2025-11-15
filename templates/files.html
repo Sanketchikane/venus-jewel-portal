@@ -202,7 +202,7 @@
             height: auto;
             max-height: 85vh;
             display: none;
-            z-index: 1 !important; /* FIX */
+            z-index: 1 !important;
         }
 
         #previewClose {
@@ -215,27 +215,7 @@
             width: 32px;
             height: 32px;
             cursor: pointer;
-            z-index: 9999 !important; /* FIX */
-        }
-
-        @media (max-width: 900px) {
-            .browser {
-                grid-template-columns: 1fr;
-            }
-
-            .list {
-                max-height: 35vh;
-            }
-
-            .btn {
-                font-size: 13px;
-                padding: 6px 8px;
-            }
-
-            .topbar {
-                flex-wrap: wrap;
-                gap: 8px;
-            }
+            z-index: 9999 !important;
         }
     </style>
 </head>
@@ -297,8 +277,10 @@
         const searchBox = document.getElementById('searchBox');
         const sortSelect = document.getElementById('sortSelect');
         const refreshBtn = document.getElementById('refreshBtn');
+
         let currentFolder = null, allFolders = [], currentFiles = [];
 
+        // Load folders
         function loadFolders() {
             packetList.innerHTML = '<div class="list-item">Loading…</div>';
             fetch(`/api/packet-folders?sort=${sortSelect.value}`)
@@ -310,10 +292,18 @@
                 .catch(() => packetList.innerHTML = '<div class="list-item">Failed to load folders</div>');
         }
 
+        // RENDER FOLDERS (UPDATED WITH FIX FOR DOWNLOAD BUTTON)
         function renderFolders() {
             const q = searchBox.value.toLowerCase();
             const filtered = allFolders.filter(f => !q || (f.name || '').toLowerCase().includes(q));
+
             packetList.innerHTML = '';
+
+            // FIX: reset download button when folder is not selected
+            downloadFolderBtn.setAttribute("disabled", "true");
+            downloadFolderBtn.href = "#";
+            currentFolder = null;
+
             if (!filtered.length) {
                 packetList.innerHTML = '<div class="list-item">No folders found</div>';
                 return;
@@ -327,14 +317,18 @@
             });
         }
 
+        // When folder is clicked
         function selectFolder(id, name) {
             currentFolder = { id, name };
             filesTitle.textContent = `Files — ${name}`;
+
             downloadFolderBtn.removeAttribute('disabled');
             downloadFolderBtn.href = `/download/folder/${id}`;
+
             loadFiles(id);
         }
 
+        // Load files inside folder
         function loadFiles(folderId) {
             filesBody.innerHTML = '<tr><td colspan="4">Loading…</td></tr>';
             fetch(`/api/folder/${folderId}/files?sort=${sortSelect.value}`)
@@ -350,15 +344,18 @@
             const q = searchBox.value.toLowerCase();
             const filtered = currentFiles.filter(f => !q || (f.name || '').toLowerCase().includes(q));
             filesBody.innerHTML = '';
+
             if (!filtered.length) {
                 filesBody.innerHTML = '<tr><td colspan="4">No files found</td></tr>';
                 return;
             }
+
             filtered.forEach(f => {
                 const tr = document.createElement('tr');
                 const mime = f.mimeType || '';
                 const ext = (f.name.split('.').pop() || '').toLowerCase();
                 const date = f.modifiedTime ? new Date(f.modifiedTime).toLocaleString() : '';
+
                 tr.innerHTML = `
                     <td>${f.name}</td>
                     <td>${mime.replace('application/', '')}</td>
@@ -381,6 +378,7 @@
         function openPreview(id, mime, ext) {
             video.style.display = img.style.display = frame.style.display = 'none';
             const url = `/preview/file/${id}`;
+
             if (mime.startsWith('video/') || ['mp4', 'mov', 'mkv', 'webm', 'hevc'].includes(ext)) {
                 video.src = url;
                 video.style.display = 'block';
@@ -400,6 +398,7 @@
                 modal.style.display = 'flex';
                 return;
             }
+
             alert('Preview not supported for this file.');
         }
 
@@ -411,24 +410,16 @@
             frame.src = '';
         }
 
-        document.getElementById("previewModal").addEventListener("click", function(e) {
-            if (e.target === this) closePreview();
+        modal.addEventListener("click", function(e) {
+            if (e.target === modal) closePreview();
         });
 
         function shareFile(id) {
             window.open(`/share.html?id=${id}`, '_blank');
         }
 
-        searchBox.oninput = () => {
-            renderFolders();
-            renderFiles();
-        };
-
-        sortSelect.onchange = () => {
-            loadFolders();
-            if (currentFolder) loadFiles(currentFolder.id);
-        };
-
+        searchBox.oninput = () => { renderFolders(); renderFiles(); };
+        sortSelect.onchange = () => { loadFolders(); if (currentFolder) loadFiles(currentFolder.id); };
         refreshBtn.onclick = () => loadFolders();
 
         loadFolders();
