@@ -85,7 +85,7 @@ def preview_file(file_id):
 
 
 # ---------------------------------------------------
-# SHARE PAGE
+# SHARE PAGE (Single File Only)
 # ---------------------------------------------------
 
 @file_bp.route("/share.html")
@@ -130,7 +130,7 @@ def download_single_folder(folder_id):
 
 
 # ---------------------------------------------------
-# DOWNLOAD MULTIPLE FOLDERS ZIP (FIXED)
+# DOWNLOAD MULTIPLE FOLDERS ZIP (FINAL FIXED)
 # ---------------------------------------------------
 
 @file_bp.route("/download/folders-zip/<folder_ids>")
@@ -143,13 +143,12 @@ def download_multiple_folders(folder_ids):
         return abort(400)
 
     zip_buffer = io.BytesIO()
-    folder_names = []  # FIX: store folder names
+    folder_names = []
 
     with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
 
         for fid in ids:
-
-            # Get Folder Name
+            # Get folder name (Packet No)
             try:
                 meta = _drive_service.files().get(
                     fileId=fid,
@@ -170,7 +169,7 @@ def download_multiple_folders(folder_ids):
 
     zip_buffer.seek(0)
 
-    # -------- Correct ZIP Name --------
+    # Set proper zip name
     if len(folder_names) == 1:
         zipname = f"{folder_names[0]}.zip"
     else:
@@ -182,4 +181,3 @@ def download_multiple_folders(folder_ids):
         as_attachment=True,
         download_name=zipname
     )
-
