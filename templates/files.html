@@ -8,6 +8,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/favicon-32x32.png') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
         :root {
             --vj-primary: #003366;
@@ -201,6 +202,7 @@
             height: auto;
             max-height: 85vh;
             display: none;
+            z-index: 1 !important; /* FIX */
         }
 
         #previewClose {
@@ -213,6 +215,7 @@
             width: 32px;
             height: 32px;
             cursor: pointer;
+            z-index: 9999 !important; /* FIX */
         }
 
         @media (max-width: 900px) {
@@ -296,7 +299,6 @@
         const refreshBtn = document.getElementById('refreshBtn');
         let currentFolder = null, allFolders = [], currentFiles = [];
 
-        // Load Folders
         function loadFolders() {
             packetList.innerHTML = '<div class="list-item">Loading…</div>';
             fetch(`/api/packet-folders?sort=${sortSelect.value}`)
@@ -371,7 +373,6 @@
             });
         }
 
-        // Preview
         const modal = document.getElementById('previewModal');
         const video = document.getElementById('previewVideo');
         const img = document.getElementById('previewImage');
@@ -406,7 +407,13 @@
             modal.style.display = 'none';
             video.pause();
             video.src = '';
+            img.src = '';
+            frame.src = '';
         }
+
+        document.getElementById("previewModal").addEventListener("click", function(e) {
+            if (e.target === this) closePreview();
+        });
 
         function shareFile(id) {
             window.open(`/share.html?id=${id}`, '_blank');
