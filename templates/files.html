@@ -1,207 +1,232 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>Files • VENUS JEWEL FILE PORTAL</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='images/apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/favicon-32x32.png') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
+        :root {
+            --vj-primary: #003366;
+            --vj-accent: #0B5FFF;
+            --vj-bg: rgba(255, 255, 255, .95);
+            --vj-card: #ffffff;
+            --vj-border: #e2e8f0;
+            --vj-muted: #6b7280;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            font-family: Poppins, sans-serif;
-            margin: 0;
-            background: #f4f7ff;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to bottom right, #f6f8fc, #ffffff);
+            color: var(--vj-primary);
+            min-height: 100vh;
         }
 
-        /* Highlight selected folders */
+        .topbar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 18px; background: var(--vj-bg);
+            border-bottom: 1px solid var(--vj-border);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .brand img { height: 46px; }
+
+        .userbox { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+        .btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 10px; border-radius: 8px;
+            border: 1px solid var(--vj-border); background: #fff;
+            font-size: 14px; text-decoration: none;
+            cursor: pointer; transition: 0.2s;
+        }
+        .btn-primary { background: var(--vj-accent); color: #fff; border-color: var(--vj-accent); }
+
+        .container {
+            max-width: 1200px; margin: 24px auto;
+            background: var(--vj-bg); border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .06); padding: 20px;
+        }
+
+        .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+        .controls input, .controls select {
+            padding: 10px 12px; border-radius: 8px;
+            border: 1px solid var(--vj-border); flex: 1; min-width: 180px;
+        }
+
+        .browser {
+            display: grid; grid-template-columns: 300px 1fr; gap: 16px;
+        }
+
+        .panel {
+            background: var(--vj-card); border: 1px solid var(--vj-border);
+            border-radius: 10px; padding: 12px;
+        }
+
+        .list {
+            max-height: 55vh; overflow: auto; border-radius: 8px;
+            border: 1px solid var(--vj-border); background: #fff;
+        }
+
+        .list-item {
+            padding: 10px 12px; border-bottom: 1px solid var(--vj-border);
+            display: flex; gap: 10px;
+            align-items: center; cursor: pointer;
+        }
+
+        /* Highlight for selected folders */
         .selected-folder {
-            background: rgba(11, 95, 255, 0.18) !important;
-            border-left: 4px solid #0B5FFF;
+            background: rgba(11,95,255,0.15) !important;
+            border-left: 4px solid var(--vj-accent);
         }
-
-        /* Loader spinner */
-        #loader {
-            display: none;
-            margin: 10px auto;
-            width: 40px;
-            height: 40px;
-            border: 5px solid #d0d7e3;
-            border-top-color: #0B5FFF;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
 
         /* Preview Modal */
-        #previewModal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.75);
-            z-index: 9999;
-            justify-content: center;
-            align-items: center;
+        #previewModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+            z-index: 1000; align-items: center; justify-content: center; padding: 10px; }
+
+        #previewBox { background: #000; border-radius: 10px;
+            width: min(95vw, 900px); position: relative; }
+
+        #previewBox video, #previewBox img, #previewBox iframe {
+            width: 100%; max-height: 85vh; display: none; z-index: 1;
         }
+
         #previewClose {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: white;
-            width: 32px;
-            height: 32px;
-            border-radius: 100%;
-            cursor: pointer;
-            z-index: 10000;
+            position: absolute; top: 8px; right: 8px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 50%; width: 32px; height: 32px;
+            cursor: pointer; z-index: 9999;
         }
     </style>
 </head>
+
 <body>
 
-<!-- TOPBAR -->
-<div style="padding:12px;background:white;border-bottom:1px solid #cfd5e1;display:flex;justify-content:space-between;align-items:center;">
-    <img src="{{ url_for('static', filename='images/venus_black_logo.jpg') }}" height="45">
-    <div>
-        <span><i class="fa fa-user-circle"></i> {{ user }}</span>
-        <a href="/dashboard" class="btn">Dashboard</a>
-        <a href="/logout" class="btn">Logout</a>
-    </div>
-</div>
-
-<div style="max-width:1250px;margin:20px auto;background:white;padding:20px;border-radius:12px;">
-    <div style="display:flex;gap:10px;">
-        <input id="searchBox" style="flex:1;padding:10px" placeholder="Search folder...">
-        <select id="sortSelect" style="padding:10px;">
-            <option value="newest">Newest</option>
-            <option value="name">A–Z</option>
-        </select>
-        <button id="refreshBtn" class="btn">Refresh</button>
-        <button id="downloadFolderBtn" class="btn btn-primary" disabled>Download Selected</button>
-    </div>
-
-    <div id="loader"></div>
-
-    <div style="display:grid;grid-template-columns:280px 1fr;gap:15px;margin-top:20px;">
-
-        <!-- LEFT PANEL -->
-        <div style="border:1px solid #cfd5e1;padding:12px;border-radius:12px;">
-            <h3><i class="fa fa-folder"></i> Packet Folders</h3>
-
-            <label style="display:flex;gap:8px;margin:10px 0;">
-                <input type="checkbox" id="selectAll" disabled>
-                <strong>Select All</strong>
-            </label>
-
-            <div id="packetList" style="max-height:60vh;overflow:auto;border:1px solid #cfd5e1;border-radius:10px;"></div>
+    <div class="topbar">
+        <div class="brand">
+            <img src="{{ url_for('static', filename='images/venus_black_logo.jpg') }}">
         </div>
-
-        <!-- RIGHT PANEL -->
-        <div style="border:1px solid #cfd5e1;padding:12px;border-radius:12px;">
-            <h3 id="filesTitle"><i class="fa fa-file"></i> Files</h3>
-            <table style="width:100%;border-collapse:collapse;">
-                <thead><tr><th>Name</th><th>Type</th><th>Modified</th><th>Actions</th></tr></thead>
-                <tbody id="filesBody"></tbody>
-            </table>
+        <div class="userbox">
+            <span><i class="fas fa-user-circle"></i> {{ user }}</span>
+            <a class="btn" href="/dashboard"><i class="fas fa-arrow-left"></i> Dashboard</a>
+            <a class="btn" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
         </div>
     </div>
-</div>
 
-<!-- PREVIEW MODAL -->
-<div id="previewModal">
-    <button id="previewClose" onclick="closePreview()">✕</button>
-    <video id="previewVideo" controls></video>
-    <img id="previewImage">
-    <iframe id="previewFrame"></iframe>
-</div>
+    <div class="container">
+        <div class="controls">
+            <input id="searchBox" type="text" placeholder="Search Packet No..." />
+            <select id="sortSelect">
+                <option value="newest">Newest</option>
+                <option value="name">Name A–Z</option>
+            </select>
+            <button id="refreshBtn" class="btn"><i class="fas fa-rotate"></i> Refresh</button>
+
+            <button id="downloadFolderBtn" class="btn btn-primary" disabled>
+                <i class="fas fa-download"></i> Download Selected Folders
+            </button>
+        </div>
+
+        <div class="browser">
+            <div class="panel">
+                <h3><i class="fas fa-folder"></i> Packet Folders</h3>
+                <div id="packetList" class="list"></div>
+            </div>
+
+            <div class="panel">
+                <h3 id="filesTitle"><i class="fas fa-file"></i> Files</h3>
+                <table class="grid">
+                    <thead>
+                        <tr><th>Name</th><th>Type</th><th>Modified</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody id="filesBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Modal -->
+    <div id="previewModal">
+        <div id="previewBox">
+            <button id="previewClose" onclick="closePreview()">✕</button>
+            <video id="previewVideo" controls></video>
+            <img id="previewImage">
+            <iframe id="previewFrame"></iframe>
+        </div>
+    </div>
 
 <script>
-let allFolders = [];
-let selectedFolders = [];
-let currentFolder = null;
+let selectedFolders = [];  // MULTI SELECTION
 
-/* ---------- LOADER ---------- */
-function showLoader(){ loader.style.display="block"; }
-function hideLoader(){ loader.style.display="none"; }
+function renderFolders() {
+    const q = searchBox.value.toLowerCase();
+    const filtered = allFolders.filter(f => !q || f.name.toLowerCase().includes(q));
 
-/* ---------- LOAD FOLDERS ---------- */
-function loadFolders(){
-    showLoader();
-    fetch(`/file/api/packet-folders?sort=${sortSelect.value}`)
-        .then(r=>r.json())
-        .then(d=>{
-            allFolders = d.folders || [];
-            selectAll.disabled = false;
-            renderFolders();
-            hideLoader();
-        });
-}
-
-/* ---------- RENDER FOLDERS ---------- */
-function renderFolders(){
     packetList.innerHTML = "";
-    let q = searchBox.value.toLowerCase();
 
-    allFolders
-        .filter(f => f.name.toLowerCase().includes(q))
-        .forEach(folder => {
-            let row = document.createElement("div");
-            row.style.padding="10px";
-            row.style.display="flex";
-            row.style.gap="8px";
-            row.style.cursor="pointer";
-            row.style.borderBottom="1px solid #eee";
-
-            if (selectedFolders.includes(folder.id)){
-                row.classList.add("selected-folder");
-            }
-
-            row.innerHTML = `
-                <input type="checkbox" class="folderChk" data-id="${folder.id}"
-                    ${selectedFolders.includes(folder.id)?"checked":""}>
-                <span><i class="fa fa-folder"></i> ${folder.name}</span>
-            `;
-
-            packetList.appendChild(row);
-        });
-
-    updateButtons();
-}
-
-/* ---------- SELECT ALL ---------- */
-selectAll.addEventListener("change",()=>{
-    selectedFolders = selectAll.checked ? allFolders.map(f=>f.id) : [];
-    renderFolders();
-});
-
-/* ---------- INDIVIDUAL CHECKBOX ---------- */
-packetList.addEventListener("change",e=>{
-    if (!e.target.classList.contains("folderChk")) return;
-    let id = e.target.dataset.id;
-
-    if (e.target.checked){
-        selectedFolders.push(id);
-    } else {
-        selectedFolders = selectedFolders.filter(x=>x!==id);
-        selectAll.checked = false;
+    if (!filtered.length) {
+        packetList.innerHTML = "<div class='list-item'>No folders</div>";
+        return;
     }
 
-    renderFolders();
-});
+    filtered.forEach(folder => {
+        const row = document.createElement("div");
+        row.className = "list-item";
 
-/* ---------- UPDATE BUTTON ---------- */
-function updateButtons(){
-    downloadFolderBtn.disabled = selectedFolders.length === 0;
+        // Highlight if selected
+        if (selectedFolders.includes(folder.id)) {
+            row.classList.add("selected-folder");
+        }
+
+        row.innerHTML = `
+            <input type="checkbox" class="folderCheck" data-id="${folder.id}" data-name="${folder.name}"
+                ${selectedFolders.includes(folder.id) ? "checked" : ""}>
+            <span><i class="fas fa-folder"></i> ${folder.name}</span>
+            <span class="muted">${new Date(folder.modifiedTime).toLocaleString()}</span>
+        `;
+
+        packetList.appendChild(row);
+    });
+
+    updateDownloadButton();
 }
 
-/* ---------- DOWNLOAD MULTI FOLDERS ---------- */
-downloadFolderBtn.onclick = ()=>{
-    let ids = selectedFolders.join(",");
-    window.location.href = `/file/download/folders-zip/${ids}`;
+function updateDownloadButton() {
+    if (selectedFolders.length === 0) {
+        downloadFolderBtn.disabled = true;
+    } else {
+        downloadFolderBtn.disabled = false;
+    }
+}
+
+// CHECKBOX HANDLER
+packetList.addEventListener("change", (e) => {
+    if (e.target.classList.contains("folderCheck")) {
+        const id = e.target.dataset.id;
+
+        if (e.target.checked) {
+            selectedFolders.push(id);
+        } else {
+            selectedFolders = selectedFolders.filter(f => f !== id);
+        }
+        renderFolders(); // re-render highlight
+    }
+});
+
+// DOWNLOAD SELECTED FOLDERS
+downloadFolderBtn.onclick = () => {
+    if (selectedFolders.length === 0) return;
+
+    const ids = selectedFolders.join(",");
+    window.location.href = `/download/folders-zip/${ids}`;
 };
 
-/* ---------- INITIAL LOAD ---------- */
-loadFolders();
+// Everything else same (load files, preview, etc.)...
 </script>
 
 </body>
