@@ -29,7 +29,7 @@
             color: var(--vj-primary);
         }
 
-        /* ===================== TOPBAR (RESPONSIVE) ===================== */
+        /* ===================== TOPBAR ===================== */
         .topbar {
             background: var(--vj-bg);
             padding: 10px 18px;
@@ -40,54 +40,35 @@
             flex-wrap: nowrap;
         }
 
-        .topbar img {
-            height: 42px;
-        }
+        .topbar img { height: 42px; }
 
         .top-right {
             display: flex;
             align-items: center;
             gap: 8px;
-            white-space: nowrap;
-        }
-
-        .top-right span {
-            font-weight: 500;
         }
 
         .top-btn {
-            padding: 5px 10px;
+            padding: 6px 10px;
             border: 1px solid var(--vj-border);
             background: #fff;
             border-radius: 8px;
             cursor: pointer;
-            display: inline-flex;
+            display: flex;
             align-items: center;
-            font-size: 13px;
             gap: 5px;
-            white-space: nowrap;
+            font-size: 13px;
         }
         .top-btn:hover { background: var(--vj-hover); }
 
-        /* ===================== MOBILE TOPBAR FIX ===================== */
-        @media (max-width: 600px) {
-            .topbar {
-                gap: 8px;
-                padding: 8px 10px;
-            }
-            .topbar img {
-                height: 34px;
-            }
-            .top-right span {
-                display: none; /* username hidden on very small screens */
-            }
-            .top-btn {
-                padding: 5px 8px;
-                font-size: 12px;
-            }
+        /* MOBILE TOPBAR FIX */
+        @media(max-width:600px){
+            .topbar { padding: 8px 12px; }
+            .topbar img { height: 32px; }
+            .top-right span { display:none; }
         }
 
-        /* ===================== MAIN CONTAINER ===================== */
+        /* ===================== MAIN ===================== */
         .container {
             max-width: 1280px;
             margin: 18px auto;
@@ -122,7 +103,6 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            transition: .2s;
             font-size: 14px;
         }
 
@@ -137,9 +117,7 @@
             .controls { flex-direction: column; }
             .controls input,
             .controls select,
-            .btn-primary {
-                width: 100%;
-            }
+            .btn-primary { width: 100%; }
         }
 
         /* ===================== LAYOUT ===================== */
@@ -150,9 +128,7 @@
         }
 
         @media(max-width:900px){
-            .browser {
-                grid-template-columns: 1fr;
-            }
+            .browser { grid-template-columns: 1fr; }
         }
 
         .panel {
@@ -178,7 +154,6 @@
             gap: 12px;
             border-bottom: 1px solid var(--vj-border);
             cursor: pointer;
-            background: #fff;
         }
 
         .list-item:hover { background: var(--vj-hover); }
@@ -186,33 +161,32 @@
 
         .muted { margin-left: auto; color: var(--vj-muted); font-size: 12px; }
 
-        /* ===================== FILE TABLE ===================== */
-        table { width:100%; border-collapse: collapse; }
-        th,td { padding:10px; border-bottom:1px solid var(--vj-border); font-size:14px; }
-        th { background:#f8faff; font-weight:600; }
+        /* ===================== FILE TABLE (DESKTOP + MOBILE SAME) ===================== */
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;   /* THIS FIXES MOBILE */
+            -webkit-overflow-scrolling: touch;
+        }
 
-        /* Mobile - File Card Layout */
+        table {
+            width: 100%;
+            min-width: 600px;   /* ensures scrolling instead of breaking */
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid var(--vj-border);
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        th { background: #f1f5ff; font-weight: 600; }
+
+        /* REMOVE MOBILE CARD STYLE COMPLETELY */
         @media(max-width:600px){
-            table, thead, tbody, tr, th, td {
-                display:block;
-            }
-            tr {
-                background:#fff;
-                margin-bottom:12px;
-                border-radius:10px;
-                padding:10px;
-                box-shadow: var(--vj-shadow);
-            }
-            td { border:none; }
-            td:nth-child(1){
-                font-weight:600;
-                font-size:15px;
-            }
-            td:nth-child(4){
-                display:flex;
-                gap:6px;
-                margin-top:6px;
-            }
+            table, thead, tbody, tr, th, td { display: table; }
+            tr { box-shadow:none; background:none; margin:0; padding:0; }
         }
 
         /* ===================== PREVIEW ===================== */
@@ -250,13 +224,8 @@
     <div class="top-right">
         <span><i class="fas fa-user-circle"></i> {{ user }}</span>
 
-        <a class="top-btn" href="/dashboard">
-            <i class="fas fa-arrow-left"></i> Dashboard
-        </a>
-
-        <a class="top-btn" href="/logout">
-            <i class="fas fa-sign-out-alt"></i> Logout
-        </a>
+        <a class="top-btn" href="/dashboard"><i class="fas fa-arrow-left"></i> Dashboard</a>
+        <a class="top-btn" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
     </div>
 </div>
 
@@ -272,17 +241,11 @@
             <option value="name">Name A–Z</option>
         </select>
 
-        <button id="refreshBtn" class="btn">
-            <i class="fa fa-rotate"></i> Refresh
-        </button>
+        <button id="refreshBtn" class="btn"><i class="fa fa-rotate"></i> Refresh</button>
 
-        <button id="selectVisibleBtn" class="btn">
-            <i class="fa fa-check-double"></i> Select Visible
-        </button>
+        <button id="selectVisibleBtn" class="btn"><i class="fa fa-check-double"></i> Select Visible</button>
 
-        <button id="deselectBtn" class="btn">
-            <i class="fa fa-xmark"></i> Deselect
-        </button>
+        <button id="deselectBtn" class="btn"><i class="fa fa-xmark"></i> Deselect</button>
 
         <button id="downloadSelectedBtn" class="btn btn-primary" disabled>
             <i class="fa fa-download"></i> Download (<span id="selectedCount">0</span>)
@@ -293,7 +256,7 @@
 
     <div class="browser">
 
-        <!-- LEFT -->
+        <!-- LEFT PANEL -->
         <div class="panel">
             <h3><i class="fa fa-folder"></i> Packet Folders</h3>
 
@@ -305,12 +268,11 @@
             <div class="list" id="packetList"></div>
         </div>
 
-        <!-- RIGHT -->
+        <!-- RIGHT PANEL -->
         <div class="panel">
             <h3 id="filesTitle"><i class="fa fa-file"></i> Files</h3>
 
-            <div id="fileLoader"></div>
-
+            <div class="table-wrapper"> <!-- IMPORTANT MOBILE FIX -->
             <table>
                 <thead>
                     <tr>
@@ -322,12 +284,14 @@
                 </thead>
                 <tbody id="filesBody"></tbody>
             </table>
+            </div>
+
         </div>
 
     </div>
 </div>
 
-<!-- ===================== PREVIEW MODAL ===================== -->
+<!-- PREVIEW MODAL -->
 <div id="previewModal">
     <div id="previewBox">
         <button id="previewClose">✕</button>
@@ -337,10 +301,9 @@
     </div>
 </div>
 
-
 <script>
-/* ALL YOUR EXISTING JS REMAINS SAME — ALREADY WORKING PERFECTLY */
-/* I am not modifying ANY logic, only UI is improved */
+/* ========== NO CHANGE TO YOUR JS LOGIC ========== */
+/* Entire JS is same as your working version */
 
 let allFolders = [];
 let selectedFolders = [];
@@ -367,7 +330,6 @@ const previewImage = document.getElementById("previewImage");
 const previewFrame = document.getElementById("previewFrame");
 const previewClose = document.getElementById("previewClose");
 
-/* ---- Load Folders ---- */
 function loadFolders() {
     loader.style.display = "block";
     packetList.innerHTML = `<div class='list-item'>Loading…</div>`;
@@ -378,7 +340,6 @@ function loadFolders() {
         .finally(() => loader.style.display = "none");
 }
 
-/* ---- Render Folder List ---- */
 function renderFolders() {
     const q = searchBox.value.toLowerCase();
     const filtered = allFolders.filter(f => f.name.toLowerCase().includes(q));
@@ -402,7 +363,7 @@ function renderFolders() {
             <span class="muted">${new Date(f.modifiedTime).toLocaleString()}</span>
         `;
 
-        row.onclick = (e)=> {
+        row.onclick = (e)=>{
             if (!e.target.classList.contains("folderChk")) {
                 currentFolder = f;
                 filesTitle.textContent = `Files — ${f.name}`;
@@ -416,7 +377,6 @@ function renderFolders() {
     updateDownloadButton();
 }
 
-/* ---- Load Files ---- */
 function loadFiles(folderId) {
     fileLoader.style.display = "block";
     filesBody.innerHTML = `<tr><td colspan="4">Loading…</td></tr>`;
@@ -427,7 +387,6 @@ function loadFiles(folderId) {
         .finally(() => fileLoader.style.display = "none");
 }
 
-/* ---- Render Files ---- */
 function renderFiles() {
     const q = searchBox.value.toLowerCase();
     const filtered = currentFiles.filter(f => f.name.toLowerCase().includes(q));
@@ -450,15 +409,9 @@ function renderFiles() {
             <td>${mime.replace("application/","")}</td>
             <td>${new Date(f.modifiedTime).toLocaleString()}</td>
             <td>
-                <a class="btn" href="/download/file/${f.id}">
-                    <i class="fa fa-download"></i>
-                </a>
-                <button class="btn" onclick="openPreview('${f.id}','${mime}','${ext}')">
-                    <i class="fa fa-eye"></i>
-                </button>
-                <button class="btn" onclick="shareFile('${f.id}')">
-                    <i class="fa fa-share-alt"></i>
-                </button>
+                <a class="btn" href="/download/file/${f.id}"><i class="fa fa-download"></i></a>
+                <button class="btn" onclick="openPreview('${f.id}','${mime}','${ext}')"><i class="fa fa-eye"></i></button>
+                <button class="btn" onclick="shareFile('${f.id}')"><i class="fa fa-share-alt"></i></button>
             </td>
         `;
 
@@ -466,12 +419,10 @@ function renderFiles() {
     });
 }
 
-/* ---- Share ---- */
 function shareFile(id) {
     window.open(`/share.html?id=${id}`, "_blank");
 }
 
-/* ---- Select / Deselect ---- */
 packetList.addEventListener("change", (e)=>{
     if (!e.target.classList.contains("folderChk")) return;
     const id = e.target.dataset.id;
@@ -486,14 +437,14 @@ packetList.addEventListener("change", (e)=>{
 });
 
 selectAll.onclick = ()=>{
-    if (selectAll.checked) selectedFolders = allFolders.map(f => f.id);
+    if (selectAll.checked) selectedFolders = allFolders.map(f=>f.id);
     else selectedFolders = [];
     renderFolders();
 };
 
 selectVisibleBtn.onclick = ()=>{
     const q = searchBox.value.toLowerCase();
-    selectedFolders = allFolders.filter(f => f.name.toLowerCase().includes(q)).map(f => f.id);
+    selectedFolders = allFolders.filter(f=>f.name.toLowerCase().includes(q)).map(f=>f.id);
     renderFolders();
 };
 
@@ -513,7 +464,6 @@ downloadBtn.onclick = ()=>{
     window.location.href = `/download/folders-zip/${selectedFolders.join(",")}`;
 };
 
-/* ---- Preview Modal ---- */
 function openPreview(id,mime,ext){
     previewVideo.style.display = previewImage.style.display = previewFrame.style.display = "none";
     const url = `/preview/file/${id}`;
@@ -550,12 +500,10 @@ function closePreview(){
     previewFrame.src="";
 }
 
-/* ---- Search / Sort ---- */
 searchBox.oninput = ()=>{ renderFolders(); renderFiles(); };
 sortSelect.onchange = ()=> loadFolders();
 refreshBtn.onclick = ()=> loadFolders();
 
-/* ---- INIT ---- */
 loadFolders();
 
 </script>
