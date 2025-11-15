@@ -29,7 +29,6 @@
             color: var(--vj-primary);
         }
 
-        /* Fade in animation */
         .fade { animation: fadeIn .35s ease; }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(6px); }
@@ -40,9 +39,7 @@
             background: var(--vj-bg);
             padding: 12px 22px;
             border-bottom: 1px solid var(--vj-border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            display: flex; justify-content: space-between; align-items: center;
             box-shadow: var(--vj-shadow);
         }
 
@@ -52,18 +49,12 @@
             background: #fff;
             border-radius: 8px;
             cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
+            display: inline-flex; align-items: center; gap: 6px;
             transition: .2s;
             font-size: 14px;
         }
         .btn:hover { background: var(--vj-hover); }
-        .btn-primary {
-            background: var(--vj-accent);
-            color: #fff;
-            border-color: var(--vj-accent);
-        }
+        .btn-primary { background: var(--vj-accent); color:#fff; border-color: var(--vj-accent); }
 
         .container {
             max-width: 1280px;
@@ -75,9 +66,7 @@
         }
 
         .controls {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
+            display: flex; gap: 12px; flex-wrap: wrap;
             margin-bottom: 18px;
         }
 
@@ -91,8 +80,7 @@
         }
 
         .browser {
-            display: grid;
-            grid-template-columns: 330px 1fr;
+            display: grid; grid-template-columns: 330px 1fr;
             gap: 20px;
         }
 
@@ -104,7 +92,6 @@
             box-shadow: var(--vj-shadow);
         }
 
-        /* Folder List */
         .list {
             max-height: 60vh;
             overflow-y: auto;
@@ -114,13 +101,11 @@
 
         .list-item {
             padding: 10px 12px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            display: flex; align-items: center; gap: 12px;
             border-bottom: 1px solid var(--vj-border);
             cursor: pointer;
-            background: #fff;
             transition: .2s;
+            background: #fff;
         }
 
         .list-item:hover { background: var(--vj-hover); }
@@ -130,30 +115,47 @@
             border-left: 4px solid var(--vj-accent);
         }
 
-        .muted {
-            margin-left: auto;
-            color: var(--vj-muted);
-            font-size: 12px;
-        }
+        .muted { margin-left: auto; color: var(--vj-muted); font-size: 12px; }
 
-        /* Loader */
-        #loader, #fileLoader {
-            display:none;
-            margin: 14px auto;
-            width:40px;height:40px;
-            border:4px solid #cfd5e1;
-            border-top-color:#0B5FFF;
-            border-radius:50%;
+        #loader,#fileLoader {
+            display:none; margin: 14px auto;
+            width:40px;height:40px;border:4px solid #cfd5e1;
+            border-top-color:#0B5FFF;border-radius:50%;
             animation:spin .75s linear infinite;
         }
-        @keyframes spin { to{ transform:rotate(360deg);} }
+        @keyframes spin { to{transform:rotate(360deg);} }
 
-        /* File Table */
         table { width:100%; border-collapse: collapse; }
-        th, td { padding: 10px; border-bottom: 1px solid var(--vj-border); font-size: 14px; }
+        th,td { padding:10px; border-bottom:1px solid var(--vj-border); font-size:14px; }
         th { background:#f8faff; font-weight:600; }
+
+        /* Preview Modal */
+        #previewModal {
+            display:none; position:fixed; inset:0;
+            background:rgba(0,0,0,.75);
+            z-index:2000; align-items:center; justify-content:center;
+        }
+
+        #previewBox {
+            background:#000; border-radius:10px;
+            width:min(95vw,900px);
+            position:relative; padding:10px;
+        }
+
+        #previewClose {
+            position:absolute; right:10px; top:10px;
+            background:#fff; border:none; border-radius:50%;
+            width:36px;height:36px; cursor:pointer;
+        }
+
+        #previewBox video,
+        #previewBox img,
+        #previewBox iframe {
+            width:100%; max-height:85vh; display:none;
+        }
     </style>
 </head>
+
 <body>
 
 <!-- TOP BAR -->
@@ -166,10 +168,9 @@
     </div>
 </div>
 
-<!-- MAIN CONTAINER -->
+<!-- MAIN -->
 <div class="container fade">
 
-    <!-- CONTROLS -->
     <div class="controls">
         <input id="searchBox" placeholder="Search Packet No or File...">
         <select id="sortSelect">
@@ -178,7 +179,6 @@
         </select>
 
         <button id="refreshBtn" class="btn"><i class="fa fa-rotate"></i> Refresh</button>
-
         <button id="selectVisibleBtn" class="btn"><i class="fa fa-check-double"></i> Select Visible</button>
         <button id="deselectBtn" class="btn"><i class="fa fa-xmark"></i> Deselect</button>
 
@@ -191,7 +191,7 @@
 
     <div class="browser">
 
-        <!-- LEFT PANEL -->
+        <!-- LEFT -->
         <div class="panel fade">
             <h3><i class="fa fa-folder"></i> Packet Folders</h3>
 
@@ -203,7 +203,7 @@
             <div class="list" id="packetList"></div>
         </div>
 
-        <!-- RIGHT PANEL -->
+        <!-- RIGHT -->
         <div class="panel fade">
             <h3 id="filesTitle"><i class="fa fa-file"></i> Files</h3>
 
@@ -221,54 +221,63 @@
                 <tbody id="filesBody"></tbody>
             </table>
         </div>
+
     </div>
 </div>
 
+<!-- PREVIEW MODAL -->
+<div id="previewModal">
+    <div id="previewBox">
+        <button id="previewClose">✕</button>
+        <video id="previewVideo" controls></video>
+        <img id="previewImage">
+        <iframe id="previewFrame"></iframe>
+    </div>
+</div>
+
+
 <script>
-/* -------------------------------------------------------------------
-    GLOBAL VARIABLES
-------------------------------------------------------------------- */
+/* GLOBAL */
 let allFolders = [];
 let selectedFolders = [];
-let currentFiles = [];
 let currentFolder = null;
+let currentFiles = [];
 
-/* -------------------------------------------------------------------
-    ELEMENTS
-------------------------------------------------------------------- */
-const packetList       = document.getElementById("packetList");
-const filesBody        = document.getElementById("filesBody");
-const filesTitle       = document.getElementById("filesTitle");
-const searchBox        = document.getElementById("searchBox");
-const sortSelect       = document.getElementById("sortSelect");
-const refreshBtn       = document.getElementById("refreshBtn");
-const selectAll        = document.getElementById("selectAll");
+/* ELEMENTS */
+const packetList = document.getElementById("packetList");
+const filesBody = document.getElementById("filesBody");
+const filesTitle = document.getElementById("filesTitle");
+const searchBox = document.getElementById("searchBox");
+const sortSelect = document.getElementById("sortSelect");
+const refreshBtn = document.getElementById("refreshBtn");
+const selectAll = document.getElementById("selectAll");
 const selectVisibleBtn = document.getElementById("selectVisibleBtn");
-const deselectBtn      = document.getElementById("deselectBtn");
-const downloadBtn      = document.getElementById("downloadSelectedBtn");
-const selectedCount    = document.getElementById("selectedCount");
-const loader           = document.getElementById("loader");
-const fileLoader       = document.getElementById("fileLoader");
+const deselectBtn = document.getElementById("deselectBtn");
+const downloadBtn = document.getElementById("downloadSelectedBtn");
+const selectedCount = document.getElementById("selectedCount");
+const loader = document.getElementById("loader");
+const fileLoader = document.getElementById("fileLoader");
 
-/* -------------------------------------------------------------------
-    LOAD FOLDERS
-------------------------------------------------------------------- */
+/* PREVIEW MODAL */
+const previewModal = document.getElementById("previewModal");
+const previewVideo = document.getElementById("previewVideo");
+const previewImage = document.getElementById("previewImage");
+const previewFrame = document.getElementById("previewFrame");
+const previewClose = document.getElementById("previewClose");
+
+
+/* LOAD FOLDERS */
 function loadFolders() {
     loader.style.display = "block";
     packetList.innerHTML = `<div class='list-item'>Loading…</div>`;
 
     fetch(`/api/packet-folders?sort=${sortSelect.value}`)
         .then(r => r.json())
-        .then(data => {
-            allFolders = data.folders || [];
-            renderFolders();
-        })
+        .then(data => { allFolders = data.folders || []; renderFolders(); })
         .finally(() => loader.style.display = "none");
 }
 
-/* -------------------------------------------------------------------
-    RENDER FOLDERS
-------------------------------------------------------------------- */
+/* RENDER FOLDERS */
 function renderFolders() {
     const q = searchBox.value.toLowerCase();
     const filtered = allFolders.filter(f => f.name.toLowerCase().includes(q));
@@ -280,7 +289,7 @@ function renderFolders() {
         return;
     }
 
-    filtered.forEach((f) => {
+    filtered.forEach(f => {
         const row = document.createElement("div");
         row.className = "list-item fade";
 
@@ -292,14 +301,13 @@ function renderFolders() {
             <span class="muted">${new Date(f.modifiedTime).toLocaleString()}</span>
         `;
 
-        /* Click folder to load files */
-        row.onclick = (e) => {
+        row.addEventListener("click",(e)=>{
             if (!e.target.classList.contains("folderChk")) {
                 currentFolder = f;
                 filesTitle.textContent = `Files — ${f.name}`;
                 loadFiles(f.id);
             }
-        };
+        });
 
         packetList.appendChild(row);
     });
@@ -307,25 +315,18 @@ function renderFolders() {
     updateDownloadButton();
 }
 
-/* -------------------------------------------------------------------
-    LOAD FILES
-------------------------------------------------------------------- */
+/* LOAD FILES */
 function loadFiles(folderId) {
     fileLoader.style.display = "block";
     filesBody.innerHTML = `<tr><td colspan="4">Loading…</td></tr>`;
 
     fetch(`/api/folder/${folderId}/files`)
         .then(r => r.json())
-        .then(data => {
-            currentFiles = data.files || [];
-            renderFiles();
-        })
+        .then(data => { currentFiles = data.files || []; renderFiles(); })
         .finally(() => fileLoader.style.display = "none");
 }
 
-/* -------------------------------------------------------------------
-    RENDER FILES
-------------------------------------------------------------------- */
+/* RENDER FILES */
 function renderFiles() {
     const q = searchBox.value.toLowerCase();
     const filtered = currentFiles.filter(f => f.name.toLowerCase().includes(q));
@@ -350,92 +351,109 @@ function renderFiles() {
             <td>
                 <a class="btn" href="/download/file/${f.id}"><i class="fa fa-download"></i> Download</a>
                 <button class="btn" onclick="openPreview('${f.id}','${mime}','${ext}')"><i class="fa fa-eye"></i> Preview</button>
+                <button class="btn" onclick="shareFile('${f.id}')"><i class="fa fa-share-alt"></i> Share</button>
             </td>
         `;
         filesBody.appendChild(tr);
     });
 }
 
-/* -------------------------------------------------------------------
-    MULTI-SELECTION CHECKBOX HANDLER
-------------------------------------------------------------------- */
-packetList.addEventListener("change", (e) => {
+/* SHARE */
+function shareFile(id) {
+    window.open(`/share.html?id=${id}`, "_blank");
+}
+
+/* MULTI-SELECT */
+packetList.addEventListener("change", (e)=>{
     if (!e.target.classList.contains("folderChk")) return;
 
     const id = e.target.dataset.id;
+
     if (e.target.checked) {
         if (!selectedFolders.includes(id)) selectedFolders.push(id);
     } else {
-        selectedFolders = selectedFolders.filter(x => x !== id);
+        selectedFolders = selectedFolders.filter(x=>x!==id);
         selectAll.checked = false;
     }
 
     renderFolders();
 });
 
-/* -------------------------------------------------------------------
-    SELECT ALL
-------------------------------------------------------------------- */
-selectAll.onchange = () => {
+/* SELECT ALL */
+selectAll.onclick = ()=>{
     if (selectAll.checked) {
-        selectedFolders = allFolders.map(f => f.id);
-    } else {
-        selectedFolders = [];
-    }
+        selectedFolders = allFolders.map(f=>f.id);
+    } else selectedFolders = [];
     renderFolders();
 };
 
-/* -------------------------------------------------------------------
-    SELECT VISIBLE ONLY
-------------------------------------------------------------------- */
-selectVisibleBtn.onclick = () => {
+/* SELECT VISIBLE */
+selectVisibleBtn.onclick = ()=>{
     const q = searchBox.value.toLowerCase();
-    selectedFolders = allFolders.filter(f => f.name.toLowerCase().includes(q)).map(f => f.id);
+    selectedFolders = allFolders.filter(f=>f.name.toLowerCase().includes(q)).map(f=>f.id);
     renderFolders();
 };
 
-/* -------------------------------------------------------------------
-    DESELECT ALL
-------------------------------------------------------------------- */
-deselectBtn.onclick = () => {
+/* DESELECT */
+deselectBtn.onclick = ()=>{
     selectedFolders = [];
     selectAll.checked = false;
     renderFolders();
 };
 
-/* -------------------------------------------------------------------
-    UPDATE DOWNLOAD BUTTON
-------------------------------------------------------------------- */
+/* UPDATE BUTTON */
 function updateDownloadButton() {
     selectedCount.textContent = selectedFolders.length;
     downloadBtn.disabled = selectedFolders.length === 0;
 }
 
-/* -------------------------------------------------------------------
-    DOWNLOAD SELECTED
-------------------------------------------------------------------- */
-downloadBtn.onclick = () => {
+/* DOWNLOAD SELECTED */
+downloadBtn.onclick = ()=>{
     if (!selectedFolders.length) return;
     window.location.href = `/download/folders-zip/${selectedFolders.join(",")}`;
 };
 
-/* -------------------------------------------------------------------
-    PREVIEW MODAL
-------------------------------------------------------------------- */
-function openPreview(id, mime, ext) {
-    alert("Preview works same as before (add your existing preview code)");
+/* PREVIEW MODAL (OLD WORKING ONE) */
+function openPreview(id,mime,ext){
+    previewVideo.style.display = previewImage.style.display = previewFrame.style.display = "none";
+    const url = `/preview/file/${id}`;
+
+    if (mime.startsWith("video/") || ["mp4","mov","mkv","webm","avi"].includes(ext)) {
+        previewVideo.src = url;
+        previewVideo.style.display = "block";
+        previewVideo.play();
+    } 
+    else if (mime.startsWith("image/") || ["jpg","jpeg","png","gif","webp"].includes(ext)) {
+        previewImage.src = url;
+        previewImage.style.display = "block";
+    }
+    else if (ext === "pdf") {
+        previewFrame.src = url;
+        previewFrame.style.display = "block";
+    } else {
+        window.open(url,"_blank");
+        return;
+    }
+
+    previewModal.style.display = "flex";
 }
 
-/* -------------------------------------------------------------------
-    EVENTS
-------------------------------------------------------------------- */
-searchBox.oninput = () => { renderFolders(); renderFiles(); };
-sortSelect.onchange = () => loadFolders();
-refreshBtn.onclick = () => loadFolders();
+previewClose.onclick = closePreview;
+previewModal.onclick = (e)=>{ if(e.target===previewModal) closePreview(); };
+document.onkeydown = (e)=>{ if(e.key==="Escape") closePreview(); };
 
-/* -------------------------------------------------------------------
-    INIT
-------------------------------------------------------------------- */
+function closePreview(){
+    previewModal.style.display = "none";
+    previewVideo.pause(); previewVideo.src="";
+    previewImage.src=""; previewFrame.src="";
+}
+
+/* SEARCH / SORT / REFRESH */
+searchBox.oninput = ()=>{ renderFolders(); renderFiles(); };
+sortSelect.onchange = ()=> loadFolders();
+refreshBtn.onclick = ()=> loadFolders();
+
+/* INIT */
 loadFolders();
 </script>
 
