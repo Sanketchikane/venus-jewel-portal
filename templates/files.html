@@ -19,11 +19,7 @@
             --vj-muted: #6b7280;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: 'Poppins', sans-serif;
@@ -33,193 +29,108 @@
         }
 
         .topbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 18px;
-            background: var(--vj-bg);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 18px; background: var(--vj-bg);
             border-bottom: 1px solid var(--vj-border);
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            position: sticky; top: 0; z-index: 100;
         }
 
-        .brand img {
-            height: 46px;
-        }
+        .brand img { height: 46px; }
 
-        .userbox {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
+        .userbox { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
         .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 10px;
-            border-radius: 8px;
-            border: 1px solid var(--vj-border);
-            background: #fff;
-            color: var(--vj-primary);
-            font-size: 14px;
-            cursor: pointer;
-            text-decoration: none;
-            transition: 0.2s;
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 10px; border-radius: 8px;
+            border: 1px solid var(--vj-border); background: #fff;
+            color: var(--vj-primary); font-size: 14px;
+            cursor: pointer; text-decoration: none; transition: 0.2s;
         }
 
-        .btn:hover {
-            background: #eef4ff;
-        }
+        .btn:hover { background: #eef4ff; }
 
         .btn-primary {
             background: var(--vj-accent);
-            color: #fff;
-            border-color: var(--vj-accent);
+            color: #fff; border-color: var(--vj-accent);
         }
 
         .container {
-            max-width: 1200px;
-            margin: 24px auto;
-            background: var(--vj-bg);
-            border-radius: 14px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, .06);
-            padding: 20px;
+            max-width: 1200px; margin: 24px auto;
+            background: var(--vj-bg); border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0,0,0,.06); padding: 20px;
         }
 
-        .controls {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-bottom: 16px;
-        }
-
+        .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
         .controls input, .controls select {
-            padding: 10px 12px;
-            border-radius: 8px;
-            border: 1px solid var(--vj-border);
-            flex: 1;
-            min-width: 180px;
+            padding: 10px 12px; border-radius: 8px;
+            border: 1px solid var(--vj-border); flex: 1; min-width: 180px;
         }
 
-        .browser {
-            display: grid;
-            grid-template-columns: 300px 1fr;
-            gap: 16px;
-        }
+        .browser { display: grid; grid-template-columns: 300px 1fr; gap: 16px; }
 
         .panel {
-            background: var(--vj-card);
-            border: 1px solid var(--vj-border);
-            border-radius: 10px;
-            padding: 12px;
-        }
-
-        .panel h3 {
-            font-size: 15px;
-            color: var(--vj-primary);
-            margin-bottom: 8px;
+            background: var(--vj-card); border: 1px solid var(--vj-border);
+            border-radius: 10px; padding: 12px;
         }
 
         .list {
-            max-height: 55vh;
-            overflow: auto;
-            border-radius: 8px;
-            border: 1px solid var(--vj-border);
-            background: #fff;
+            max-height: 55vh; overflow: auto; border-radius: 8px;
+            border: 1px solid var(--vj-border); background: #fff;
         }
 
         .list-item {
-            padding: 10px 12px;
-            border-bottom: 1px solid var(--vj-border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 10px 12px; border-bottom: 1px solid var(--vj-border);
+            display: flex; align-items: center; gap: 8px;
             cursor: pointer;
-            transition: background 0.2s;
         }
 
-        .list-item:hover {
-            background: #f0f6ff;
+        .selected-folder {
+            background: rgba(11,95,255,0.15) !important;
+            border-left: 4px solid var(--vj-accent);
         }
 
-        .grid {
-            width: 100%;
-            border-collapse: collapse;
-        }
+        .muted { color: var(--vj-muted); font-size: 12px; margin-left:auto; }
 
-        .grid th, .grid td {
-            padding: 10px;
-            border-bottom: 1px solid var(--vj-border);
-            text-align: left;
-            font-size: 14px;
+        /* Loader */
+        #loader {
+            display:none;
+            width:40px;height:40px;
+            margin:12px auto;
+            border:5px solid #cfd5e1;
+            border-top-color:#0B5FFF;
+            border-radius:50%;
+            animation:spin .8s linear infinite;
         }
-
-        .grid th {
-            background: #f7f9fe;
-            font-weight: 600;
-            color: var(--vj-primary);
-        }
-
-        .actions {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-        }
-
-        .muted {
-            color: var(--vj-muted);
-            font-size: 13px;
-        }
+        @keyframes spin { to{ transform:rotate(360deg); } }
 
         /* Preview Modal */
         #previewModal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.75);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            padding: 10px;
+            display:none; position:fixed; inset:0;
+            background:rgba(0,0,0,0.75);
+            z-index:1000; align-items:center; justify-content:center;
+            padding:10px;
         }
 
         #previewBox {
-            background: #000;
-            border-radius: 10px;
-            width: min(95vw, 900px);
-            height: auto;
-            overflow: hidden;
-            position: relative;
+            background:#000; border-radius:10px;
+            width:min(95vw,900px); overflow:hidden; position:relative;
         }
 
-        #previewBox video,
-        #previewBox img,
-        #previewBox iframe {
-            width: 100%;
-            height: auto;
-            max-height: 85vh;
-            display: none;
-            z-index: 1 !important;
+        #previewBox video, #previewBox img, #previewBox iframe {
+            width:100%; display:none; max-height:85vh;
         }
 
         #previewClose {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: rgba(255,255,255,0.9);
-            border: none;
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            cursor: pointer;
-            z-index: 9999 !important;
+            position:absolute; top:8px; right:8px;
+            background:#fff; border:none; border-radius:50%;
+            width:32px; height:32px; cursor:pointer;
+            z-index:9999;
         }
     </style>
 </head>
+
 <body>
+
     <div class="topbar">
         <div class="brand">
             <img src="{{ url_for('static', filename='images/venus_black_logo.jpg') }}" alt="Venus Jewel">
@@ -232,26 +143,41 @@
     </div>
 
     <div class="container">
+
         <div class="controls">
-            <input id="searchBox" type="text" placeholder="Search Packet No or File..." />
+            <input id="searchBox" type="text" placeholder="Search Packet No or File...">
             <select id="sortSelect">
                 <option value="newest">Newest First</option>
                 <option value="name">Name A–Z</option>
             </select>
             <button id="refreshBtn" class="btn"><i class="fas fa-rotate"></i> Refresh</button>
-            <a id="downloadFolderBtn" class="btn btn-primary" href="#" disabled><i class="fas fa-download"></i> Download Folder</a>
+
+            <button id="downloadSelectedBtn" class="btn btn-primary" disabled>
+                <i class="fas fa-download"></i> Download Selected
+            </button>
         </div>
+
+        <div id="loader"></div>
 
         <div class="browser">
             <div class="panel">
                 <h3><i class="fas fa-folder"></i> Packet Folders</h3>
+
+                <label style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                    <input type="checkbox" id="selectAll">
+                    <strong>Select All</strong>
+                </label>
+
                 <div id="packetList" class="list"></div>
             </div>
+
             <div class="panel">
                 <h3 id="filesTitle"><i class="fas fa-file"></i> Files</h3>
                 <table class="grid">
                     <thead>
-                        <tr><th>Name</th><th>Type</th><th>Modified</th><th>Actions</th></tr>
+                        <tr>
+                            <th>Name</th><th>Type</th><th>Modified</th><th>Actions</th>
+                        </tr>
                     </thead>
                     <tbody id="filesBody"></tbody>
                 </table>
@@ -264,165 +190,252 @@
         <div id="previewBox">
             <button id="previewClose" onclick="closePreview()">✕</button>
             <video id="previewVideo" controls></video>
-            <img id="previewImage" alt="Preview Image">
+            <img id="previewImage">
             <iframe id="previewFrame"></iframe>
         </div>
     </div>
 
-    <script>
-        const packetList = document.getElementById('packetList');
-        const filesBody = document.getElementById('filesBody');
-        const filesTitle = document.getElementById('filesTitle');
-        const downloadFolderBtn = document.getElementById('downloadFolderBtn');
-        const searchBox = document.getElementById('searchBox');
-        const sortSelect = document.getElementById('sortSelect');
-        const refreshBtn = document.getElementById('refreshBtn');
+<script>
+/* -----------------------
+   GLOBAL VARIABLES
+----------------------- */
+let allFolders = [];
+let selectedFolders = [];
+let currentFolder = null;
+let currentFiles = [];
 
-        let currentFolder = null, allFolders = [], currentFiles = [];
+/* -----------------------
+   ELEMENT REFERENCES
+----------------------- */
+const packetList      = document.getElementById('packetList');
+const filesBody       = document.getElementById('filesBody');
+const filesTitle      = document.getElementById('filesTitle');
+const searchBox       = document.getElementById('searchBox');
+const sortSelect      = document.getElementById('sortSelect');
+const refreshBtn      = document.getElementById('refreshBtn');
+const downloadBtn     = document.getElementById('downloadSelectedBtn');
+const selectAll       = document.getElementById('selectAll');
+const loader          = document.getElementById('loader');
 
-        // Load folders
-        function loadFolders() {
-            packetList.innerHTML = '<div class="list-item">Loading…</div>';
-            fetch(`/api/packet-folders?sort=${sortSelect.value}`)
-                .then(r => r.json())
-                .then(({ folders }) => {
-                    allFolders = folders || [];
-                    renderFolders();
-                })
-                .catch(() => packetList.innerHTML = '<div class="list-item">Failed to load folders</div>');
-        }
+/* -----------------------
+   LOAD FOLDERS
+----------------------- */
+function loadFolders() {
+    loader.style.display = "block";
+    packetList.innerHTML = `<div class='list-item'>Loading…</div>`;
 
-        // RENDER FOLDERS (UPDATED WITH FIX FOR DOWNLOAD BUTTON)
-        function renderFolders() {
-            const q = searchBox.value.toLowerCase();
-            const filtered = allFolders.filter(f => !q || (f.name || '').toLowerCase().includes(q));
+    fetch(`/api/packet-folders?sort=${sortSelect.value}`)
+        .then(r => r.json())
+        .then(data => {
+            allFolders = data.folders || [];
+            renderFolders();
+        })
+        .catch(err => {
+            console.error(err);
+            packetList.innerHTML = `<div class='list-item'>Failed to load</div>`;
+        })
+        .finally(() => loader.style.display = "none");
+}
 
-            packetList.innerHTML = '';
+/* -----------------------
+   RENDER FOLDERS WITH CHECKBOXES
+----------------------- */
+function renderFolders() {
+    const q = searchBox.value.toLowerCase();
+    const filtered = allFolders.filter(f => f.name.toLowerCase().includes(q));
+    packetList.innerHTML = "";
 
-            // FIX: reset download button when folder is not selected
-            downloadFolderBtn.setAttribute("disabled", "true");
-            downloadFolderBtn.href = "#";
-            currentFolder = null;
+    if (!filtered.length) {
+        packetList.innerHTML = `<div class='list-item'>No folders found</div>`;
+        return;
+    }
 
-            if (!filtered.length) {
-                packetList.innerHTML = '<div class="list-item">No folders found</div>';
-                return;
+    filtered.forEach(f => {
+        const div = document.createElement("div");
+        div.className = "list-item";
+        if (selectedFolders.includes(f.id)) div.classList.add("selected-folder");
+
+        div.innerHTML = `
+            <input type="checkbox" class="folderCheck" data-id="${f.id}" ${selectedFolders.includes(f.id) ? "checked":""}>
+            <span style="flex:1"><i class="fas fa-folder"></i> ${f.name}</span>
+            <span class="muted">${new Date(f.modifiedTime).toLocaleString()}</span>
+        `;
+
+        // click folder name → load files
+        div.addEventListener("click", (e) => {
+            if (!e.target.classList.contains("folderCheck")) {
+                selectFolder(f.id, f.name);
             }
-            filtered.forEach(f => {
-                const row = document.createElement('div');
-                row.className = 'list-item';
-                row.innerHTML = `<span><i class="fas fa-folder"></i> ${f.name}</span> <span class="muted">${new Date(f.modifiedTime).toLocaleString()}</span>`;
-                row.onclick = () => selectFolder(f.id, f.name);
-                packetList.appendChild(row);
-            });
-        }
-
-        // When folder is clicked
-        function selectFolder(id, name) {
-            currentFolder = { id, name };
-            filesTitle.textContent = `Files — ${name}`;
-
-            downloadFolderBtn.removeAttribute('disabled');
-            downloadFolderBtn.href = `/download/folder/${id}`;
-
-            loadFiles(id);
-        }
-
-        // Load files inside folder
-        function loadFiles(folderId) {
-            filesBody.innerHTML = '<tr><td colspan="4">Loading…</td></tr>';
-            fetch(`/api/folder/${folderId}/files?sort=${sortSelect.value}`)
-                .then(r => r.json())
-                .then(({ files }) => {
-                    currentFiles = files || [];
-                    renderFiles();
-                })
-                .catch(() => filesBody.innerHTML = '<tr><td colspan="4">Failed to load files</td></tr>');
-        }
-
-        function renderFiles() {
-            const q = searchBox.value.toLowerCase();
-            const filtered = currentFiles.filter(f => !q || (f.name || '').toLowerCase().includes(q));
-            filesBody.innerHTML = '';
-
-            if (!filtered.length) {
-                filesBody.innerHTML = '<tr><td colspan="4">No files found</td></tr>';
-                return;
-            }
-
-            filtered.forEach(f => {
-                const tr = document.createElement('tr');
-                const mime = f.mimeType || '';
-                const ext = (f.name.split('.').pop() || '').toLowerCase();
-                const date = f.modifiedTime ? new Date(f.modifiedTime).toLocaleString() : '';
-
-                tr.innerHTML = `
-                    <td>${f.name}</td>
-                    <td>${mime.replace('application/', '')}</td>
-                    <td>${date}</td>
-                    <td class="actions">
-                        <button class="btn" onclick="openPreview('${f.id}', '${mime}', '${ext}')"><i class="fas fa-eye"></i> Preview</button>
-                        <a class="btn" href="/download/file/${f.id}"><i class="fas fa-download"></i> Download</a>
-                        <button class="btn" onclick="shareFile('${f.id}')"><i class="fas fa-share-alt"></i> Share</button>
-                    </td>
-                `;
-                filesBody.appendChild(tr);
-            });
-        }
-
-        const modal = document.getElementById('previewModal');
-        const video = document.getElementById('previewVideo');
-        const img = document.getElementById('previewImage');
-        const frame = document.getElementById('previewFrame');
-
-        function openPreview(id, mime, ext) {
-            video.style.display = img.style.display = frame.style.display = 'none';
-            const url = `/preview/file/${id}`;
-
-            if (mime.startsWith('video/') || ['mp4', 'mov', 'mkv', 'webm', 'hevc'].includes(ext)) {
-                video.src = url;
-                video.style.display = 'block';
-                modal.style.display = 'flex';
-                video.play();
-                return;
-            }
-            if (mime.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
-                img.src = url;
-                img.style.display = 'block';
-                modal.style.display = 'flex';
-                return;
-            }
-            if (mime === 'application/pdf' || ext === 'pdf') {
-                frame.src = url;
-                frame.style.display = 'block';
-                modal.style.display = 'flex';
-                return;
-            }
-
-            alert('Preview not supported for this file.');
-        }
-
-        function closePreview() {
-            modal.style.display = 'none';
-            video.pause();
-            video.src = '';
-            img.src = '';
-            frame.src = '';
-        }
-
-        modal.addEventListener("click", function(e) {
-            if (e.target === modal) closePreview();
         });
 
-        function shareFile(id) {
-            window.open(`/share.html?id=${id}`, '_blank');
-        }
+        packetList.appendChild(div);
+    });
 
-        searchBox.oninput = () => { renderFolders(); renderFiles(); };
-        sortSelect.onchange = () => { loadFolders(); if (currentFolder) loadFiles(currentFolder.id); };
-        refreshBtn.onclick = () => loadFolders();
+    updateDownloadButton();
+}
 
-        loadFolders();
-    </script>
+/* -----------------------
+   SELECT FOLDER TO LOAD FILES
+----------------------- */
+function selectFolder(id, name) {
+    currentFolder = { id, name };
+    filesTitle.textContent = `Files — ${name}`;
+    loadFiles(id);
+}
+
+/* -----------------------
+   LOAD FILES IN FOLDER
+----------------------- */
+function loadFiles(folderId) {
+    filesBody.innerHTML = `<tr><td colspan="4">Loading…</td></tr>`;
+    fetch(`/api/folder/${folderId}/files?sort=${sortSelect.value}`)
+        .then(r => r.json())
+        .then(data => {
+            currentFiles = data.files || [];
+            renderFiles();
+        })
+        .catch(() =>
+            filesBody.innerHTML = `<tr><td colspan="4">Failed to load files</td></tr>`
+        );
+}
+
+/* -----------------------
+   RENDER FILES
+----------------------- */
+function renderFiles() {
+    const q = searchBox.value.toLowerCase();
+    const filtered = currentFiles.filter(f => f.name.toLowerCase().includes(q));
+    filesBody.innerHTML = "";
+
+    if (!filtered.length) {
+        filesBody.innerHTML = "<tr><td colspan='4'>No files found</td></tr>";
+        return;
+    }
+
+    filtered.forEach(f => {
+        const mime = f.mimeType || "";
+        const ext = f.name.split(".").pop().toLowerCase();
+        const date = f.modifiedTime ? new Date(f.modifiedTime).toLocaleString() : "";
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${f.name}</td>
+            <td>${mime.replace("application/","")}</td>
+            <td>${date}</td>
+            <td class="actions">
+                <button class="btn" onclick="openPreview('${f.id}','${mime}','${ext}')"><i class="fas fa-eye"></i> Preview</button>
+                <a class="btn" href="/download/file/${f.id}"><i class="fas fa-download"></i> Download</a>
+                <button class="btn" onclick="shareFile('${f.id}')"><i class="fas fa-share-alt"></i> Share</button>
+            </td>
+        `;
+        filesBody.appendChild(tr);
+    });
+}
+
+/* -----------------------
+   MULTI-SELECT CHECKBOX HANDLER
+----------------------- */
+packetList.addEventListener("change", (e) => {
+    if (!e.target.classList.contains("folderCheck")) return;
+    const id = e.target.dataset.id;
+
+    if (e.target.checked) {
+        if (!selectedFolders.includes(id)) selectedFolders.push(id);
+    } else {
+        selectedFolders = selectedFolders.filter(x => x !== id);
+        selectAll.checked = false;
+    }
+    renderFolders();
+});
+
+/* -----------------------
+   SELECT ALL CHECKBOX
+----------------------- */
+selectAll.addEventListener("change", () => {
+    if (selectAll.checked) {
+        selectedFolders = allFolders.map(f => f.id);
+    } else {
+        selectedFolders = [];
+    }
+    renderFolders();
+});
+
+/* -----------------------
+   UPDATE DOWNLOAD BUTTON
+----------------------- */
+function updateDownloadButton() {
+    downloadBtn.disabled = selectedFolders.length === 0;
+}
+
+/* -----------------------
+   DOWNLOAD SELECTED FOLDERS
+----------------------- */
+downloadBtn.onclick = () => {
+    if (!selectedFolders.length) return;
+    const ids = selectedFolders.join(",");
+    window.location.href = `/download/folders-zip/${ids}`;
+};
+
+/* -----------------------
+   PREVIEW
+----------------------- */
+const modal        = document.getElementById('previewModal');
+const previewVideo = document.getElementById('previewVideo');
+const previewImg   = document.getElementById('previewImage');
+const previewFrame = document.getElementById('previewFrame');
+
+function openPreview(id,mime,ext){
+    previewVideo.style.display = previewImg.style.display = previewFrame.style.display = 'none';
+    const url = `/preview/file/${id}`;
+
+    if (mime.startsWith("video/") || ["mp4","mov","avi","mkv","webm"].includes(ext)) {
+        previewVideo.src = url;
+        previewVideo.style.display = "block";
+        modal.style.display = "flex";
+        previewVideo.play().catch(()=>{});
+        return;
+    }
+    if (mime.startsWith("image/") || ["jpg","jpeg","png","gif","webp"].includes(ext)) {
+        previewImg.src = url;
+        previewImg.style.display = "block";
+        modal.style.display = "flex";
+        return;
+    }
+    if (ext === "pdf" || mime === "application/pdf") {
+        previewFrame.src = url;
+        previewFrame.style.display = "block";
+        modal.style.display = "flex";
+        return;
+    }
+
+    alert("Preview not supported.");
+}
+
+function closePreview(){
+    modal.style.display = "none";
+    previewVideo.pause();
+    previewVideo.src = "";
+    previewImg.src = "";
+    previewFrame.src = "";
+}
+
+modal.onclick = (e) => { if (e.target === modal) closePreview(); };
+
+function shareFile(id){
+    window.open(`/share.html?id=${id}`, "_blank");
+}
+
+/* -----------------------
+   SEARCH / SORT EVENTS
+----------------------- */
+searchBox.addEventListener("input", () => { renderFolders(); renderFiles(); });
+sortSelect.addEventListener("change", () => { loadFolders(); if (currentFolder) loadFiles(currentFolder.id); });
+refreshBtn.addEventListener("click", loadFolders);
+
+/* -----------------------
+   INITIAL LOAD
+----------------------- */
+loadFolders();
+</script>
 </body>
 </html>
