@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <title>Files • VENUS JEWEL FILE PORTAL</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='images/apple-touch-icon.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/favicon-32x32.png') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -14,424 +13,425 @@
         :root {
             --vj-primary: #003366;
             --vj-accent: #0B5FFF;
-            --vj-bg: rgba(255,255,255,.95);
+            --vj-bg: rgba(255, 255, 255, .95);
             --vj-card: #ffffff;
             --vj-border: #e2e8f0;
             --vj-muted: #6b7280;
-            --vj-hover: #eef4ff;
-            --vj-shadow: 0 8px 20px rgba(0,0,0,.06);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            margin: 0;
-            font-family: "Poppins", sans-serif;
-            background: #f4f7fc;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to bottom right, #f6f8fc, #ffffff);
             color: var(--vj-primary);
+            min-height: 100vh;
         }
 
-        /* TOPBAR */
         .topbar {
-            background: var(--vj-bg);
-            padding: 10px 18px;
-            border-bottom: 1px solid var(--vj-border);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 10px;
-            flex-wrap: nowrap;
+            padding: 12px 18px;
+            background: var(--vj-bg);
+            border-bottom: 1px solid var(--vj-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
-        .topbar img { height: 42px; }
-        .top-right { display:flex; align-items:center; gap:10px; }
-        .top-btn {
-            padding: 6px 12px; border:1px solid var(--vj-border); background:#fff; border-radius:8px;
-            font-size:13px; cursor:pointer; display:flex; align-items:center; gap:6px;
-        }
-        .top-btn:hover { background: var(--vj-hover); }
 
-        @media(max-width:600px){
-            .topbar { padding: 6px 10px; gap: 6px; flex-wrap: wrap; }
-            .topbar img { height: 32px; }
-            .top-right span { display:none; }
-            .top-btn { font-size:11px; padding:4px 8px; }
+        .brand img {
+            height: 46px;
+        }
+
+        .userbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid var(--vj-border);
+            background: #fff;
+            color: var(--vj-primary);
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: 0.2s;
+        }
+
+        .btn:hover {
+            background: #eef4ff;
+        }
+
+        .btn-primary {
+            background: var(--vj-accent);
+            color: #fff;
+            border-color: var(--vj-accent);
         }
 
         .container {
-            max-width: 1280px; margin: 18px auto; padding: 14px;
-            background: var(--vj-bg); border-radius: 14px; box-shadow: var(--vj-shadow);
+            max-width: 1200px;
+            margin: 24px auto;
+            background: var(--vj-bg);
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .06);
+            padding: 20px;
         }
 
         .controls {
-            display:flex; gap:12px; flex-wrap:wrap; margin-bottom:14px; align-items:center;
-        }
-        .controls input, .controls select { padding:10px; border-radius:8px; border:1px solid var(--vj-border); font-size:14px; }
-
-        .btn { padding:8px 12px; border:1px solid var(--vj-border); background:#fff; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:.15s; }
-        .btn-primary { background:var(--vj-accent); color:#fff; border-color:var(--vj-accent); }
-
-        @media(max-width:600px){
-            .controls { flex-direction:column; align-items:stretch; }
-            .controls input, .controls select, .controls .btn { width:100%; }
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
         }
 
-        .browser { display:grid; grid-template-columns:320px 1fr; gap:16px; }
-        @media(max-width:900px){ .browser { grid-template-columns:1fr; } }
-
-        .panel { background:#fff; border:1px solid var(--vj-border); border-radius:12px; padding:14px; box-shadow:var(--vj-shadow); }
-
-        .list { max-height:60vh; overflow-y:auto; border-radius:10px; border:1px solid var(--vj-border); }
-        .list-item { padding:10px; display:flex; gap:12px; align-items:center; border-bottom:1px solid var(--vj-border); cursor:pointer; }
-        .list-item:hover { background:var(--vj-hover); }
-        .selected-folder { background: rgba(11,95,255,0.18) !important; }
-        .muted { margin-left:auto; color:var(--vj-muted); font-size:12px; }
-
-        /* Table stays side-by-side even on mobile: horizontal scroll */
-        .table-wrap { overflow-x:auto; }
-        table { width:100%; border-collapse:collapse; min-width:720px; } /* min-width keeps columns side-by-side */
-        th, td { padding:10px; border-bottom:1px solid var(--vj-border); text-align:left; vertical-align:middle; }
-        th { background:#f8faff; font-weight:600; }
-
-        @media(max-width:600px){
-            table { min-width:720px; } /* keeps side-by-side and allows horizontal scroll */
+        .controls input, .controls select {
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--vj-border);
+            flex: 1;
+            min-width: 180px;
         }
 
-        /* Loader */
-        #loader, #fileLoader { display:none; margin:12px auto; width:36px; height:36px; border:4px solid #cfd5e1; border-top-color:#0B5FFF; border-radius:50%; animation:spin .75s linear infinite; }
-        @keyframes spin { to{ transform:rotate(360deg);} }
+        .browser {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 16px;
+        }
 
-        /* Preview modal */
-        #previewModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:2000; align-items:center; justify-content:center; }
-        #previewBox { width:min(95vw,900px); background:#000; border-radius:10px; padding:10px; position:relative; }
-        #previewClose { position:absolute; right:10px; top:10px; background:#fff; border:none; border-radius:50%; width:36px; height:36px; cursor:pointer; }
-        #previewBox video,#previewBox img,#previewBox iframe{display:none;width:100%;max-height:85vh;}
+        .panel {
+            background: var(--vj-card);
+            border: 1px solid var(--vj-border);
+            border-radius: 10px;
+            padding: 12px;
+        }
 
-        /* Share modal */
-        #shareModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:3000; align-items:center; justify-content:center; }
-        #shareBox { width:min(680px,95vw); background:#fff; border-radius:10px; padding:18px; box-shadow:var(--vj-shadow); }
-        .share-link { word-break:break-all; background:#f7f9fe; padding:10px; border-radius:8px; border:1px solid var(--vj-border); margin-bottom:10px; }
+        .panel h3 {
+            font-size: 15px;
+            color: var(--vj-primary);
+            margin-bottom: 8px;
+        }
+
+        .list {
+            max-height: 55vh;
+            overflow: auto;
+            border-radius: 8px;
+            border: 1px solid var(--vj-border);
+            background: #fff;
+        }
+
+        .list-item {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--vj-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .list-item:hover {
+            background: #f0f6ff;
+        }
+
+        .grid {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .grid th, .grid td {
+            padding: 10px;
+            border-bottom: 1px solid var(--vj-border);
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .grid th {
+            background: #f7f9fe;
+            font-weight: 600;
+            color: var(--vj-primary);
+        }
+
+        .actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .muted {
+            color: var(--vj-muted);
+            font-size: 13px;
+        }
+
+        /* Preview Modal */
+        #previewModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        #previewBox {
+            background: #000;
+            border-radius: 10px;
+            width: min(95vw, 900px);
+            height: auto;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #previewBox video,
+        #previewBox img,
+        #previewBox iframe {
+            width: 100%;
+            height: auto;
+            max-height: 85vh;
+            display: none;
+            z-index: 1 !important; /* FIX */
+        }
+
+        #previewClose {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            z-index: 9999 !important; /* FIX */
+        }
+
+        @media (max-width: 900px) {
+            .browser {
+                grid-template-columns: 1fr;
+            }
+
+            .list {
+                max-height: 35vh;
+            }
+
+            .btn {
+                font-size: 13px;
+                padding: 6px 8px;
+            }
+
+            .topbar {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+        }
     </style>
 </head>
 <body>
-
-<div class="topbar">
-    <img src="{{ url_for('static', filename='images/venus_black_logo.jpg') }}">
-    <div class="top-right">
-        <span><i class="fas fa-user-circle"></i> {{ user }}</span>
-        <a class="top-btn" href="/dashboard"><i class="fas fa-arrow-left"></i> Dashboard</a>
-        <a class="top-btn" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
-    </div>
-</div>
-
-<div class="container">
-
-    <div class="controls">
-        <input id="searchBox" placeholder="Search Packet No or File...">
-        <select id="sortSelect">
-            <option value="newest">Newest First</option>
-            <option value="name">Name A–Z</option>
-        </select>
-
-        <button id="refreshBtn" class="btn"><i class="fa fa-rotate"></i> Refresh</button>
-
-        <!-- Top control: Download Selected + Share Folder (side-by-side) -->
-        <div style="margin-left:auto; display:flex; gap:8px; flex-wrap:wrap;">
-            <button id="downloadSelectedBtn" class="btn btn-primary" disabled>
-                <i class="fa fa-download"></i> Download Selected (<span id="selectedCount">0</span>)
-            </button>
-
-            <!-- Share Folder: only enabled when EXACTLY ONE folder is selected -->
-            <button id="shareFolderBtn" class="btn" disabled>
-                <i class="fa fa-share-alt"></i> Share Folder
-            </button>
+    <div class="topbar">
+        <div class="brand">
+            <img src="{{ url_for('static', filename='images/venus_black_logo.jpg') }}" alt="Venus Jewel">
+        </div>
+        <div class="userbox">
+            <span><i class="fas fa-user-circle"></i> {{ user }}</span>
+            <a class="btn" href="/dashboard"><i class="fas fa-arrow-left"></i> Dashboard</a>
+            <a class="btn" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
         </div>
     </div>
 
-    <div id="loader"></div>
-
-    <div class="browser">
-
-        <div class="panel">
-            <h3><i class="fa fa-folder"></i> Packet Folders</h3>
-
-            <label style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
-                <input type="checkbox" id="selectAll"> <strong>Select All</strong>
-            </label>
-
-            <div class="list" id="packetList"></div>
+    <div class="container">
+        <div class="controls">
+            <input id="searchBox" type="text" placeholder="Search Packet No or File..." />
+            <select id="sortSelect">
+                <option value="newest">Newest First</option>
+                <option value="name">Name A–Z</option>
+            </select>
+            <button id="refreshBtn" class="btn"><i class="fas fa-rotate"></i> Refresh</button>
+            <a id="downloadFolderBtn" class="btn btn-primary" href="#" disabled><i class="fas fa-download"></i> Download Folder</a>
         </div>
 
-        <div class="panel">
-            <h3 id="filesTitle"><i class="fa fa-file"></i> Files</h3>
-            <div id="fileLoader"></div>
-
-            <div class="table-wrap">
-                <table>
+        <div class="browser">
+            <div class="panel">
+                <h3><i class="fas fa-folder"></i> Packet Folders</h3>
+                <div id="packetList" class="list"></div>
+            </div>
+            <div class="panel">
+                <h3 id="filesTitle"><i class="fas fa-file"></i> Files</h3>
+                <table class="grid">
                     <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Type</th>
-                            <th>Modified</th>
-                            <th>Action</th>
-                        </tr>
+                        <tr><th>Name</th><th>Type</th><th>Modified</th><th>Actions</th></tr>
                     </thead>
                     <tbody id="filesBody"></tbody>
                 </table>
             </div>
         </div>
-
     </div>
-</div>
 
-<!-- Preview modal -->
-<div id="previewModal" role="dialog" aria-modal="true">
-    <div id="previewBox">
-        <button id="previewClose">✕</button>
-        <video id="previewVideo" controls></video>
-        <img id="previewImage" alt="Preview image">
-        <iframe id="previewFrame" title="PDF Preview"></iframe>
-    </div>
-</div>
-
-<!-- Share modal (folder link) -->
-<div id="shareModal" role="dialog" aria-modal="true">
-    <div id="shareBox">
-        <h3>Share Folder</h3>
-        <div class="share-link" id="shareLink">Generating link…</div>
-        <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:8px;">
-            <button id="copyShareLink" class="btn">Copy Link</button>
-            <button id="openShareLink" class="btn btn-primary">Open Link</button>
-            <button id="closeShareModal" class="btn">Close</button>
+    <!-- Preview Modal -->
+    <div id="previewModal">
+        <div id="previewBox">
+            <button id="previewClose" onclick="closePreview()">✕</button>
+            <video id="previewVideo" controls></video>
+            <img id="previewImage" alt="Preview Image">
+            <iframe id="previewFrame"></iframe>
         </div>
     </div>
-</div>
 
-<script>
-/* ========== State ========== */
-let allFolders = [];
-let selectedFolders = [];
-let currentFolder = null;
-let currentFiles = [];
-let latestShareUrl = "";
+    <script>
+        const packetList = document.getElementById('packetList');
+        const filesBody = document.getElementById('filesBody');
+        const filesTitle = document.getElementById('filesTitle');
+        const downloadFolderBtn = document.getElementById('downloadFolderBtn');
+        const searchBox = document.getElementById('searchBox');
+        const sortSelect = document.getElementById('sortSelect');
+        const refreshBtn = document.getElementById('refreshBtn');
+        let currentFolder = null, allFolders = [], currentFiles = [];
 
-/* ========== Elements ========== */
-const packetList = document.getElementById('packetList');
-const filesBody = document.getElementById('filesBody');
-const filesTitle = document.getElementById('filesTitle');
-const searchBox = document.getElementById('searchBox');
-const sortSelect = document.getElementById('sortSelect');
-const refreshBtn = document.getElementById('refreshBtn');
-const selectAll = document.getElementById('selectAll');
-const downloadBtn = document.getElementById('downloadSelectedBtn');
-const shareFolderBtn = document.getElementById('shareFolderBtn');
-const selectedCount = document.getElementById('selectedCount');
-const loader = document.getElementById('loader');
-const fileLoader = document.getElementById('fileLoader');
+        function loadFolders() {
+            packetList.innerHTML = '<div class="list-item">Loading…</div>';
+            fetch(`/api/packet-folders?sort=${sortSelect.value}`)
+                .then(r => r.json())
+                .then(({ folders }) => {
+                    allFolders = folders || [];
+                    renderFolders();
+                })
+                .catch(() => packetList.innerHTML = '<div class="list-item">Failed to load folders</div>');
+        }
 
-const previewModal = document.getElementById('previewModal');
-const previewVideo = document.getElementById('previewVideo');
-const previewImage = document.getElementById('previewImage');
-const previewFrame = document.getElementById('previewFrame');
-const previewClose = document.getElementById('previewClose');
-
-const shareModal = document.getElementById('shareModal');
-const shareLinkDiv = document.getElementById('shareLink');
-const copyShareLinkBtn = document.getElementById('copyShareLink');
-const openShareLinkBtn = document.getElementById('openShareLink');
-const closeShareModalBtn = document.getElementById('closeShareModal');
-
-/* ========== Helpers ========== */
-function setLoading(el, on) { el.style.display = on ? 'block' : 'none'; }
-
-function loadFolders() {
-    setLoading(loader, true);
-    packetList.innerHTML = "<div class='list-item'>Loading…</div>";
-    fetch(`/api/packet-folders?sort=${sortSelect.value}`)
-        .then(r => r.json())
-        .then(data => { allFolders = data.folders || []; renderFolders(); })
-        .catch(() => packetList.innerHTML = "<div class='list-item'>Failed to load</div>")
-        .finally(() => setLoading(loader, false));
-}
-
-function renderFolders() {
-    const q = (searchBox.value || "").toLowerCase();
-    const filtered = (allFolders || []).filter(f => (f.name||'').toLowerCase().includes(q));
-    packetList.innerHTML = "";
-    if (!filtered.length) {
-        packetList.innerHTML = "<div class='list-item'>No folders</div>";
-        updateActionButtons();
-        return;
-    }
-
-    filtered.forEach(f => {
-        const row = document.createElement('div');
-        row.className = "list-item" + (selectedFolders.includes(f.id) ? " selected-folder" : "");
-        row.innerHTML = `
-            <input type="checkbox" class="folderChk" data-id="${f.id}" ${selectedFolders.includes(f.id) ? "checked": ""}>
-            <span style="flex:1"><i class="fa fa-folder"></i> ${f.name}</span>
-            <span class="muted">${f.modifiedTime ? new Date(f.modifiedTime).toLocaleString() : ''}</span>
-        `;
-        row.addEventListener('click', (e) => {
-            if (!e.target.classList.contains('folderChk')) {
-                // click selects folder to view files
-                currentFolder = f;
-                filesTitle.textContent = 'Files — ' + f.name;
-                loadFiles(f.id);
+        function renderFolders() {
+            const q = searchBox.value.toLowerCase();
+            const filtered = allFolders.filter(f => !q || (f.name || '').toLowerCase().includes(q));
+            packetList.innerHTML = '';
+            if (!filtered.length) {
+                packetList.innerHTML = '<div class="list-item">No folders found</div>';
+                return;
             }
+            filtered.forEach(f => {
+                const row = document.createElement('div');
+                row.className = 'list-item';
+                row.innerHTML = `<span><i class="fas fa-folder"></i> ${f.name}</span> <span class="muted">${new Date(f.modifiedTime).toLocaleString()}</span>`;
+                row.onclick = () => selectFolder(f.id, f.name);
+                packetList.appendChild(row);
+            });
+        }
+
+        function selectFolder(id, name) {
+            currentFolder = { id, name };
+            filesTitle.textContent = `Files — ${name}`;
+            downloadFolderBtn.removeAttribute('disabled');
+            downloadFolderBtn.href = `/download/folder/${id}`;
+            loadFiles(id);
+        }
+
+        function loadFiles(folderId) {
+            filesBody.innerHTML = '<tr><td colspan="4">Loading…</td></tr>';
+            fetch(`/api/folder/${folderId}/files?sort=${sortSelect.value}`)
+                .then(r => r.json())
+                .then(({ files }) => {
+                    currentFiles = files || [];
+                    renderFiles();
+                })
+                .catch(() => filesBody.innerHTML = '<tr><td colspan="4">Failed to load files</td></tr>');
+        }
+
+        function renderFiles() {
+            const q = searchBox.value.toLowerCase();
+            const filtered = currentFiles.filter(f => !q || (f.name || '').toLowerCase().includes(q));
+            filesBody.innerHTML = '';
+            if (!filtered.length) {
+                filesBody.innerHTML = '<tr><td colspan="4">No files found</td></tr>';
+                return;
+            }
+            filtered.forEach(f => {
+                const tr = document.createElement('tr');
+                const mime = f.mimeType || '';
+                const ext = (f.name.split('.').pop() || '').toLowerCase();
+                const date = f.modifiedTime ? new Date(f.modifiedTime).toLocaleString() : '';
+                tr.innerHTML = `
+                    <td>${f.name}</td>
+                    <td>${mime.replace('application/', '')}</td>
+                    <td>${date}</td>
+                    <td class="actions">
+                        <button class="btn" onclick="openPreview('${f.id}', '${mime}', '${ext}')"><i class="fas fa-eye"></i> Preview</button>
+                        <a class="btn" href="/download/file/${f.id}"><i class="fas fa-download"></i> Download</a>
+                        <button class="btn" onclick="shareFile('${f.id}')"><i class="fas fa-share-alt"></i> Share</button>
+                    </td>
+                `;
+                filesBody.appendChild(tr);
+            });
+        }
+
+        const modal = document.getElementById('previewModal');
+        const video = document.getElementById('previewVideo');
+        const img = document.getElementById('previewImage');
+        const frame = document.getElementById('previewFrame');
+
+        function openPreview(id, mime, ext) {
+            video.style.display = img.style.display = frame.style.display = 'none';
+            const url = `/preview/file/${id}`;
+            if (mime.startsWith('video/') || ['mp4', 'mov', 'mkv', 'webm', 'hevc'].includes(ext)) {
+                video.src = url;
+                video.style.display = 'block';
+                modal.style.display = 'flex';
+                video.play();
+                return;
+            }
+            if (mime.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
+                img.src = url;
+                img.style.display = 'block';
+                modal.style.display = 'flex';
+                return;
+            }
+            if (mime === 'application/pdf' || ext === 'pdf') {
+                frame.src = url;
+                frame.style.display = 'block';
+                modal.style.display = 'flex';
+                return;
+            }
+            alert('Preview not supported for this file.');
+        }
+
+        function closePreview() {
+            modal.style.display = 'none';
+            video.pause();
+            video.src = '';
+            img.src = '';
+            frame.src = '';
+        }
+
+        document.getElementById("previewModal").addEventListener("click", function(e) {
+            if (e.target === this) closePreview();
         });
-        packetList.appendChild(row);
-    });
 
-    updateActionButtons();
-}
+        function shareFile(id) {
+            window.open(`/share.html?id=${id}`, '_blank');
+        }
 
-packetList.addEventListener('change', (e) => {
-    if (!e.target.classList.contains('folderChk')) return;
-    const id = e.target.dataset.id;
-    if (e.target.checked) {
-        if (!selectedFolders.includes(id)) selectedFolders.push(id);
-    } else {
-        selectedFolders = selectedFolders.filter(x => x !== id);
-        selectAll.checked = false;
-    }
-    renderFolders();
-});
+        searchBox.oninput = () => {
+            renderFolders();
+            renderFiles();
+        };
 
-selectAll.addEventListener('change', () => {
-    if (selectAll.checked) selectedFolders = (allFolders||[]).map(f => f.id);
-    else selectedFolders = [];
-    renderFolders();
-});
+        sortSelect.onchange = () => {
+            loadFolders();
+            if (currentFolder) loadFiles(currentFolder.id);
+        };
 
-function updateActionButtons() {
-    selectedCount.textContent = selectedFolders.length;
-    downloadBtn.disabled = selectedFolders.length === 0;
-    // Share Folder only enabled when exactly ONE folder selected (Option 1)
-    shareFolderBtn.disabled = selectedFolders.length !== 1;
-}
+        refreshBtn.onclick = () => loadFolders();
 
-/* ========== Files ========== */
-function loadFiles(folderId) {
-    setLoading(fileLoader, true);
-    filesBody.innerHTML = "<tr><td colspan='4'>Loading…</td></tr>";
-    fetch(`/api/folder/${folderId}/files?sort=${sortSelect.value}`)
-        .then(r => r.json())
-        .then(data => { currentFiles = data.files || []; renderFiles(); })
-        .catch(() => filesBody.innerHTML = "<tr><td colspan='4'>Failed to load files</td></tr>")
-        .finally(() => setLoading(fileLoader, false));
-}
-
-function renderFiles() {
-    const q = (searchBox.value || "").toLowerCase();
-    const filtered = (currentFiles || []).filter(f => (f.name||'').toLowerCase().includes(q));
-    filesBody.innerHTML = "";
-    if (!filtered.length) {
-        filesBody.innerHTML = "<tr><td colspan='4'>No files found</td></tr>";
-        return;
-    }
-
-    filtered.forEach(f => {
-        const mime = f.mimeType || "";
-        const ext = (f.name || "").split('.').pop().toLowerCase();
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${f.name}</td>
-            <td>${mime.replace('application/','')}</td>
-            <td>${f.modifiedTime ? new Date(f.modifiedTime).toLocaleString() : ''}</td>
-            <td>
-                <button class="btn" onclick="openPreview('${f.id}','${mime}','${ext}')"><i class="fa fa-eye"></i></button>
-                <a class="btn" href="/download/file/${f.id}" title="Download"><i class="fa fa-download"></i></a>
-                <button class="btn" onclick="shareFile('${f.id}')" title="Share"><i class="fa fa-share-alt"></i></button>
-            </td>
-        `;
-        filesBody.appendChild(tr);
-    });
-}
-
-/* File-level share (unchanged) */
-function shareFile(id) {
-    window.open(`/share.html?id=${id}`, '_blank');
-}
-
-/* Download selected folders */
-downloadBtn.addEventListener('click', () => {
-    if (!selectedFolders.length) return;
-    window.location.href = `/download/folders-zip/${selectedFolders.join(',')}`;
-});
-
-/* Share ONE folder (Option 1) */
-shareFolderBtn.addEventListener('click', async () => {
-    if (selectedFolders.length !== 1) return;
-    const folderId = selectedFolders[0];
-    shareLinkDiv.textContent = "Generating link…";
-    shareModal.style.display = "flex";
-    latestShareUrl = "";
-    try {
-        // expire optional param — you can change default server-side
-        const resp = await fetch(`/api/share-folder?id=${encodeURIComponent(folderId)}`);
-        if (!resp.ok) throw new Error('Failed to generate share link');
-        const data = await resp.json();
-        latestShareUrl = data.link;
-        shareLinkDiv.textContent = latestShareUrl;
-    } catch (err) {
-        console.error(err);
-        shareLinkDiv.textContent = "Failed to generate link.";
-    }
-});
-
-/* Share modal actions */
-copyShareLinkBtn.addEventListener('click', () => {
-    if (!latestShareUrl) return;
-    navigator.clipboard.writeText(latestShareUrl).then(() => {
-        copyShareLinkBtn.textContent = "Copied!";
-        setTimeout(() => copyShareLinkBtn.textContent = "Copy Link", 1400);
-    }).catch(() => alert("Copy failed"));
-});
-openShareLinkBtn.addEventListener('click', () => {
-    if (!latestShareUrl) return;
-    window.open(latestShareUrl, '_blank');
-});
-closeShareModalBtn.addEventListener('click', () => {
-    shareModal.style.display = "none";
-    latestShareUrl = "";
-    shareLinkDiv.textContent = "";
-});
-
-/* ===== Preview modal ===== */
-function openPreview(id, mime, ext) {
-    previewVideo.style.display = previewImage.style.display = previewFrame.style.display = 'none';
-    const url = `/preview/file/${id}`;
-    if (mime.startsWith('video/') || ['mp4','mov','mkv','webm','avi'].includes(ext)) {
-        previewVideo.src = url;
-        previewVideo.style.display = 'block';
-        previewVideo.play().catch(()=>{});
-    } else if (mime.startsWith('image/') || ['jpg','jpeg','png','gif','webp'].includes(ext)) {
-        previewImage.src = url;
-        previewImage.style.display = 'block';
-    } else if (ext === 'pdf' || mime === 'application/pdf') {
-        previewFrame.src = url;
-        previewFrame.style.display = 'block';
-    } else {
-        window.open(url, '_blank');
-        return;
-    }
-    previewModal.style.display = 'flex';
-}
-
-function closePreview() {
-    previewModal.style.display = 'none';
-    previewVideo.pause(); previewVideo.src = '';
-    previewImage.src = ''; previewFrame.src = '';
-}
-previewClose.addEventListener('click', closePreview);
-previewModal.addEventListener('click', (e) => { if (e.target === previewModal) closePreview(); });
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePreview(); });
-
-/* ===== Events ===== */
-searchBox.addEventListener('input', () => { renderFolders(); renderFiles(); });
-sortSelect.addEventListener('change', () => loadFolders());
-refreshBtn.addEventListener('click', () => loadFolders());
-
-/* ===== Init ===== */
-loadFolders();
-</script>
+        loadFolders();
+    </script>
 </body>
 </html>
