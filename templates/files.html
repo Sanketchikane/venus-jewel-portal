@@ -22,49 +22,28 @@
             --vj-shadow: 0 8px 20px rgba(0,0,0,.06);
         }
 
-        body {
-            margin: 0;
-            font-family: "Poppins", sans-serif;
-            background: #f4f7fc;
-            color: var(--vj-primary);
-        }
+        body { margin: 0; font-family: "Poppins", sans-serif; background: #f4f7fc; color: var(--vj-primary); }
 
-        /* TOPBAR */
         .topbar {
-            background: var(--vj-bg);
-            padding: 10px 18px;
-            border-bottom: 1px solid var(--vj-border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            flex-wrap: nowrap;
+            background: var(--vj-bg); padding: 10px 18px; border-bottom: 1px solid var(--vj-border);
+            display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:nowrap;
         }
-        .topbar img { height: 42px; }
+        .topbar img { height:42px; }
         .top-right { display:flex; align-items:center; gap:10px; }
-        .top-btn {
-            padding: 6px 12px; border:1px solid var(--vj-border); background:#fff; border-radius:8px;
-            font-size:13px; cursor:pointer; display:flex; align-items:center; gap:6px;
-        }
+        .top-btn { padding:6px 12px; border:1px solid var(--vj-border); background:#fff; border-radius:8px; font-size:13px; cursor:pointer; display:flex; align-items:center; gap:6px; }
         .top-btn:hover { background: var(--vj-hover); }
 
         @media(max-width:600px){
-            .topbar { padding: 6px 10px; gap: 6px; flex-wrap: wrap; }
-            .topbar img { height: 32px; }
+            .topbar { padding: 6px 10px; gap:6px; flex-wrap:wrap; }
+            .topbar img { height:32px; }
             .top-right span { display:none; }
             .top-btn { font-size:11px; padding:4px 8px; }
         }
 
-        .container {
-            max-width: 1280px; margin: 18px auto; padding: 14px;
-            background: var(--vj-bg); border-radius: 14px; box-shadow: var(--vj-shadow);
-        }
+        .container { max-width:1280px; margin:18px auto; padding:14px; background:var(--vj-bg); border-radius:14px; box-shadow:var(--vj-shadow); }
 
-        .controls {
-            display:flex; gap:12px; flex-wrap:wrap; margin-bottom:14px; align-items:center;
-        }
+        .controls { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:14px; align-items:center; }
         .controls input, .controls select { padding:10px; border-radius:8px; border:1px solid var(--vj-border); font-size:14px; }
-
         .btn { padding:8px 12px; border:1px solid var(--vj-border); background:#fff; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:.15s; }
         .btn-primary { background:var(--vj-accent); color:#fff; border-color:var(--vj-accent); }
 
@@ -81,20 +60,18 @@
         .list { max-height:60vh; overflow-y:auto; border-radius:10px; border:1px solid var(--vj-border); }
         .list-item { padding:10px; display:flex; gap:12px; align-items:center; border-bottom:1px solid var(--vj-border); cursor:pointer; }
         .list-item:hover { background:var(--vj-hover); }
-        .selected-folder { background: rgba(11,95,255,0.18) !important; }
+        .selected-folder { background: rgba(11,95,255,0.18) !important; border-left:4px solid var(--vj-accent); }
         .muted { margin-left:auto; color:var(--vj-muted); font-size:12px; }
 
-        /* Table stays side-by-side even on mobile: horizontal scroll */
         .table-wrap { overflow-x:auto; }
-        table { width:100%; border-collapse:collapse; min-width:720px; } /* min-width keeps columns side-by-side */
+        table { width:100%; border-collapse:collapse; min-width:720px; }
         th, td { padding:10px; border-bottom:1px solid var(--vj-border); text-align:left; vertical-align:middle; }
         th { background:#f8faff; font-weight:600; }
 
         @media(max-width:600px){
-            table { min-width:720px; } /* keeps side-by-side and allows horizontal scroll */
+            table { min-width:720px; } /* horizontal scroll keeps side-by-side columns on mobile */
         }
 
-        /* Loader */
         #loader, #fileLoader { display:none; margin:12px auto; width:36px; height:36px; border:4px solid #cfd5e1; border-top-color:#0B5FFF; border-radius:50%; animation:spin .75s linear infinite; }
         @keyframes spin { to{ transform:rotate(360deg);} }
 
@@ -108,6 +85,14 @@
         #shareModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:3000; align-items:center; justify-content:center; }
         #shareBox { width:min(680px,95vw); background:#fff; border-radius:10px; padding:18px; box-shadow:var(--vj-shadow); }
         .share-link { word-break:break-all; background:#f7f9fe; padding:10px; border-radius:8px; border:1px solid var(--vj-border); margin-bottom:10px; }
+
+        /* Delete confirm modal */
+        #deleteModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:4000; align-items:center; justify-content:center; }
+        #deleteBox { width:min(640px,95vw); background:#fff; border-radius:10px; padding:18px; box-shadow:var(--vj-shadow); }
+        #deleteBox h3 { margin:0 0 8px 0; font-size:18px; }
+        #deleteBox p { margin:8px 0 14px 0; color:var(--vj-muted); }
+        .delete-actions { display:flex; gap:10px; justify-content:flex-end; }
+        .btn-danger { background:#ff4d4f; color:#fff; border-color:#ff4d4f; }
     </style>
 </head>
 <body>
@@ -132,15 +117,17 @@
 
         <button id="refreshBtn" class="btn"><i class="fa fa-rotate"></i> Refresh</button>
 
-        <!-- Top control: Download Selected + Share Folder (side-by-side) -->
         <div style="margin-left:auto; display:flex; gap:8px; flex-wrap:wrap;">
             <button id="downloadSelectedBtn" class="btn btn-primary" disabled>
                 <i class="fa fa-download"></i> Download Selected (<span id="selectedCount">0</span>)
             </button>
 
-            <!-- Share Folder: only enabled when EXACTLY ONE folder is selected -->
             <button id="shareFolderBtn" class="btn" disabled>
                 <i class="fa fa-share-alt"></i> Share Folder
+            </button>
+
+            <button id="deleteFoldersBtn" class="btn" disabled>
+                <i class="fa fa-trash"></i> Delete Folders
             </button>
         </div>
     </div>
@@ -148,21 +135,17 @@
     <div id="loader"></div>
 
     <div class="browser">
-
         <div class="panel">
             <h3><i class="fa fa-folder"></i> Packet Folders</h3>
-
             <label style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
                 <input type="checkbox" id="selectAll"> <strong>Select All</strong>
             </label>
-
             <div class="list" id="packetList"></div>
         </div>
 
         <div class="panel">
             <h3 id="filesTitle"><i class="fa fa-file"></i> Files</h3>
             <div id="fileLoader"></div>
-
             <div class="table-wrap">
                 <table>
                     <thead>
@@ -177,7 +160,6 @@
                 </table>
             </div>
         </div>
-
     </div>
 </div>
 
@@ -191,7 +173,7 @@
     </div>
 </div>
 
-<!-- Share modal (folder link) -->
+<!-- Share modal -->
 <div id="shareModal" role="dialog" aria-modal="true">
     <div id="shareBox">
         <h3>Share Folder</h3>
@@ -200,6 +182,18 @@
             <button id="copyShareLink" class="btn">Copy Link</button>
             <button id="openShareLink" class="btn btn-primary">Open Link</button>
             <button id="closeShareModal" class="btn">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Delete confirm modal -->
+<div id="deleteModal" role="dialog" aria-modal="true">
+    <div id="deleteBox">
+        <h3>Confirmation Required</h3>
+        <p id="deleteMsg">You have selected <strong id="deleteCount">0</strong> folder(s) for deletion. These folders will be moved to the Trash in the Shared Drive. Do you want to continue?</p>
+        <div class="delete-actions">
+            <button id="cancelDelete" class="btn">No, Cancel</button>
+            <button id="confirmDelete" class="btn btn-danger">Yes, Delete</button>
         </div>
     </div>
 </div>
@@ -222,6 +216,7 @@ const refreshBtn = document.getElementById('refreshBtn');
 const selectAll = document.getElementById('selectAll');
 const downloadBtn = document.getElementById('downloadSelectedBtn');
 const shareFolderBtn = document.getElementById('shareFolderBtn');
+const deleteFoldersBtn = document.getElementById('deleteFoldersBtn');
 const selectedCount = document.getElementById('selectedCount');
 const loader = document.getElementById('loader');
 const fileLoader = document.getElementById('fileLoader');
@@ -237,6 +232,11 @@ const shareLinkDiv = document.getElementById('shareLink');
 const copyShareLinkBtn = document.getElementById('copyShareLink');
 const openShareLinkBtn = document.getElementById('openShareLink');
 const closeShareModalBtn = document.getElementById('closeShareModal');
+
+const deleteModal = document.getElementById('deleteModal');
+const deleteCountSpan = document.getElementById('deleteCount');
+const cancelDeleteBtn = document.getElementById('cancelDelete');
+const confirmDeleteBtn = document.getElementById('confirmDelete');
 
 /* ========== Helpers ========== */
 function setLoading(el, on) { el.style.display = on ? 'block' : 'none'; }
@@ -271,7 +271,6 @@ function renderFolders() {
         `;
         row.addEventListener('click', (e) => {
             if (!e.target.classList.contains('folderChk')) {
-                // click selects folder to view files
                 currentFolder = f;
                 filesTitle.textContent = 'Files — ' + f.name;
                 loadFiles(f.id);
@@ -304,8 +303,10 @@ selectAll.addEventListener('change', () => {
 function updateActionButtons() {
     selectedCount.textContent = selectedFolders.length;
     downloadBtn.disabled = selectedFolders.length === 0;
-    // Share Folder only enabled when exactly ONE folder selected (Option 1)
+    // Share Folder only enabled when exactly ONE folder selected
     shareFolderBtn.disabled = selectedFolders.length !== 1;
+    // Delete enabled when one or more selected
+    deleteFoldersBtn.disabled = selectedFolders.length === 0;
 }
 
 /* ========== Files ========== */
@@ -357,7 +358,7 @@ downloadBtn.addEventListener('click', () => {
     window.location.href = `/download/folders-zip/${selectedFolders.join(',')}`;
 });
 
-/* Share ONE folder (Option 1) */
+/* Share selected folder (only 1 allowed) */
 shareFolderBtn.addEventListener('click', async () => {
     if (selectedFolders.length !== 1) return;
     const folderId = selectedFolders[0];
@@ -365,7 +366,6 @@ shareFolderBtn.addEventListener('click', async () => {
     shareModal.style.display = "flex";
     latestShareUrl = "";
     try {
-        // expire optional param — you can change default server-side
         const resp = await fetch(`/api/share-folder?id=${encodeURIComponent(folderId)}`);
         if (!resp.ok) throw new Error('Failed to generate share link');
         const data = await resp.json();
@@ -395,23 +395,59 @@ closeShareModalBtn.addEventListener('click', () => {
     shareLinkDiv.textContent = "";
 });
 
+/* Delete folders — show confirmation modal (professional message) */
+deleteFoldersBtn.addEventListener('click', () => {
+    if (!selectedFolders.length) return;
+    deleteCountSpan.textContent = selectedFolders.length;
+    deleteModal.style.display = 'flex';
+});
+
+/* Cancel delete */
+cancelDeleteBtn.addEventListener('click', () => {
+    deleteModal.style.display = 'none';
+});
+
+/* Confirm delete (move to Trash) */
+confirmDeleteBtn.addEventListener('click', async () => {
+    deleteModal.style.display = 'none';
+    if (!selectedFolders.length) return;
+
+    // call backend to move to trash
+    try {
+        const resp = await fetch('/api/delete-folders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ids: selectedFolders })
+        });
+        const data = await resp.json();
+        // Optionally show user feedback
+        let msg = `Deleted: ${data.deleted ? data.deleted.length || data.deleted : 0}`;
+        if (data.failed && data.failed.length) msg += `; Failed: ${data.failed.length}`;
+        alert(msg);
+    } catch (err) {
+        console.error(err);
+        alert('Delete operation failed.');
+    } finally {
+        // reload list to reflect changes
+        selectedFolders = [];
+        selectAll.checked = false;
+        loadFolders();
+        filesBody.innerHTML = "<tr><td colspan='4'>No files loaded</td></tr>";
+    }
+});
+
 /* ===== Preview modal ===== */
 function openPreview(id, mime, ext) {
     previewVideo.style.display = previewImage.style.display = previewFrame.style.display = 'none';
     const url = `/preview/file/${id}`;
     if (mime.startsWith('video/') || ['mp4','mov','mkv','webm','avi'].includes(ext)) {
-        previewVideo.src = url;
-        previewVideo.style.display = 'block';
-        previewVideo.play().catch(()=>{});
+        previewVideo.src = url; previewVideo.style.display = 'block'; previewVideo.play().catch(()=>{});
     } else if (mime.startsWith('image/') || ['jpg','jpeg','png','gif','webp'].includes(ext)) {
-        previewImage.src = url;
-        previewImage.style.display = 'block';
+        previewImage.src = url; previewImage.style.display = 'block';
     } else if (ext === 'pdf' || mime === 'application/pdf') {
-        previewFrame.src = url;
-        previewFrame.style.display = 'block';
+        previewFrame.src = url; previewFrame.style.display = 'block';
     } else {
-        window.open(url, '_blank');
-        return;
+        window.open(url, '_blank'); return;
     }
     previewModal.style.display = 'flex';
 }
@@ -425,7 +461,7 @@ previewClose.addEventListener('click', closePreview);
 previewModal.addEventListener('click', (e) => { if (e.target === previewModal) closePreview(); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePreview(); });
 
-/* ===== Events ===== */
+/* ===== Search / Sort / Refresh ===== */
 searchBox.addEventListener('input', () => { renderFolders(); renderFiles(); });
 sortSelect.addEventListener('change', () => loadFolders());
 refreshBtn.addEventListener('click', () => loadFolders());
